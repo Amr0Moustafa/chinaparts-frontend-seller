@@ -1,0 +1,387 @@
+{
+  "language": {
+    "english": "English",
+    "arabic": "Arabic",
+    "chinese": "Chinese"
+  },
+  "sidebar": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "products": "Products",
+      "orders": "Orders",
+      "returns": "Returns",
+      "messages": "Messages",
+      "reports": "Reports",
+      "coupons": "Coupons",
+      "productoffers": "Product Offers",
+      "settings": "Store Settings",
+      "account": "Account"
+    },
+    "sellerLabel": "Premium Seller",
+    "sellerName": "Mohamed's Auto Parts"
+  },
+  "signup": {
+    "heading": {
+      "prefix": "Create your",
+      "highlight": "auto parts store"
+    },
+    "description": "Sign up to list products, manage orders, and reach new customers.",
+    "or": "Or",
+    "haveAccount": "Have an account?",
+    "signIn": "Sign In"
+  },
+  "signin": {
+    "heading": {
+      "prefix": "Sign in to",
+      "highlight1": "manage your auto",
+      "highlight2": "parts store"
+    },
+    "description": "Manage your inventory, track orders, and grow your spare parts store — all from one place.",
+    "or": "Or",
+    "haveAccount": "Have an account?",
+    "registerNow": "Register now"
+  },
+  "category": {
+    "showing": "Showing",
+    "of": "of",
+    "products": "products",
+    "sort": "Sort",
+    "show": "Show"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next"
+  },
+
+  "table": {
+    "productInventory": "Products Inventory",
+    "productName": "Product Name",
+    "sku": "SKU",
+    "price": "Price",
+    "stock": "Stock",
+    "status": "Status",
+    "actions": "Actions",
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete",
+    "accept": "Accept",
+    "reject": "Reject"
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "addProduct": {
+      "title": "Add New Product",
+      "subtitle": "List a new spare part"
+    },
+    "manageOrders": {
+      "title": "Manage Orders",
+      "subtitle": "View and update orders"
+    },
+    "replyMessages": {
+      "title": "Reply to Messages",
+      "subtitle": "8 unread messages"
+    },
+    "createOffers": {
+      "title": "Create Offers",
+      "subtitle": "Set up product deals"
+    },
+    "editStore": {
+      "title": "Edit Store Info",
+      "subtitle": "Update store details"
+    }
+  },
+  "stats": {
+    "total": "Total Products",
+    "active": "Active",
+    "inactive": "Inactive",
+    "outOfStock": "Out of Stock",
+    "totalProducts_sub": "189 active, 59 inactive",
+    "newOrders": "New Orders",
+    "newOrders_sub": "Last 24 hours",
+    "inProgress": "In Progress",
+    "inProgress_sub": "5 shipped, 12 processing",
+    "returns": "Returns Pending",
+    "returns_sub": "Awaiting your response",
+    "messages": "Messages",
+    "messages_sub": "Unread customer messages"
+  },
+  "orderchart": {
+    "order_trend": "Order Trend",
+    "vs_last_week": "Vs Last Week",
+    "total_orders": "Total Orders",
+    "Revenue": "Revenue",
+    "avg_rating": "Average Rating"
+  },
+  "topselling": {
+    "title": "Top Selling Products"
+  },
+  "recentorders": {
+    "title": "Recent Orders",
+    "viewall": "View All"
+  },
+  "recentnotif": {
+    "title": "Recent Notifications",
+    "viewall": "View All"
+  },
+  "product": {
+    "title": "Products",
+    "addproduct": "Add Product",
+    "mainimage": "Main Image",
+    "image1": "Image 1",
+    "image2": "Image 2",
+    "image3": "Image 3",
+    "image4": "Image 4",
+    "Recommended": "Recommended: 800x800 pixels"
+  },
+  "order": {
+    "title": "Orders Management",
+    "stats": {
+      "processing": "Processing",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "totalOrders": "Total Orders",
+      "rejected": "Reject Order",
+      "recentOrders": "Recent Orders"
+    },
+    "table": {
+      "orderId": "Order ID",
+      "customer": "Customer",
+      "product": "Product",
+      "amount": "Amount",
+      "date": "Date",
+      "status": "Status",
+      "actions": "Actions"
+    }
+  },
+  "orderdetails": {
+    "title": "Order Details",
+    "contactcustomer": "Contact Customer",
+    "printinvoice": "Print Invoice",
+    "customerInformation": {
+      "title": "Customer Information",
+      "shippingAddress": "Shipping Address"
+    },
+    "orderStatus": {
+      "title": "Order Status",
+      "updateLabel": "Update Status:",
+      "selectPlaceholder": "Select status",
+      "status": {
+        "processing": "Processing",
+        "shipped": "Shipped",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled",
+        "pending": "Pending",
+        "returned": "Returned"
+      }
+    },
+    "orderTimeline": {
+      "title": "Order Timeline"
+    },
+    "paymentInformation": {
+      "title": "Payment Information",
+      "subtotal": "Subtotal:",
+      "tax": "Tax:",
+      "shipping": "Shipping:",
+      "total": "Total:"
+    },
+    "productInformation": {
+      "title": "Product Information",
+      "sku": "SKU",
+      "orderDate": "Order Date",
+      "quantity": "Quantity"
+    }
+  },
+  "returns": {
+    "title": "Returns Management",
+    "returnsrequest": "Returns Request",
+    "stats": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "totalReturns": "Total Returns"
+    },
+    "table": {
+      "returnId": "Return ID",
+      "product": "Product",
+      "customer": "Customer",
+      "reason": "Reason",
+      "status": "Status",
+      "date": "Date",
+      "amount": "Amount",
+      "actions": "Actions"
+    }
+  },
+  "returnsdetails": {
+    "title": "Returns Details",
+    "approveButton": "Approve Return",
+    "rejectButton": "Reject Return",
+    "productInformation": {
+      "title": "Product Information",
+      "sku": "SKU",
+      "partNumber": "Part Number"
+    },
+    "customerInformation": {
+      "title": "Customer Information",
+      "name": "Name",
+      "order": "Order",
+      "returnDate": "Return Date"
+    },
+    "returnReason": "Return Reason",
+    "addNotes": "Add Notes",
+    "uploadImages": "Upload Images",
+    "messageCustomer": "Message Customer",
+    "productDescriptionPlaceholder": "Describe your product, its features, compatibility, and benefits..."
+  },
+  "coupons": {
+    "title": "Discount Coupons",
+    "createOffer": "Create Offer",
+    "stats": {
+      "activeOffers": "Active Offers",
+      "totalRedemptions": "Total Redemptions",
+      "discountGiven": "Discount Given",
+      "avgOrderIncrease": "Avg. Order Increase"
+    },
+    "table": {
+      "couponCode": "Coupon Code",
+      "title": "Title",
+      "discount": "Discount",
+      "minOrder": "Min Order",
+      "usage": "Usage",
+      "date": "Date",
+      "status": "Status",
+      "couponList": "Coupons"
+    },
+    "category": {
+      "showing": "Showing",
+      "of": "of",
+      "coupons": "coupons"
+    },
+    "form": {
+      "productName": "Product Name",
+      "couponCode": "Coupon Code",
+      "couponTitle": "Coupon Title",
+      "discountType": "Discount Type",
+      "discountValue": "Discount Value (%)",
+      "minimumOrderValue": "Minimum Order Value ($)",
+      "usageLimit": "Usage Limit",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "addCoupon": "Add Coupon"
+      
+    }
+  },
+  "offers": {
+    "title": "Product Offers & Deals",
+    "createOffer": "Create Offer",
+    "stats": {
+      "activeOffers": "Active Offers",
+      "totalRedemptions": "Total Redemptions",
+      "discountGiven": "Discount Given",
+      "avgOrderIncrease": "Avg. Order Increase"
+    },
+    "filters": {
+      "all": "All Offers",
+      "active": "Active",
+      "expired": "Expired",
+      "scheduled": "Scheduled"
+    },
+    "table": {
+      "product": "Product",
+      "originalPrice": "Original Price",
+      "offerPrice": "Offer Price",
+      "discount": "Discount",
+      "validPeriod": "Valid Period",
+      "sales": "Sales",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "expired": "Expired",
+      "scheduled": "Scheduled"
+    },
+    "pagination": {
+      "showing": "Showing",
+      "of": "of",
+      "offers": "offers"
+    },
+    "form": {
+      "offerName": "Offer Name",
+      "productName": "Product Name",
+      "originalPrice": "Original Price ($)",
+      "offerPrice": "Offer Price ($)",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "createOffer": "Create Offer"
+
+      
+    }
+  },
+  "storeSetting":{
+    "title": "Store Settings",
+    "saveChanges": "Save Changes",
+    "store": {
+    "information": "Store Information",
+    "name": "Store Name",
+    "namePlaceholder": "Enter store name",
+    "description": "Store Description",
+    "descriptionPlaceholder": "Enter store description...",
+    "mainImage": "Main Image",
+    "recommended": "Recommended size : 800x800 pixels",
+    "formats": "JPG, PNG, WebP"
+  },
+  "location": {
+    "contact": "Location & Contact",
+    "businessAddress": "Business Address",
+    "businessAddressPlaceholder": "Enter business address",
+    "city": "City",
+    "cityPlaceholder": "Enter city",
+    "zipCode": "ZIP Code",
+    "zipCodePlaceholder": "Enter ZIP code",
+    "phoneNumber": "Phone Number",
+    "phoneNumberPlaceholder": "Enter phone number",
+    "email": "Email",
+    "emailPlaceholder": "Enter email"
+  },
+  "shipping": {
+    "information": "Shipping Company Information",
+    "companyName": "Company Name",
+    "companyNamePlaceholder": "Enter company name",
+    "companyContact": "Contact Number",
+    "companyContactPlaceholder": "Enter contact number",
+    "companyLogo": "Upload Company Logo",
+    "addAnother": "+ Add Another Company",
+    "saveCompanies": "Save Shipping Companies"
+  }
+  },
+  "account":{
+  "title": "Account Settings",
+  "saveChanges": "Save Changes",
+  "toast": {
+    "success": "Account settings saved successfully!"
+  },
+  "personalInfo": "Personal Information",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "email": "Email Address",
+  "phone": "Phone Number",
+  "securitySettings": "Security Settings",
+  "currentPassword": "Current Password",
+  "newPassword": "New Password",
+  "confirmPassword": "Confirm New Password",
+  "enableTwoFactor": "Enable two-factor authentication",
+  "companyLegal": "Company Legal Information",
+    "updateLegal": "Update Legal Information",
+
+  "taxId": "Tax Identification Number (TIN)",
+  "registrationNumber": "Commercial Registration Number",
+  "taxCertificate": "Attach Tax Certificate (PDF or image)",
+  "commercialRegistration": "Upload Commercial Registration File",
+  "notifications": "Notification Preferences",
+  "newOrders": "New order notifications",
+  "customerMessages": "Customer messages",
+  "lowStock": "Low stock alerts",
+  "weeklyReports": "Weekly sales reports",
+  "marketingEmails": "Marketing emails"
+}
+
+}

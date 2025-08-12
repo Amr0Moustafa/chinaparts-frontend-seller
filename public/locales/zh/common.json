@@ -1,0 +1,395 @@
+{
+  "language": {
+    "english": "英语",
+    "arabic": "阿拉伯语",
+    "chinese": "中文"
+  },
+  "sidebar": {
+    "nav": {
+      "dashboard": "仪表板",
+      "products": "产品",
+      "orders": "订单",
+      "returns": "退货",
+      "messages": "消息",
+      "reports": "报告",
+      "coupons": "优惠券",
+      "productoffers": "产品优惠",
+      "settings": "店铺设置",
+      "account": "账户"
+    },
+    "sellerLabel": "高级卖家",
+    "sellerName": "Mohamed 的汽车配件"
+  },
+  "signup": {
+    "heading": {
+      "prefix": "创建你的",
+      "highlight": "汽车配件商店"
+    },
+    "description": "注册以列出产品、管理订单并接触新客户。",
+    "or": "或",
+    "haveAccount": "已有账号？",
+    "signIn": "登录"
+  },
+  "signin": {
+    "heading": {
+      "prefix": "登录以",
+      "highlight1": "管理你的汽车",
+      "highlight2": "配件商店"
+    },
+    "description": "管理你的库存、跟踪订单，并从一个地方发展你的备件商店。",
+    "or": "或",
+    "haveAccount": "有账号？",
+    "registerNow": "立即注册"
+  },
+  "category": {
+    "showing": "显示",
+    "of": "的",
+    "products": "产品",
+    "sort": "排序",
+    "show": "显示"
+  },
+  "pagination": {
+    "previous": "上一页",
+    "next": "下一页"
+  },
+
+  "table": {
+    "productInventory": "产品库存",
+    "productName": "产品名称",
+    "sku": "SKU 编号",
+    "price": "价格",
+    "stock": "库存",
+    "status": "状态",
+    "actions": "操作",
+    "view": "查看",
+    "edit": "编辑",
+    "delete": "删除",
+    "accept": "接受",
+    "reject": "拒绝"
+  },
+  "quickActions": {
+    "title": "快速操作",
+    "addProduct": {
+      "title": "添加新产品",
+      "subtitle": "列出一个新零件"
+    },
+    "manageOrders": {
+      "title": "管理订单",
+      "subtitle": "查看和更新订单"
+    },
+    "replyMessages": {
+      "title": "回复消息",
+      "subtitle": "8 条未读消息"
+    },
+    "createOffers": {
+      "title": "创建优惠",
+      "subtitle": "设置产品优惠"
+    },
+    "editStore": {
+      "title": "编辑商店信息",
+      "subtitle": "更新商店详情"
+    }
+  },
+  "stats": {
+    "total": "产品总数",
+    "active": "活跃",
+    "inactive": "非活跃",
+    "outOfStock": "缺货",
+    "totalProducts_sub": "189 个启用，59 个停用",
+    "newOrders": "新订单",
+    "newOrders_sub": "过去24小时",
+    "inProgress": "处理中",
+    "inProgress_sub": "5 已发货，12 处理中",
+    "returns": "待退货",
+    "returns_sub": "等待你的回复",
+    "messages": "消息",
+    "messages_sub": "未读客户消息"
+  },
+  "orderchart": {
+    "order_trend": "订单趋势",
+    "vs_last_week": "与上周对比",
+    "total_orders": "总订单",
+    "Revenue": "收入",
+    "avg_rating": "平均评分"
+  },
+  "topselling": {
+    "title": "热销产品"
+  },
+  "recentorders": {
+    "title": "最近的订单",
+    "viewall": "查看所有"
+  },
+  "recentnotif": {
+    "title": "最近通知",
+    "viewall": "查看所有"
+  },
+  "products": {
+    "title": "产品",
+    "addproduct": "添加产品",
+    "mainimage": "主图",
+    "image1": "图像 1",
+    "image2": "图像 2",
+    "image3": "图像 3",
+    "image4": "图像 4",
+    "Recommended": "推荐：800x800 像素"
+  },
+  "order": {
+    "title": "订单管理",
+    "stats": {
+      "processing": "处理中",
+      "shipped": "已发货",
+      "delivered": "已送达",
+      "totalOrders": "总订单数",
+      "rejected": "已拒绝订单",
+      "recentOrders": "最近订单"
+    },
+    "table": {
+      "orderId": "订单编号",
+      "customer": "客户",
+      "product": "产品",
+      "amount": "金额",
+      "date": "日期",
+      "status": "状态"
+    }
+  },
+  "orderdetails": {
+    "title": "订单详情",
+    "contactcustomer": "联系客户",
+    "printinvoice": "打印发票",
+    "customerInformation": {
+      "title": "客户信息",
+      "shippingAddress": "送货地址"
+    },
+    "orderStatus": {
+      "title": "订单状态",
+      "updateLabel": "更新状态：",
+      "selectPlaceholder": "选择状态",
+      "status": {
+        "processing": "处理中",
+        "shipped": "已发货",
+        "delivered": "已送达",
+        "cancelled": "已取消",
+        "pending": "待处理",
+        "returned": "已退货"
+      }
+    },
+    "orderTimeline": {
+      "title": "订单时间线"
+    },
+    "paymentInformation": {
+      "title": "支付信息",
+      "subtotal": "小计：",
+      "tax": "税费：",
+      "shipping": "运费：",
+      "total": "总计："
+    },
+    "productInformation": {
+      "title": "产品信息",
+      "sku": "库存单位",
+      "orderDate": "下单日期",
+      "quantity": "数量"
+    }
+  },
+  "returns": {
+    "title": "退货管理",
+    "returnsrequest": "退货请求",
+    "stats": {
+      "pending": "待处理",
+      "approved": "已批准",
+      "rejected": "已拒绝",
+      "totalReturns": "退货总数"
+    },
+    "table": {
+      "returnId": "退货编号",
+      "product": "产品",
+      "customer": "客户",
+      "reason": "原因",
+      "status": "状态",
+      "date": "日期",
+      "amount": "金额",
+      "actions": "操作"
+    }
+  },
+  "returnsdetails": {
+    "title": "退货详情",
+    "approveButton": "批准退货",
+    "rejectButton": "拒绝退货",
+    "productInformation": {
+      "title": "产品信息",
+      "sku": "SKU",
+      "partNumber": "部件号"
+    },
+    "customerInformation": {
+      "title": "客户信息",
+      "name": "姓名",
+      "order": "订单",
+      "returnDate": "退货日期"
+    },
+    "returnReason": "退货原因",
+    "addNotes": "添加备注",
+    "uploadImages": "上传图片",
+    "messageCustomer": "联系客户",
+    "productDescriptionPlaceholder": "描述您的产品、其功能、兼容性和优势..."
+
+  },
+  "coupons": {
+    "title": "折扣优惠券",
+    "createOffer": "创建优惠",
+    "stats": {
+      "activeOffers": "有效优惠",
+      "totalRedemptions": "总兑换次数",
+      "discountGiven": "已提供折扣",
+      "avgOrderIncrease": "平均订单增长"
+    },
+    "table": {
+      "couponCode": "优惠码",
+      "title": "标题",
+      "discount": "折扣",
+      "minOrder": "最低订单",
+      "usage": "使用情况",
+      "date": "日期",
+      "status": "状态",
+      "couponList": "优惠券"
+    },
+    "category": {
+      "showing": "显示",
+      "of": "的",
+      "coupons": "优惠券"
+    },
+    "form":{
+       "productName": "产品名称",
+      "couponCode": "优惠码",
+      "couponTitle": "优惠标题",
+      "discountType": "折扣类型",
+      "discountValue": "折扣值 (%)",
+      "minimumOrderValue": "最低订单金额 ($)",
+      "usageLimit": "使用限制",
+      "startDate": "开始日期",
+      "endDate": "结束日期",
+      "addCoupon": "添加优惠券",
+      "productOptions": [
+        { "value": "automotive", "label": "汽车用品" },
+        { "value": "electronics", "label": "电子产品" },
+        { "value": "home", "label": "家居与厨房" }
+      ],
+      "discountOptions": [
+        { "value": "5", "label": "5%" },
+        { "value": "10", "label": "10%" },
+        { "value": "20", "label": "20%" }
+      ]
+    }
+    
+  },
+  "offers": {
+    "title": "产品优惠与特价",
+    "createOffer": "创建优惠",
+    "stats": {
+      "activeOffers": "有效优惠",
+      "totalRedemptions": "总兑换次数",
+      "discountGiven": "已提供的折扣",
+      "avgOrderIncrease": "平均订单增长"
+    },
+    "filters": {
+      "all": "全部优惠",
+      "active": "有效",
+      "expired": "已过期",
+      "scheduled": "已安排"
+    },
+    "table": {
+      "product": "产品",
+      "originalPrice": "原价",
+      "offerPrice": "优惠价",
+      "discount": "折扣",
+      "validPeriod": "有效期",
+      "sales": "销量",
+      "status": "状态"
+    },
+    "status": {
+      "active": "有效",
+      "expired": "已过期",
+      "scheduled": "已安排"
+    },
+    "pagination": {
+      "showing": "显示",
+      "of": "共",
+      "offers": "个优惠"
+    },
+    "form":{
+      "offerName": "优惠名称",
+      "productName": "产品名称",
+      "originalPrice": "原价 ($)",
+      "offerPrice": "优惠价 ($)",
+      "startDate": "开始日期",
+      "endDate": "结束日期",
+      "createOffer": "创建优惠"
+      
+    }
+  },
+  "storeSetting":{
+    "title": "商店设置",
+    "saveChanges": "保存更改",
+    "store": {
+    "information": "商店信息",
+    "name": "商店名称",
+    "namePlaceholder": "输入商店名称",
+    "description": "商店描述",
+    "descriptionPlaceholder": "输入商店描述...",
+    "mainImage": "主图片",
+    "recommended": "推荐尺寸 : 800x800 像素",
+    "formats": "JPG, PNG, WebP"
+  },
+  "location": {
+    "contact": "位置与联系方式",
+    "businessAddress": "营业地址",
+    "businessAddressPlaceholder": "输入营业地址",
+    "city": "城市",
+    "cityPlaceholder": "输入城市",
+    "zipCode": "邮政编码",
+    "zipCodePlaceholder": "输入邮政编码",
+    "phoneNumber": "电话号码",
+    "phoneNumberPlaceholder": "输入电话号码",
+    "email": "电子邮箱",
+    "emailPlaceholder": "输入电子邮箱"
+  },
+  "shipping": {
+    "information": "运输公司信息",
+    "companyName": "公司名称",
+    "companyNamePlaceholder": "输入公司名称",
+    "companyContact": "联系电话",
+    "companyContactPlaceholder": "输入联系电话",
+    "companyLogo": "上传公司标志",
+    "addAnother": "+ 添加另一家公司",
+    "saveCompanies": "保存运输公司"
+  }
+  },
+  "account":{
+  "title": "账户设置",
+  "saveChanges": "保存更改",
+  "toast": {
+    "success": "账户设置已成功保存！"
+  },
+  "personalInfo": "个人信息",
+  "firstName": "名字",
+  "lastName": "姓氏",
+  "email": "电子邮箱",
+  "phone": "电话号码",
+  "securitySettings": "安全设置",
+  "currentPassword": "当前密码",
+  "newPassword": "新密码",
+  "confirmPassword": "确认新密码",
+  "enableTwoFactor": "启用双重身份验证",
+  "companyLegal": "公司法律信息",
+  "updateLegal": "更新法律信息",
+  "taxId": "税务识别号 (TIN)",
+  "registrationNumber": "商业注册号",
+  "taxCertificate": "上传税务证书 (PDF 或图片)",
+  "commercialRegistration": "上传商业注册文件",
+  "notifications": "通知偏好",
+  "newOrders": "新订单通知",
+  "customerMessages": "客户消息",
+  "lowStock": "库存不足提醒",
+  "weeklyReports": "每周销售报告",
+  "marketingEmails": "营销邮件"
+}
+
+}

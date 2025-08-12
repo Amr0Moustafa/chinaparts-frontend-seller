@@ -1,0 +1,387 @@
+{
+  "language": {
+    "english": "الإنجليزية",
+    "arabic": "العربية",
+    "chinese": "الصينية"
+  },
+  "sidebar": {
+    "nav": {
+      "dashboard": "لوحة التحكم",
+      "products": "المنتجات",
+      "orders": "الطلبات",
+      "returns": "الإرجاع",
+      "messages": "الرسائل",
+      "reports": "التقارير",
+      "coupons": "الكوپونات",
+      "productoffers": "عروض المنتجات",
+      "settings": "إعدادات المتجر",
+      "account": "الحساب"
+    },
+    "sellerLabel": "البائع المميز",
+    "sellerName": "قطع غيار محمد"
+  },
+  "signup": {
+    "heading": {
+      "prefix": "أنشئ متجرك",
+      "highlight": "متجر قطع غيار السيارات"
+    },
+    "description": "قم بالتسجيل لعرض المنتجات، إدارة الطلبات، والوصول إلى عملاء جدد.",
+    "or": "أو",
+    "haveAccount": "هل لديك حساب؟",
+    "signIn": "تسجيل الدخول"
+  },
+  "signin": {
+    "heading": {
+      "prefix": "سجّل الدخول إلى",
+      "highlight1": "إدارة متجرك",
+      "highlight2": "لقطع غيار السيارات"
+    },
+    "description": "قم بإدارة مخزونك، وتتبع الطلبات، وتنمية متجر قطع الغيار الخاص بك — كل ذلك من مكان واحد.",
+    "or": "أو",
+    "haveAccount": "هل لديك حساب؟",
+    "registerNow": "سجّل الآن"
+  },
+  "category": {
+    "showing": "عرض",
+    "of": "من",
+    "products": "المنتجات",
+    "sort": "ترتيب",
+    "show": "عرض"
+  },
+  "pagination": {
+    "previous": "السابق",
+    "next": "التالي"
+  },
+
+  "table": {
+    "productInventory": "مخزون المنتجات",
+    "productName": "اسم المنتج",
+    "sku": "رمز SKU",
+    "price": "السعر",
+    "stock": "المخزون",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "view": "عرض",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "accept": "قبول",
+    "reject": "رفض"
+  },
+  "quickActions": {
+    "title": "خيارات سريعة",
+    "addProduct": {
+      "title": "إضافة منتج جديد",
+      "subtitle": "إدراج قطعة غيار جديدة"
+    },
+    "manageOrders": {
+      "title": "إدارة الطلبات",
+      "subtitle": "عرض وتحديث الطلبات"
+    },
+    "replyMessages": {
+      "title": "الرد على الرسائل",
+      "subtitle": "٨ رسائل غير مقروءة"
+    },
+    "createOffers": {
+      "title": "إنشاء عروض",
+      "subtitle": "إعداد عروض المنتجات"
+    },
+    "editStore": {
+      "title": "تعديل معلومات المتجر",
+      "subtitle": "تحديث تفاصيل المتجر"
+    }
+  },
+  "stats": {
+    "total": "إجمالي المنتجات",
+    "active": "نشطة",
+    "inactive": "غير نشطة",
+    "outOfStock": "نفدت الكمية",
+    "totalProducts_sub": "189 نشطة، 59 غير نشطة",
+    "newOrders": "طلبات جديدة",
+    "newOrders_sub": "آخر 24 ساعة",
+    "inProgress": "قيد المعالجة",
+    "inProgress_sub": "5 تم شحنها، 12 قيد التنفيذ",
+    "returns": "المرتجعات المعلقة",
+    "returns_sub": "بانتظار ردك",
+    "messages": "الرسائل",
+    "messages_sub": "رسائل العملاء غير المقروءة"
+  },
+  "orderchart": {
+    "order_trend": "نسبة الطلبات",
+    "vs_last_week": "مقارنة مع الاسبوع الماضي",
+    "total_orders": "اجمالي الطلبات",
+    "Revenue": "الايرادات",
+    "avg_rating": "متوسط التقييم"
+  },
+  "topselling": {
+    "title": "المنتجات الرائجة"
+  },
+  "recentorders": {
+    "title": "الطلبات الحديثة",
+    "viewall": "عرض الكل"
+  },
+  "recentnotif": {
+    "title": "الاشعارات الحديثة",
+    "viewall": "عرض الكل"
+  },
+  "products": {
+    "title": "المنتجات",
+    "addproduct": "اضافة منتج",
+    "mainimage": "الصورة الرئيسية",
+    "image1": "الصوره 1",
+    "image2": "الصوره 2",
+    "image3": "الصوره 3",
+    "image4": "الصوره 4",
+    "Recommended": "منتجات توصيه: 800x800 بكسل"
+  },
+  "order": {
+    "title": "إدارة الطلبات",
+    "stats": {
+      "processing": "قيد المعالجة",
+      "shipped": "تم الشحن",
+      "delivered": "تم التوصيل",
+      "totalOrders": "إجمالي الطلبات",
+      "rejected": "طلب مرفوض",
+      "recentOrders": "الطلبات الأخيرة"
+    },
+    "table": {
+      "orderId": "رقم الطلب",
+      "customer": "العميل",
+      "product": "المنتج",
+      "amount": "المبلغ",
+      "date": "التاريخ",
+      "status": "الحالة",
+      "actions": "الإجراءات",
+      "accept": "قبول",
+      "reject": "رفض"
+    }
+  },
+  "orderdetails": {
+    "title": "تفاصيل الطلب",
+    "contactcustomer": "اتصل بالعميل",
+    "printinvoice": "طباعة الفاتورة",
+    "customerInformation": {
+      "title": "معلومات العميل",
+      "shippingAddress": "عنوان الشحن"
+    },
+    "orderStatus": {
+      "title": "حالة الطلب",
+      "updateLabel": "تحديث الحالة:",
+      "selectPlaceholder": "اختر الحالة",
+      "status": {
+        "processing": "قيد المعالجة",
+        "shipped": "تم الشحن",
+        "delivered": "تم التسليم",
+        "cancelled": "ملغي",
+        "pending": "معلق",
+        "returned": "تم الإرجاع"
+      }
+    },
+    "orderTimeline": {
+      "title": "الجدول الزمني للطلب"
+    },
+    "paymentInformation": {
+      "title": "معلومات الدفع",
+      "subtotal": "المجموع الفرعي:",
+      "tax": "الضريبة:",
+      "shipping": "الشحن:",
+      "total": "الإجمالي:"
+    },
+    "productInformation": {
+      "title": "معلومات المنتج",
+      "sku": "رمز المنتج",
+      "orderDate": "تاريخ الطلب",
+      "quantity": "الكمية"
+    }
+  },
+  "returns": {
+    "title": "إدارة المرتجعات",
+    "returnsrequest": "طلبات المرتجعات",
+    "stats": {
+      "pending": "قيد الانتظار",
+      "approved": "تمت الموافقة",
+      "rejected": "مرفوض",
+      "totalReturns": "إجمالي المرتجعات"
+    },
+    "table": {
+      "returnId": "رقم الإرجاع",
+      "product": "المنتج",
+      "customer": "العميل",
+      "reason": "السبب",
+      "status": "الحالة",
+      "date": "التاريخ",
+      "amount": "المبلغ",
+      "actions": "الإجراءات"
+    }
+  },
+  "returnsdetails": {
+    "title": "تفاصيل المرتجعات",
+    "approveButton": "الموافقة على الإرجاع",
+    "rejectButton": "رفض الإرجاع",
+    "productInformation": {
+      "title": "معلومات المنتج",
+      "sku": "رمز التخزين ",
+      "partNumber": "رقم الجزء"
+    },
+    "customerInformation": {
+      "title": "معلومات العميل",
+      "name": "الاسم",
+      "order": "الطلب",
+      "returnDate": "تاريخ الإرجاع"
+    },
+    "returnReason": "سبب الإرجاع",
+    "addNotes": "إضافة ملاحظات",
+    "uploadImages": "رفع الصور",
+    "messageCustomer": "مراسلة العميل",
+    "productDescriptionPlaceholder": "صف منتجك وميزاته وتوافقه وفوائده..."
+  },
+  "coupons": {
+    "title": "كوبونات الخصم",
+    "createOffer": "إنشاء عرض",
+    "stats": {
+      "activeOffers": "العروض النشطة",
+      "totalRedemptions": "إجمالي عمليات الاسترداد",
+      "discountGiven": "إجمالي الخصم المقدم",
+      "avgOrderIncrease": "متوسط زيادة الطلبات"
+    },
+    "table": {
+      "couponCode": "رمز الكوبون",
+      "title": "العنوان",
+      "discount": "الخصم",
+      "minOrder": "الحد الأدنى للطلب",
+      "usage": "الاستخدام",
+      "date": "التاريخ",
+      "status": "الحالة",
+      "couponList": "الكوبونات"
+    },
+    "category": {
+      "showing": "عرض",
+      "of": "من",
+      "coupons": "كوبونات"
+    },
+    "form": {
+      "productName": "اسم المنتج",
+      "couponCode": "رمز الكوبون",
+      "couponTitle": "عنوان الكوبون",
+      "discountType": "نوع الخصم",
+      "discountValue": "قيمة الخصم (%)",
+      "minimumOrderValue": "الحد الأدنى لقيمة الطلب ($)",
+      "usageLimit": "حد الاستخدام",
+      "startDate": "تاريخ البدء",
+      "endDate": "تاريخ الانتهاء",
+      "addCoupon": "إضافة كوبون"
+    }
+  },
+  "offers": {
+    "title": "عروض وصفقات المنتجات",
+    "createOffer": "إنشاء عرض",
+    "stats": {
+      "activeOffers": "العروض النشطة",
+      "totalRedemptions": "إجمالي مرات الاسترداد",
+      "discountGiven": "إجمالي الخصم",
+      "avgOrderIncrease": "زيادة متوسط الطلب"
+    },
+    "filters": {
+      "all": "جميع العروض",
+      "active": "نشط",
+      "expired": "منتهي",
+      "scheduled": "مجدول"
+    },
+    "table": {
+      "product": "المنتج",
+      "originalPrice": "السعر الأصلي",
+      "offerPrice": "سعر العرض",
+      "discount": "الخصم",
+      "validPeriod": "فترة الصلاحية",
+      "sales": "المبيعات",
+      "status": "الحالة"
+    },
+    "status": {
+      "active": "نشط",
+      "expired": "منتهي",
+      "scheduled": "مجدول"
+    },
+    "pagination": {
+      "showing": "عرض",
+      "of": "من",
+      "offers": "عروض"
+    },
+    "form": {
+      "offerName": "اسم العرض",
+      "productName": "اسم المنتج",
+      "originalPrice": "السعر الأصلي ($)",
+      "offerPrice": "سعر العرض ($)",
+      "startDate": "تاريخ البدء",
+      "endDate": "تاريخ الانتهاء",
+      "createOffer": "إنشاء عرض"
+    }
+  },
+  "storeSetting": {
+    "title": "اعدادات المتجر",
+    "saveChanges": "حفظ التغييرات",
+    "store": {
+      "information": "معلومات المتجر",
+      "name": "اسم المتجر",
+      "namePlaceholder": "أدخل اسم المتجر",
+      "description": "وصف المتجر",
+      "descriptionPlaceholder": "أدخل وصف المتجر...",
+      "mainImage": "الصورة الرئيسية",
+      
+      "recommended": "الحجم الموصى به 800x800 بكسل",
+      "formats": "JPG, PNG, WebP"
+    },
+    "location": {
+      "contact": "الموقع ووسائل الاتصال",
+      "businessAddress": "عنوان العمل",
+      "businessAddressPlaceholder": "أدخل عنوان العمل",
+      "city": "المدينة",
+      "cityPlaceholder": "أدخل المدينة",
+      "zipCode": "الرمز البريدي",
+      "zipCodePlaceholder": "أدخل الرمز البريدي",
+      "phoneNumber": "رقم الهاتف",
+      "phoneNumberPlaceholder": "أدخل رقم الهاتف",
+      "email": "البريد الإلكتروني",
+      "emailPlaceholder": "أدخل البريد الإلكتروني"
+    },
+    "shipping": {
+      "information": "معلومات شركة الشحن",
+      "companyName": "اسم الشركة",
+      "companyNamePlaceholder": "أدخل اسم الشركة",
+      "companyContact": "رقم الاتصال",
+      "companyContactPlaceholder": "أدخل رقم الاتصال",
+      "companyLogo": "رفع شعار الشركة",
+      "addAnother": "+ إضافة شركة أخرى",
+      "saveCompanies": "حفظ شركات الشحن"
+    }
+  },
+  "account":{
+  "title": "إعدادات الحساب",
+  "saveChanges": "حفظ التغييرات",
+  "toast": {
+    "success": "تم حفظ إعدادات الحساب بنجاح!"
+  },
+  "personalInfo": "المعلومات الشخصية",
+  "firstName": "الاسم الأول",
+  "lastName": "اسم العائلة",
+  "email": "البريد الإلكتروني",
+  "phone": "رقم الهاتف",
+  "securitySettings": "إعدادات الأمان",
+  "currentPassword": "كلمة المرور الحالية",
+  "newPassword": "كلمة المرور الجديدة",
+  "confirmPassword": "تأكيد كلمة المرور الجديدة",
+  "enableTwoFactor": "تفعيل المصادقة الثنائية",
+  "companyLegal": "المعلومات القانونية للشركة",
+    "updateLegal": "تحديث المعلومات القانونية",
+
+  "taxId": "الرقم الضريبي (TIN)",
+  "registrationNumber": "رقم السجل التجاري",
+  "taxCertificate": "إرفاق الشهادة الضريبية (PDF أو صورة)",
+  "commercialRegistration": "رفع ملف السجل التجاري",
+  "notifications": "تفضيلات الإشعارات",
+  "newOrders": "إشعارات الطلبات الجديدة",
+  "customerMessages": "رسائل العملاء",
+  "lowStock": "تنبيهات انخفاض المخزون",
+  "weeklyReports": "تقارير المبيعات الأسبوعية",
+  "marketingEmails": "رسائل تسويقية"
+}
+
+}
