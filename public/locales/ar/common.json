@@ -325,7 +325,7 @@
       "description": "وصف المتجر",
       "descriptionPlaceholder": "أدخل وصف المتجر...",
       "mainImage": "الصورة الرئيسية",
-      
+
       "recommended": "الحجم الموصى به 800x800 بكسل",
       "formats": "JPG, PNG, WebP"
     },
@@ -353,35 +353,88 @@
       "saveCompanies": "حفظ شركات الشحن"
     }
   },
-  "account":{
-  "title": "إعدادات الحساب",
-  "saveChanges": "حفظ التغييرات",
-  "toast": {
-    "success": "تم حفظ إعدادات الحساب بنجاح!"
-  },
-  "personalInfo": "المعلومات الشخصية",
-  "firstName": "الاسم الأول",
-  "lastName": "اسم العائلة",
-  "email": "البريد الإلكتروني",
-  "phone": "رقم الهاتف",
-  "securitySettings": "إعدادات الأمان",
-  "currentPassword": "كلمة المرور الحالية",
-  "newPassword": "كلمة المرور الجديدة",
-  "confirmPassword": "تأكيد كلمة المرور الجديدة",
-  "enableTwoFactor": "تفعيل المصادقة الثنائية",
-  "companyLegal": "المعلومات القانونية للشركة",
+  "account": {
+    "title": "إعدادات الحساب",
+    "saveChanges": "حفظ التغييرات",
+    "toast": {
+      "success": "تم حفظ إعدادات الحساب بنجاح!"
+    },
+    "personalInfo": "المعلومات الشخصية",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الهاتف",
+    "securitySettings": "إعدادات الأمان",
+    "currentPassword": "كلمة المرور الحالية",
+    "newPassword": "كلمة المرور الجديدة",
+    "confirmPassword": "تأكيد كلمة المرور الجديدة",
+    "enableTwoFactor": "تفعيل المصادقة الثنائية",
+    "companyLegal": "المعلومات القانونية للشركة",
     "updateLegal": "تحديث المعلومات القانونية",
 
-  "taxId": "الرقم الضريبي (TIN)",
-  "registrationNumber": "رقم السجل التجاري",
-  "taxCertificate": "إرفاق الشهادة الضريبية (PDF أو صورة)",
-  "commercialRegistration": "رفع ملف السجل التجاري",
-  "notifications": "تفضيلات الإشعارات",
-  "newOrders": "إشعارات الطلبات الجديدة",
-  "customerMessages": "رسائل العملاء",
-  "lowStock": "تنبيهات انخفاض المخزون",
-  "weeklyReports": "تقارير المبيعات الأسبوعية",
-  "marketingEmails": "رسائل تسويقية"
-}
-
+    "taxId": "الرقم الضريبي (TIN)",
+    "registrationNumber": "رقم السجل التجاري",
+    "taxCertificate": "إرفاق الشهادة الضريبية (PDF أو صورة)",
+    "commercialRegistration": "رفع ملف السجل التجاري",
+    "notifications": "تفضيلات الإشعارات",
+    "newOrders": "إشعارات الطلبات الجديدة",
+    "customerMessages": "رسائل العملاء",
+    "lowStock": "تنبيهات انخفاض المخزون",
+    "weeklyReports": "تقارير المبيعات الأسبوعية",
+    "marketingEmails": "رسائل تسويقية"
+  },
+  "salesreport": {
+    "title": "تقارير المبيعات",
+    "description": "حلل أداءك وتتبع النمو",
+    "exportPdf": "تصدير PDF",
+    "exportExcel": "تصدير Excel",
+    "filters": "عوامل التصفية",
+    "dateRange": "النطاق الزمني",
+    "dateRangePlaceholder": "اختر النطاق الزمني",
+    "productCategory": "فئة المنتج",
+    "productCategoryPlaceholder": "اختر الفئة",
+    "timePeriod": "الفترة الزمنية",
+    "timePeriodPlaceholder": "اختر الفترة الزمنية",
+    "salesTrend": "اتجاه المبيعات",
+    "orderStatusBreakdown": "تفصيل حالة الطلبات",
+    "totalOrders": "إجمالي الطلبات",
+    "netProfit": "صافي الربح",
+    "avgRating": "متوسط التقييم",
+    "productCategoryPerformance": "أداء فئات المنتجات",
+    "category": "الفئة",
+    "subcategory": " الفئة الفرعية",
+    "topSellingProducts": "أعلى 5 منتجات مبيعًا",
+    "bestSelling": {
+      "productName": "اسم المنتج",
+      "quantitySold": "الكمية المباعة",
+      "revenue": "الإيرادات",
+      "platformCommission": "عمولة المنصة",
+      "trend": "الاتجاه"
+    }
+  },
+  "messages": {
+    "title": "الرسائل",
+    "markAllRead": "تحديد الكل كمقروء",
+    "unreadMessages": "الرسائل غير المقروءة",
+    "returnsOrders": "طلبات الإرجاع",
+    "productInquiries": "استفسارات المنتج",
+    "totalConversations": "إجمالي المحادثات",
+    "avgResponseTime": "متوسط وقت الاستجابة",
+    "conversations": "المحادثات",
+    "searchPlaceholder": "ابحث في المحادثات...",
+    "noConversations": "لا توجد محادثات.",
+    "tabs": {
+      "all": "الكل",
+      "unread": "غير مقروء",
+      "product": "المنتج",
+      "resolved": "تم الحل"
+    },
+    "selectConversationTitle": "اختر محادثة",
+    "selectConversationDescription": "اختر محادثة من القائمة لبدء المراسلة",
+    "price": "السعر",
+    "sku": "رمز المنتج",
+    "stock": "المخزون",
+    "viewProduct": "عرض المنتج",
+    "typeMessagePlaceholder": "اكتب رسالتك..."
+  }
 }

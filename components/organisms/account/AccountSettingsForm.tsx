@@ -3,7 +3,6 @@
 import { FC } from "react";
 import { useForm, FormProvider, FieldValues } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import { Card, CardContent } from "@/components/ui/card";
 import { InputField } from "@/components/atoms/input";
 import { Label } from "@/components/ui/label";
@@ -70,31 +69,31 @@ export const AccountSettingsForm: FC = () => {
                 title={t("account.personalInfo") || "Personal Information"}
               />
             </div>
-            <CardContent className="space-y-3 grid grid-cols-1 md:grid-cols-2 gap-2 ">
+            <CardContent className="space-y-3 grid grid-cols-1 md:grid-cols-2 gap-2">
               <InputField
                 name="firstName"
                 label={t("account.firstName")}
                 className="bg-[var(--theme-light-gray)]"
-                labelColor="text-gray-900"
+                labelColor="text-gray-900 text-xs sm:text-sm md:text-base"
               />
               <InputField
                 name="lastName"
                 label={t("account.lastName")}
                 className="bg-[var(--theme-light-gray)]"
-                labelColor="text-gray-900"
+                labelColor="text-gray-900 text-xs sm:text-sm md:text-base"
               />
               <InputField
                 name="email"
                 type="email"
                 label={t("account.email")}
                 className="bg-[var(--theme-light-gray)]"
-                labelColor="text-gray-900"
+                labelColor="text-gray-900 text-xs sm:text-sm md:text-base"
               />
               <InputField
                 name="phone"
                 label={t("account.phone")}
                 className="bg-[var(--theme-light-gray)]"
-                labelColor="text-gray-900"
+                labelColor="text-gray-900 text-xs sm:text-sm md:text-base"
               />
             </CardContent>
           </Card>
@@ -105,6 +104,7 @@ export const AccountSettingsForm: FC = () => {
               <SectionHeader
                 icon={ShieldCheck}
                 title={t("account.securitySettings") || "Security Settings"}
+                  
               />
             </div>
             <CardContent className="space-y-3">
@@ -113,28 +113,31 @@ export const AccountSettingsForm: FC = () => {
                 type="password"
                 label={t("account.currentPassword")}
                 className="bg-[var(--theme-light-gray)]"
-                labelColor="text-gray-900"
+                labelColor="text-gray-900 text-xs sm:text-sm md:text-base"
               />
               <InputField
                 name="newPassword"
                 type="password"
                 label={t("account.newPassword")}
                 className="bg-[var(--theme-light-gray)]"
-                labelColor="text-gray-900"
+                labelColor="text-gray-900 text-xs sm:text-sm md:text-base"
               />
               <InputField
                 name="confirmPassword"
                 type="password"
                 label={t("account.confirmPassword")}
                 className="bg-[var(--theme-light-gray)]"
-                labelColor="text-gray-900"
+                labelColor="text-gray-900 text-xs sm:text-sm md:text-base"
               />
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                 <Checkbox
                   id="twoFactor"
                   className="data-[state=checked]:bg-orange-500 data-[state=checked]:text-white data-[state=checked]:border-orange-500 border-gray-500"
                 />
-                <Label htmlFor="twoFactor">
+                <Label
+                  htmlFor="twoFactor"
+                  className="text-xs sm:text-sm md:text-base break-words"
+                >
                   {t("account.enableTwoFactor")}
                 </Label>
               </div>
@@ -154,50 +157,45 @@ export const AccountSettingsForm: FC = () => {
                 name="taxId"
                 label={t("account.taxId")}
                 className="bg-[var(--theme-light-gray)]"
-                labelColor="text-gray-900"
+                labelColor="text-gray-900 text-xs sm:text-sm md:text-base"
               />
               <InputField
                 name="registrationNumber"
                 label={t("account.registrationNumber")}
                 className="bg-[var(--theme-light-gray)]"
-                labelColor="text-gray-900"
+                labelColor="text-gray-900 text-xs sm:text-sm md:text-base"
               />
-              <div>
-                <InputField
-                  name="taxCertificate"
-                  label={t("account.taxCertificate")}
-                  className="bg-[var(--theme-light-gray)]"
-                  labelColor="text-gray-900"
-                  type="file"
-                  onChange={(e) =>
-                    handleFileChange("taxCertificate", e.target.files)
-                  }
-                />
-              </div>
-              <div>
-                <InputField
-                  name="commercialRegistration"
-                  label={t("account.commercialRegistration")}
-                  className="bg-[var(--theme-light-gray)]"
-                  labelColor="text-gray-900"
-                  type="file"
-                  onChange={(e) =>
-                    handleFileChange("commercialRegistration", e.target.files)
-                  }
-                />
-              </div>
+              <InputField
+                name="taxCertificate"
+                label={t("account.taxCertificate")}
+                type="file"
+                className="bg-[var(--theme-light-gray)]"
+                labelColor="text-gray-900 text-xs sm:text-sm md:text-base"
+                onChange={(e) =>
+                  handleFileChange("taxCertificate", e.target.files)
+                }
+              />
+              <InputField
+                name="commercialRegistration"
+                label={t("account.commercialRegistration")}
+                type="file"
+                className="bg-[var(--theme-light-gray)]"
+                labelColor="text-gray-900 text-xs sm:text-sm md:text-base"
+                onChange={(e) =>
+                  handleFileChange("commercialRegistration", e.target.files)
+                }
+              />
               <div className="pt-2">
-      <Button
-        variant="outline"
-className=" border border-gray-300 px-4 py-4 rounded-lg w-full "
-        onClick={() => {
-          // Open modal or handle legal info update
-          console.log("Update Legal Info clicked");
-        }}
-      >
-        {t("account.updateLegal")}
-      </Button>
-    </div>
+                <Button
+                  variant="outline"
+                  className="border border-gray-300 px-3 py-2 sm:px-4 sm:py-3 rounded-lg w-full text-xs sm:text-sm md:text-base"
+                  onClick={() => {
+                    console.log("Update Legal Info clicked");
+                  }}
+                >
+                  {t("account.updateLegal")}
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
@@ -207,24 +205,26 @@ className=" border border-gray-300 px-4 py-4 rounded-lg w-full "
               <SectionHeader
                 icon={Bell}
                 title={t("account.notifications") || "Notification Preferences"}
+                  
+                
               />
             </div>
             <CardContent className="space-y-3">
               {[
                 { key: "newOrders", label: t("account.newOrders") },
-                {
-                  key: "customerMessages",
-                  label: t("account.customerMessages"),
-                },
+                { key: "customerMessages", label: t("account.customerMessages") },
                 { key: "lowStock", label: t("account.lowStock") },
                 { key: "weeklyReports", label: t("account.weeklyReports") },
                 { key: "marketingEmails", label: t("account.marketingEmails") },
               ].map(({ key, label }) => (
                 <div
                   key={key}
-                  className="flex items-center justify-between gap-2 pt-2"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-2"
                 >
-                  <Label htmlFor={key} className="text-sm font-semibold">
+                  <Label
+                    htmlFor={key}
+                    className="text-xs sm:text-sm md:text-base font-semibold break-words"
+                  >
                     {label}
                   </Label>
                   <Checkbox

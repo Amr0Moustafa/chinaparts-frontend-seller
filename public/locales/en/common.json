@@ -382,6 +382,60 @@
   "lowStock": "Low stock alerts",
   "weeklyReports": "Weekly sales reports",
   "marketingEmails": "Marketing emails"
-}
+},
+"salesreport": {
+    "title": "Sales Reports",
+    "description": "Analyze your performance and track growth",
+    "exportPdf": "Export PDF",
+    "exportExcel": "Export Excel",
+    "filters": "Filters",
+    "dateRange": "Date Range",
+    "dateRangePlaceholder": "Pick a date range",
+    "productCategory": "Product Category",
+    "productCategoryPlaceholder": "Select category",
+    "timePeriod": "Time Period",
+    "timePeriodPlaceholder": "Select time period",
+    "salesTrend": "Sales Trend",
+    "orderStatusBreakdown": "Order Status Breakdown",
+    "totalOrders": "Total Orders",
+    "netProfit": "Net profit",
+    "avgRating": "Avg Rating",
+    "productCategoryPerformance": "Product Category Performance",
+    "category": "Category",
+  "subcategory": "Subcategory",
+    "topSellingProducts": "Top 5 Best-Selling Products",
+     "bestSelling": {
+    "productName": "Product Name",
+    "quantitySold": "Quantity Sold",
+    "revenue": "Revenue",
+    "platformCommission": "Platform Commission",
+    "trend": "Trend"
+  }
+  },
+ "messages": {
+    "title": "Messages",
+    "markAllRead": "Mark All Read",
+    "unreadMessages": "Unread Messages",
+    "returnsOrders": "Returns Orders",
+    "productInquiries": "Product Inquiries",
+    "totalConversations": "Total Conversations",
+    "avgResponseTime": "Avg Response Time",
+    "conversations": "Conversations",
+    "searchPlaceholder": "Search conversations...",
+    "noConversations": "No conversations found.",
+    "tabs": {
+      "all": "All",
+      "unread": "Unread",
+      "product": "Product",
+      "resolved": "Resolved"
+    },
+    "selectConversationTitle": "Select a conversation",
+    "selectConversationDescription": "Choose a conversation from the left to start messaging",
+    "price": "Price",
+    "sku": "SKU",
+    "stock": "Stock",
+    "viewProduct": "View Product",
+    "typeMessagePlaceholder": "Type your message..."
+  }
 
 }

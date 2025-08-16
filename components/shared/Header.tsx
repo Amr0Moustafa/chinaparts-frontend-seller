@@ -8,12 +8,14 @@ import { useTranslation } from "react-i18next";
 import { Sheet, SheetTrigger, SheetContent, SheetClose } from "@/components/ui/sheet";
 import Sidebar from "./Sidebar";
 import { LanguageSelector } from "../atoms/languageselector";
+import { useRouter } from "next/navigation";
+
 
 const Header: FC = () => {
   const { i18n,t } = useTranslation();
   const direction = i18n.dir();
   const [open, setOpen] = useState(false);
-
+  const router = useRouter();
   return (
     <>
       {/* Mobile header with sheet trigger */}
@@ -47,13 +49,13 @@ const Header: FC = () => {
       <header className="hidden md:flex items-center justify-end px-6 py-4 bg-white border-b border-gray-200">
         <div className="flex items-center gap-6">
           <LanguageSelector />
-          <button className="relative">
+          <button onClick={()=>router.push("/dashboard/messages")} className="relative cursor-pointer">
             <HiOutlineChatBubbleOvalLeftEllipsis className="w-7 h-7 text-gray-600" />
             <span className="absolute -top-1.5 -right-1 inline-flex items-center justify-center px-2 py-1 text-[10px] font-bold leading-none text-white bg-orange-500 rounded-full">
               0
             </span>
           </button>
-          <button className="relative">
+          <button  className="relative">
             <HiOutlineBell className="w-7 h-7 text-gray-600" />
             <span className="absolute -top-1.5 -right-1 inline-flex items-center justify-center px-2 py-1 text-[10px] font-bold leading-none text-white bg-orange-500 rounded-full">
               2

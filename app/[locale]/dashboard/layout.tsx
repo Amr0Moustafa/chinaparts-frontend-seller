@@ -37,7 +37,7 @@ export default function RootLayout({
         {" "}
         <I18n_Provider>
           <div className="min-h-screen flex bg-gray-50">
-             <aside className="w-64 flex-shrink-0 bg-white border-r border-gray-200 hidden md:flex flex-col">
+             <aside className="w-64 flex-shrink-0 bg-white border-r border-gray-200 hidden md:flex flex-col min-h-screen">
       <div className="px-6 py-5 flex items-center border-b border-gray-100">
         <Image src="/logo.webp" alt="Logo" width={150} height={150} className="h-10 w-auto" />
       </div>

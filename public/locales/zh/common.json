@@ -390,6 +390,61 @@
   "lowStock": "库存不足提醒",
   "weeklyReports": "每周销售报告",
   "marketingEmails": "营销邮件"
-}
+},
+
+ "salesreport": {
+    "title": "销售报告",
+    "description": "分析您的表现并跟踪增长",
+    "exportPdf": "导出 PDF",
+    "exportExcel": "导出 Excel",
+    "filters": "筛选器",
+    "dateRange": "日期范围",
+    "dateRangePlaceholder": "选择日期范围",
+    "productCategory": "产品类别",
+    "productCategoryPlaceholder": "选择类别",
+    "timePeriod": "时间周期",
+    "timePeriodPlaceholder": "选择时间周期",
+    "salesTrend": "销售趋势",
+    "orderStatusBreakdown": "订单状态分布",
+    "totalOrders": "总订单数",
+    "netProfit": "净利润",
+    "avgRating": "平均评分",
+    "productCategoryPerformance": "产品类别表现",
+    "category": "类别",
+  "subcategory": "子类别",
+    "topSellingProducts": "前五畅销产品",
+     "bestSelling": {
+    "productName": "产品名称",
+    "quantitySold": "销售数量",
+    "revenue": "收入",
+    "platformCommission": "平台佣金",
+    "trend": "趋势"
+  }
+  },
+ "messages": {
+    "title": "消息",
+    "markAllRead": "全部标记为已读",
+    "unreadMessages": "未读消息",
+    "returnsOrders": "退货订单",
+    "productInquiries": "产品咨询",
+    "totalConversations": "总会话数",
+    "avgResponseTime": "平均响应时间",
+    "conversations": "会话",
+    "searchPlaceholder": "搜索会话...",
+    "noConversations": "未找到会话。",
+    "tabs": {
+      "all": "全部",
+      "unread": "未读",
+      "product": "产品",
+      "resolved": "已解决"
+    },
+    "selectConversationTitle": "选择一个会话",
+    "selectConversationDescription": "从左侧选择一个会话开始聊天",
+    "price": "价格",
+    "sku": "SKU",
+    "stock": "库存",
+    "viewProduct": "查看产品",
+    "typeMessagePlaceholder": "输入您的消息..."
+  }
 
 }
