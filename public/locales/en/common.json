@@ -267,7 +267,6 @@
       "startDate": "Start Date",
       "endDate": "End Date",
       "addCoupon": "Add Coupon"
-      
     }
   },
   "offers": {
@@ -312,78 +311,76 @@
       "startDate": "Start Date",
       "endDate": "End Date",
       "createOffer": "Create Offer"
-
-      
     }
   },
-  "storeSetting":{
+  "storeSetting": {
     "title": "Store Settings",
     "saveChanges": "Save Changes",
     "store": {
-    "information": "Store Information",
-    "name": "Store Name",
-    "namePlaceholder": "Enter store name",
-    "description": "Store Description",
-    "descriptionPlaceholder": "Enter store description...",
-    "mainImage": "Main Image",
-    "recommended": "Recommended size : 800x800 pixels",
-    "formats": "JPG, PNG, WebP"
+      "information": "Store Information",
+      "name": "Store Name",
+      "namePlaceholder": "Enter store name",
+      "description": "Store Description",
+      "descriptionPlaceholder": "Enter store description...",
+      "mainImage": "Main Image",
+      "recommended": "Recommended size : 800x800 pixels",
+      "formats": "JPG, PNG, WebP"
+    },
+    "location": {
+      "contact": "Location & Contact",
+      "businessAddress": "Business Address",
+      "businessAddressPlaceholder": "Enter business address",
+      "city": "City",
+      "cityPlaceholder": "Enter city",
+      "zipCode": "ZIP Code",
+      "zipCodePlaceholder": "Enter ZIP code",
+      "phoneNumber": "Phone Number",
+      "phoneNumberPlaceholder": "Enter phone number",
+      "email": "Email",
+      "emailPlaceholder": "Enter email"
+    },
+    "shipping": {
+      "information": "Shipping Company Information",
+      "companyName": "Company Name",
+      "companyNamePlaceholder": "Enter company name",
+      "companyContact": "Contact Number",
+      "companyContactPlaceholder": "Enter contact number",
+      "companyLogo": "Upload Company Logo",
+      "addAnother": "+ Add Another Company",
+      "saveCompanies": "Save Shipping Companies"
+    }
   },
-  "location": {
-    "contact": "Location & Contact",
-    "businessAddress": "Business Address",
-    "businessAddressPlaceholder": "Enter business address",
-    "city": "City",
-    "cityPlaceholder": "Enter city",
-    "zipCode": "ZIP Code",
-    "zipCodePlaceholder": "Enter ZIP code",
-    "phoneNumber": "Phone Number",
-    "phoneNumberPlaceholder": "Enter phone number",
-    "email": "Email",
-    "emailPlaceholder": "Enter email"
-  },
-  "shipping": {
-    "information": "Shipping Company Information",
-    "companyName": "Company Name",
-    "companyNamePlaceholder": "Enter company name",
-    "companyContact": "Contact Number",
-    "companyContactPlaceholder": "Enter contact number",
-    "companyLogo": "Upload Company Logo",
-    "addAnother": "+ Add Another Company",
-    "saveCompanies": "Save Shipping Companies"
-  }
-  },
-  "account":{
-  "title": "Account Settings",
-  "saveChanges": "Save Changes",
-  "toast": {
-    "success": "Account settings saved successfully!"
-  },
-  "personalInfo": "Personal Information",
-  "firstName": "First Name",
-  "lastName": "Last Name",
-  "email": "Email Address",
-  "phone": "Phone Number",
-  "securitySettings": "Security Settings",
-  "currentPassword": "Current Password",
-  "newPassword": "New Password",
-  "confirmPassword": "Confirm New Password",
-  "enableTwoFactor": "Enable two-factor authentication",
-  "companyLegal": "Company Legal Information",
+  "account": {
+    "title": "Account Settings",
+    "saveChanges": "Save Changes",
+    "toast": {
+      "success": "Account settings saved successfully!"
+    },
+    "personalInfo": "Personal Information",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "securitySettings": "Security Settings",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm New Password",
+    "enableTwoFactor": "Enable two-factor authentication",
+    "companyLegal": "Company Legal Information",
     "updateLegal": "Update Legal Information",
 
-  "taxId": "Tax Identification Number (TIN)",
-  "registrationNumber": "Commercial Registration Number",
-  "taxCertificate": "Attach Tax Certificate (PDF or image)",
-  "commercialRegistration": "Upload Commercial Registration File",
-  "notifications": "Notification Preferences",
-  "newOrders": "New order notifications",
-  "customerMessages": "Customer messages",
-  "lowStock": "Low stock alerts",
-  "weeklyReports": "Weekly sales reports",
-  "marketingEmails": "Marketing emails"
-},
-"salesreport": {
+    "taxId": "Tax Identification Number (TIN)",
+    "registrationNumber": "Commercial Registration Number",
+    "taxCertificate": "Attach Tax Certificate (PDF or image)",
+    "commercialRegistration": "Upload Commercial Registration File",
+    "notifications": "Notification Preferences",
+    "newOrders": "New order notifications",
+    "customerMessages": "Customer messages",
+    "lowStock": "Low stock alerts",
+    "weeklyReports": "Weekly sales reports",
+    "marketingEmails": "Marketing emails"
+  },
+  "salesreport": {
     "title": "Sales Reports",
     "description": "Analyze your performance and track growth",
     "exportPdf": "Export PDF",
@@ -402,17 +399,17 @@
     "avgRating": "Avg Rating",
     "productCategoryPerformance": "Product Category Performance",
     "category": "Category",
-  "subcategory": "Subcategory",
+    "subcategory": "Subcategory",
     "topSellingProducts": "Top 5 Best-Selling Products",
-     "bestSelling": {
-    "productName": "Product Name",
-    "quantitySold": "Quantity Sold",
-    "revenue": "Revenue",
-    "platformCommission": "Platform Commission",
-    "trend": "Trend"
-  }
+    "bestSelling": {
+      "productName": "Product Name",
+      "quantitySold": "Quantity Sold",
+      "revenue": "Revenue",
+      "platformCommission": "Platform Commission",
+      "trend": "Trend"
+    }
   },
- "messages": {
+  "messages": {
     "title": "Messages",
     "markAllRead": "Mark All Read",
     "unreadMessages": "Unread Messages",
@@ -436,6 +433,183 @@
     "stock": "Stock",
     "viewProduct": "View Product",
     "typeMessagePlaceholder": "Type your message..."
+  },
+  "createproduct": {
+    "header": {
+      "addNewProduct": "Add New Product",
+      "saveAsDraft": "Save as Draft"
+    },
+    "steps": {
+      "title": "Add New Product",
+      "description": "Create a comprehensive product listing in 4 easy steps"
+    },
+    "productInfo": {
+      "title": "Product Information",
+      "nameLabel": "Product Name",
+      "namePlaceholder": "e.g., Brake Pads – Toyota Camry 2013-2022",
+      "descriptionLabel": "Product Description",
+      "descriptionPlaceholder": "Describe your product...",
+      "skuLabel": "SKU",
+      "skuPlaceholder": "BP-TC-001",
+      "manufacturerLabel": "Manufacturer",
+      "manufacturerPlaceholder": "OEM, Bosch, Wagner..."
+    },
+    "images": {
+      "title": "Product Images",
+      "mainimage": "Main Image",
+      "recommended": "Recommended",
+      "image1": "Image 1",
+      "image2": "Image 2",
+      "image3": "Image 3",
+      "image4": "Image 4",
+      "formatNote": "JPG, PNG, WebP"
+    },
+    "pricingInventory": {
+      "title": "Pricing & Inventory",
+      "price": "Price",
+      "costPerItem": "Cost per Item",
+      "quantityInStock": "Quantity in Stock",
+      "trackQuantity": "Track quantity"
+    },
+    "shippingInfo": {
+      "title": "Shipping info",
+      "weight": "Weight (lbs)",
+      "length": "Length (in)",
+      "width": "Width (in)",
+      "height": "Height (in)",
+      "fragile": "Fragile item"
+    },
+    "variantForm": {
+      "title": "Variants",
+      "addVariantType": "Add Variant Type",
+      "dialog": {
+        "title": "Add New Variant Type",
+        "description": "Create a custom variant type for your specific auto parts needs",
+        "typeName": "Type Name",
+        "cancel": "Cancel",
+        "addType": "Add Type"
+      },
+      "form": {
+        "variantType": "Variant Type",
+        "variantValue": "Variant Value",
+        "price": "Price",
+        "quantity": "Quantity",
+        "addVariant": "Add Variant"
+        
+      },
+      "table": {
+        "title": "Added Variants",
+        "type": "Type",
+        "value": "Value",
+        "price": "Price",
+        "quantity": "Quantity"
+      }
+    },
+    "vehicleForm": {
+      "mainVehicle": {
+        "title": "Main Vehicle",
+        "fields": {
+          "vehicleType": "Vehicle Type",
+          "brand": "Brand",
+          "model": "Model",
+          "year": "Year",
+          "partNumber": "Part Number",
+          "bodyType": "Body Type"
+        },
+        "placeholders": {
+          "vehicleType": "Select Vehicle",
+          "brand": "Select Brand",
+          "model": "Select Model",
+          "year": "Select Year",
+          "partNumber": "Enter Part Number",
+          "bodyType": "Select Body Type"
+        }
+      },
+      "compatibility": {
+        "title": "Vehicle Compatibility",
+        "addButton": "Add Another Vehicle",
+        "fields": {
+          "vehicleType": "Vehicle Type",
+          "bodyType": "Body Type",
+          "make": "Make",
+          "model": "Model",
+          "yearRange": "Year Range",
+          "partNumber": "Part Number"
+        },
+        "placeholders": {
+          "vehicleType": "Select Vehicle",
+          "bodyType": "Select Body Type",
+          "make": "Select Make",
+          "model": "Select Model",
+          "yearRange": "Select Year Range",
+          "partNumber": "Enter Part Number"
+        }
+      },
+      "submit": {
+        "saveVehicle": "Save Vehicle"
+      }
+    },
+    "categoryTags": {
+      "title": "Category & Tags",
+      "categoryLabel": "Category",
+      "subcategoryLabel": "Subcategory",
+      "tagsLabel": "Tags",
+      "tagsPlaceholder": "Enter tag and press Enter",
+      "addButton": "Add"
+    },
+    "productSummary": {
+      "title": "Product Summary",
+      "basicInfo": {
+        "title": "Basic Information",
+        "name": "Name",
+        "sku": "SKU",
+        "manufacturer": "Manufacturer",
+        "price": "Price"
+      },
+      "variantsCompatibility": {
+        "title": "Variants & Compatibility",
+        "variants": "Variants",
+        "mainVehicle": "Main Vehicle"
+      },
+      "shippingInfo": {
+        "title": "Shipping Information",
+        "dimensions": "Dimensions",
+        "weight": "Weight",
+        "fragile": "Fragile"
+      },
+      "categoryTags": {
+        "title": "Category & Tags",
+        "category": "Category",
+        "tags": "Tags"
+      }
+    },
+    "stepper": {
+      "steps": {
+        "1": {
+          "title": "Product Info & Media",
+          "subtitle": "Basic details and images"
+        },
+        "2": {
+          "title": "Variants",
+          "subtitle": "Product variants"
+        },
+        "3": {
+          "title": "Compatibility",
+          "subtitle": "Compatible vehicles"
+        },
+        "4": {
+          "title": "Pricing & Shipping",
+          "subtitle": "Price and shipping details"
+        },
+        "5": {
+          "title": "Review & Submit",
+          "subtitle": "Category, tags and final review"
+        }
+      },
+      "buttons": {
+        "previous": "Previous",
+        "next": "Next"
+      }
+    }
   }
-
 }

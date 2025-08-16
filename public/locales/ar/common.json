@@ -436,5 +436,182 @@
     "stock": "المخزون",
     "viewProduct": "عرض المنتج",
     "typeMessagePlaceholder": "اكتب رسالتك..."
+  },
+  "createproduct": {
+    "header": {
+      "addNewProduct": "إضافة منتج جديد",
+      "saveAsDraft": "حفظ كمسودة"
+    },
+    "steps": {
+      "title": "إضافة منتج جديد",
+      "description": "أنشئ قائمة منتج شاملة في 4 خطوات سهلة"
+    },
+    "productInfo": {
+      "title": "معلومات المنتج",
+      "nameLabel": "اسم المنتج",
+      "namePlaceholder": "مثال: فرامل – تويوتا كامري 2013-2022",
+      "descriptionLabel": "وصف المنتج",
+      "descriptionPlaceholder": "صف منتجك...",
+      "skuLabel": "الرمز (SKU)",
+      "skuPlaceholder": "BP-TC-001",
+      "manufacturerLabel": "المُصنّع",
+      "manufacturerPlaceholder": "OEM, Bosch, Wagner..."
+    },
+    "images": {
+      "title": "صور المنتج",
+      "mainimage": "الصورة الرئيسية",
+      "recommended": "مستحسن",
+      "image1": "الصورة 1",
+      "image2": "الصورة 2",
+      "image3": "الصورة 3",
+      "image4": "الصورة 4",
+      "formatNote": "JPG, PNG, WebP"
+    },
+    "pricingInventory": {
+      "title": "التسعير والمخزون",
+      "price": "السعر",
+      "costPerItem": "تكلفة الوحدة",
+      "quantityInStock": "الكمية في المخزون",
+      "trackQuantity": "تتبع الكمية"
+    },
+    "shippingInfo": {
+      "title": "معلومات الشحن",
+      "weight": "الوزن (رطل)",
+      "length": "الطول (بوصة)",
+      "width": "العرض (بوصة)",
+      "height": "الارتفاع (بوصة)",
+      "fragile": "منتج قابل للكسر"
+    },
+    "variantForm": {
+      "title": "الخيارات",
+      "addVariantType": "إضافة نوع خيار",
+      "dialog": {
+        "title": "إضافة نوع خيار جديد",
+        "description": "أنشئ نوع خيار مخصص لقطع الغيار",
+        "typeName": "اسم النوع",
+        "cancel": "إلغاء",
+        "addType": "إضافة النوع"
+      },
+      "form": {
+        "variantType": "نوع الخيار",
+        "variantValue": "قيمة الخيار",
+        "price": "السعر",
+        "quantity": "الكمية",
+        "addVariant": "إضافة خيار"
+      },
+      "table": {
+        "title": "الخيارات المضافة",
+        "type": "النوع",
+        "value": "القيمة",
+        "price": "السعر",
+        "quantity": "الكمية"
+      }
+    },
+    "vehicleForm": {
+      "mainVehicle": {
+        "title": "المركبة الرئيسية",
+        "fields": {
+          "vehicleType": "نوع المركبة",
+          "brand": "العلامة التجارية",
+          "model": "الموديل",
+          "year": "السنة",
+          "partNumber": "رقم القطعة",
+          "bodyType": "نوع الهيكل"
+        },
+        "placeholders": {
+          "vehicleType": "اختر المركبة",
+          "brand": "اختر العلامة التجارية",
+          "model": "اختر الموديل",
+          "year": "اختر السنة",
+          "partNumber": "أدخل رقم القطعة",
+          "bodyType": "اختر نوع الهيكل"
+        }
+      },
+      "compatibility": {
+        "title": "التوافق مع المركبات",
+        "addButton": "إضافة مركبة أخرى",
+        "fields": {
+          "vehicleType": "نوع المركبة",
+          "bodyType": "نوع الهيكل",
+          "make": "الصانع",
+          "model": "الموديل",
+          "yearRange": "النطاق الزمني",
+          "partNumber": "رقم القطعة"
+        },
+        "placeholders": {
+          "vehicleType": "اختر المركبة",
+          "bodyType": "اختر نوع الهيكل",
+          "make": "اختر الصانع",
+          "model": "اختر الموديل",
+          "yearRange": "اختر النطاق الزمني",
+          "partNumber": "أدخل رقم القطعة"
+        }
+      },
+      "submit": {
+        "saveVehicle": "حفظ المركبة"
+      }
+    },
+    "categoryTags": {
+      "title": "الفئة والوسوم",
+      "categoryLabel": "الفئة",
+      "subcategoryLabel": "الفئة الفرعية",
+      "tagsLabel": "الوسوم",
+      "tagsPlaceholder": "أدخل الوسم واضغط Enter",
+      "addButton": "إضافة"
+    },
+    "productSummary": {
+      "title": "ملخص المنتج",
+      "basicInfo": {
+        "title": "المعلومات الأساسية",
+        "name": "الاسم",
+        "sku": "الرمز",
+        "manufacturer": "المُصنّع",
+        "price": "السعر"
+      },
+      "variantsCompatibility": {
+        "title": "الخيارات والتوافق",
+        "variants": "الخيارات",
+        "mainVehicle": "المركبة الرئيسية"
+      },
+      "shippingInfo": {
+        "title": "معلومات الشحن",
+        "dimensions": "الأبعاد",
+        "weight": "الوزن",
+        "fragile": "قابل للكسر"
+      },
+      "categoryTags": {
+        "title": "الفئة والوسوم",
+        "category": "الفئة",
+        "tags": "الوسوم"
+      }
+    },
+    "stepper": {
+      "steps": {
+        "1": {
+          "title": "معلومات المنتج والوسائط",
+          "subtitle": "التفاصيل الأساسية والصور"
+        },
+        "2": {
+          "title": "المتغيرات",
+          "subtitle": "أنواع المنتج"
+        },
+        "3": {
+          "title": "التوافق",
+          "subtitle": "المركبات المتوافقة"
+        },
+        "4": {
+          "title": "التسعير والشحن",
+          "subtitle": "تفاصيل السعر والشحن"
+        },
+        "5": {
+          "title": "مراجعة وإرسال",
+          "subtitle": "الفئات والعلامات والمراجعة النهائية"
+        }
+      },
+      "buttons": {
+        "previous": "السابق",
+        "next": "التالي"
+      }
+    }
   }
 }

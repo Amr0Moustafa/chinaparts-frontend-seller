@@ -445,6 +445,184 @@
     "stock": "库存",
     "viewProduct": "查看产品",
     "typeMessagePlaceholder": "输入您的消息..."
+  },
+"createproduct": {
+  "header": {
+    "addNewProduct": "添加新产品",
+    "saveAsDraft": "保存为草稿"
+  },
+  "steps": {
+    "title": "添加新产品",
+    "description": "通过 4 个简单步骤创建完整的产品列表"
+  },
+  "productInfo": {
+    "title": "产品信息",
+    "nameLabel": "产品名称",
+    "namePlaceholder": "例如：刹车片 – 丰田凯美瑞 2013-2022",
+    "descriptionLabel": "产品描述",
+    "descriptionPlaceholder": "描述您的产品...",
+    "skuLabel": "SKU",
+    "skuPlaceholder": "BP-TC-001",
+    "manufacturerLabel": "制造商",
+    "manufacturerPlaceholder": "OEM, Bosch, Wagner..."
+  },
+  "images": {
+    "title": "产品图片",
+    "mainimage": "主图",
+    "recommended": "推荐",
+    "image1": "图片 1",
+    "image2": "图片 2",
+    "image3": "图片 3",
+    "image4": "图片 4",
+    "formatNote": "JPG, PNG, WebP"
+  },
+  "pricingInventory": {
+    "title": "定价与库存",
+    "price": "价格",
+    "costPerItem": "单件成本",
+    "quantityInStock": "库存数量",
+    "trackQuantity": "跟踪库存"
+  },
+  "shippingInfo": {
+    "title": "运输信息",
+    "weight": "重量 (磅)",
+    "length": "长度 (英寸)",
+    "width": "宽度 (英寸)",
+    "height": "高度 (英寸)",
+    "fragile": "易碎品"
+  },
+  "variantForm": {
+    "title": "产品规格",
+    "addVariantType": "添加规格类型",
+    "dialog": {
+      "title": "添加新规格类型",
+      "description": "为您的汽车零件创建自定义规格类型",
+      "typeName": "类型名称",
+      "cancel": "取消",
+      "addType": "添加类型"
+    },
+    "form": {
+      "variantType": "规格类型",
+      "variantValue": "规格值",
+      "price": "价格",
+      "quantity": "数量",
+      "addVariant": "添加规格"
+    },
+    "table": {
+      "title": "已添加的规格",
+      "type": "类型",
+      "value": "值",
+      "price": "价格",
+      "quantity": "数量"
+    }
+  },
+  "vehicleForm": {
+    "mainVehicle": {
+      "title": "主要车辆",
+      "fields": {
+        "vehicleType": "车辆类型",
+        "brand": "品牌",
+        "model": "型号",
+        "year": "年份",
+        "partNumber": "零件号",
+        "bodyType": "车身类型"
+      },
+      "placeholders": {
+        "vehicleType": "选择车辆",
+        "brand": "选择品牌",
+        "model": "选择型号",
+        "year": "选择年份",
+        "partNumber": "输入零件号",
+        "bodyType": "选择车身类型"
+      }
+    },
+    "compatibility": {
+      "title": "车辆兼容性",
+      "addButton": "添加其他车辆",
+      "fields": {
+        "vehicleType": "车辆类型",
+        "bodyType": "车身类型",
+        "make": "制造商",
+        "model": "型号",
+        "yearRange": "年份范围",
+        "partNumber": "零件号"
+      },
+      "placeholders": {
+        "vehicleType": "选择车辆",
+        "bodyType": "选择车身类型",
+        "make": "选择制造商",
+        "model": "选择型号",
+        "yearRange": "选择年份范围",
+        "partNumber": "输入零件号"
+      }
+    },
+    "submit": {
+      "saveVehicle": "保存车辆"
+    }
+  },
+  "categoryTags": {
+    "title": "类别与标签",
+    "categoryLabel": "类别",
+    "subcategoryLabel": "子类别",
+    "tagsLabel": "标签",
+    "tagsPlaceholder": "输入标签并按 Enter",
+    "addButton": "添加"
+  },
+  "productSummary": {
+    "title": "产品摘要",
+    "basicInfo": {
+      "title": "基本信息",
+      "name": "名称",
+      "sku": "SKU",
+      "manufacturer": "制造商",
+      "price": "价格"
+    },
+    "variantsCompatibility": {
+      "title": "规格与兼容性",
+      "variants": "规格",
+      "mainVehicle": "主要车辆"
+    },
+    "shippingInfo": {
+      "title": "运输信息",
+      "dimensions": "尺寸",
+      "weight": "重量",
+      "fragile": "易碎"
+    },
+    "categoryTags": {
+      "title": "类别与标签",
+      "category": "类别",
+      "tags": "标签"
+    }
+  },
+  "stepper": {
+    "steps": {
+      "1": {
+        "title": "产品信息和媒体",
+        "subtitle": "基本信息和图片"
+      },
+      "2": {
+        "title": "变体",
+        "subtitle": "产品变体"
+      },
+      "3": {
+        "title": "兼容性",
+        "subtitle": "兼容车辆"
+      },
+      "4": {
+        "title": "定价与运输",
+        "subtitle": "价格和运输详情"
+      },
+      "5": {
+        "title": "审核与提交",
+        "subtitle": "类别、标签和最终审核"
+      }
+    },
+    "buttons": {
+      "previous": "上一步",
+      "next": "下一步"
+    }
   }
+}
+
 
 }

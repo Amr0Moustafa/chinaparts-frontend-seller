@@ -23,9 +23,9 @@ export const StepItem: React.FC<StepItemProps> = ({
   isLast = false,
 }) => {
   return (
-    <div className="flex items-center w-full">
+    <div className="flex items-center w-full ">
       <div
-        className="flex items-center gap-3 cursor-pointer"
+        className="flex flex-col md:flex-row items-center gap-3 cursor-pointer bg-orange-50 md:px-4 md:py-2"
         onClick={onClick}
       >
         <StepCircle

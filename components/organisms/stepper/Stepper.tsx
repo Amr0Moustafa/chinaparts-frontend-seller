@@ -4,33 +4,46 @@ import React, { useState } from "react";
 import { StepItem } from "@/components/molecules/stepper/StepItem";
 import { ProductInfoCard } from "../product/ProductInfoCard";
 import { ProductImagesCard } from "../product/ProductImagesCard";
+import { ShippingInfoCard } from "../product/ShippingInfoCard";
+import { PricingInventoryCard } from "../product/PricingInventoryCard";
+import VariantForm from "../product/VariantForm";
+import { VehicleForm } from "../product/VehicleCompatibilityForm";
+import CategoryTags  from "../product/CategoryTagsCard";
+import { useTranslation } from "react-i18next";
 
-const steps = [
-  {
-    id: 1,
-    title: "Product Info & Media",
-    subtitle: "Basic details and images",
-  },
-  {
-    id: 2,
-    title: "Variants & Compatibility",
-    subtitle: "Product variants and vehicles",
-  },
-  {
-    id: 3,
-    title: "Pricing & Shipping",
-    subtitle: "Price and shipping details",
-  },
-  { id: 4, title: "Inventory", subtitle: "Stock and warehouse details" },
-  {
-    id: 5,
-    title: "Review & Submit",
-    subtitle: "Category, tags and final review",
-  },
-];
+
 
 export const Stepper: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const { t } =useTranslation();
+const steps = [
+  {
+    id: 1,
+    title: t("createproduct.stepper.steps.1.title"),
+    subtitle: t("createproduct.stepper.steps.1.subtitle"),
+  },
+  {
+    id: 2,
+    title: t("createproduct.stepper.steps.2.title"),
+    subtitle: t("createproduct.stepper.steps.2.subtitle"),
+  },
+  {
+    id: 3,
+    title: t("createproduct.stepper.steps.3.title"),
+    subtitle: t("createproduct.stepper.steps.3.subtitle"),
+  },
+  {
+    id: 4,
+    title: t("createproduct.stepper.steps.4.title"),
+    subtitle: t("createproduct.stepper.steps.4.subtitle"),
+  },
+  {
+    id: 5,
+    title: t("createproduct.stepper.steps.5.title"),
+    subtitle: t("createproduct.stepper.steps.5.subtitle"),
+  },
+];
+
   const renderSectionContent = () => {
     switch (currentStep) {
       case 1:
@@ -42,42 +55,51 @@ export const Stepper: React.FC = () => {
         );
       case 2:
         return (
-          <div className="bg-white shadow p-6 rounded-md">
-            <h2 className="text-lg font-semibold mb-4">
-              Variants & Compatibility
-            </h2>
-            <p>Fields to select product variants and compatible vehicles.</p>
+          <div className="space-y-5">
+              <VariantForm/>
           </div>
         );
       case 3:
         return (
-          <div className="bg-white shadow p-6 rounded-md">
-            <h2 className="text-lg font-semibold mb-4">Pricing & Shipping</h2>
-            <p>Form to set price, discounts, and shipping rules.</p>
+          <div className="space-y-5">
+              <VehicleForm/>
           </div>
         );
       case 4:
         return (
-          <div className="bg-white shadow p-6 rounded-md">
-            <h2 className="text-lg font-semibold mb-4">Inventory</h2>
-            <p>Stock level and warehouse management.</p>
+          <div className="space-y-5">
+            <PricingInventoryCard/>
+           <ShippingInfoCard />
           </div>
         );
       case 5:
         return (
-          <div className="bg-white shadow p-6 rounded-md">
-            <h2 className="text-lg font-semibold mb-4">Review & Submit</h2>
-            <p>Final check before publishing the product.</p>
+          <div className="space-y-5">
+           <CategoryTags/>
           </div>
         );
       default:
         return null;
     }
   };
+
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-7xl mx-auto mt-5 ">
       {/* Stepper */}
-      <div className="flex justify-between items-center border-b pb-4 mb-6">
+      <div
+        className="
+          flex 
+          md:justify-between 
+          items-center 
+           
+          pb-4 
+          mb-6 
+          overflow-x-auto 
+          md:overflow-visible 
+          gap-4
+          
+        "
+      >
         {steps.map((step, index) => (
           <StepItem
             key={step.id}
@@ -96,20 +118,20 @@ export const Stepper: React.FC = () => {
       {renderSectionContent()}
 
       {/* Navigation Buttons */}
-      <div className="flex justify-between mt-6">
+      <div className="bg-white p-2 border border-gray-300 rounded-md flex flex-col sm:flex-row justify-between mt-6 gap-3">
         <button
-          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50 w-full sm:w-auto"
           onClick={() => setCurrentStep((prev) => prev - 1)}
           disabled={currentStep === 1}
         >
-          Previous
+          {t("createproduct.stepper.buttons.previous")}
         </button>
         <button
-          className="px-4 py-2 bg-orange-500 text-white rounded disabled:opacity-50"
+          className="px-4 py-2 bg-orange-500 text-white rounded disabled:opacity-50 w-full sm:w-auto"
           onClick={() => setCurrentStep((prev) => prev + 1)}
           disabled={currentStep === steps.length}
         >
-          Next
+           {t("createproduct.stepper.buttons.next")}
         </button>
       </div>
     </div>
