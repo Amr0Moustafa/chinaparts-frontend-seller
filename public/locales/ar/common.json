@@ -268,7 +268,8 @@
       "usageLimit": "حد الاستخدام",
       "startDate": "تاريخ البدء",
       "endDate": "تاريخ الانتهاء",
-      "addCoupon": "إضافة كوبون"
+      "addCoupon": "إضافة كوبون",
+      "updateCoupon": "تحديث كوبون"
     }
   },
   "offers": {
@@ -312,7 +313,8 @@
       "offerPrice": "سعر العرض ($)",
       "startDate": "تاريخ البدء",
       "endDate": "تاريخ الانتهاء",
-      "createOffer": "إنشاء عرض"
+      "createOffer": "إنشاء عرض",
+      "updateOffer": "تحديث العرض"
     }
   },
   "storeSetting": {

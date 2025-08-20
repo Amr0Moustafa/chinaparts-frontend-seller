@@ -188,27 +188,32 @@ export const DashboardTemplate = () => {
       title: t("quickActions.addProduct.title"),
       subtitle: t("quickActions.addProduct.subtitle"),
       icon: <Plus size={20} />,
+      href: "/dashboard/products/create",
     },
     {
       title: t("quickActions.manageOrders.title"),
       subtitle: t("quickActions.manageOrders.subtitle"),
       icon: <Package size={20} />,
+      href: "/dashboard/orders",
     },
     {
       title: t("quickActions.replyMessages.title"),
       subtitle: t("quickActions.replyMessages.subtitle"),
       icon: <MessageSquare size={20} />,
+      href: "/dashboard/messages",
     },
     {
       title: t("quickActions.createOffers.title"),
       subtitle: t("quickActions.createOffers.subtitle"),
       icon: <Percent size={20} />,
       text: "text-purple-600",
+      href: "/dashboard/offers/create",
     },
     {
       title: t("quickActions.editStore.title"),
       subtitle: t("quickActions.editStore.subtitle"),
       icon: <Store size={20} />,
+      href: "/dashboard/settings",
     },
   ];
   const statsData :StatDataItem[] = [

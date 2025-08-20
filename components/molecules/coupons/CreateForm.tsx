@@ -22,6 +22,10 @@ type FormValues = {
  
 };
 
+interface FormProps {
+  formData?: FormValues;
+}
+
 const productOptions = [
   { value: "automotive", label: "Automotive" },
   { value: "electronics", label: "Electronics" },
@@ -34,7 +38,8 @@ const discountOptions = [
   { value: "20", label: "20%" }
 ];
 
-export const CreateForm = () => {
+
+export const CreateForm = ( {formData}:FormProps) => {
   const { t }=useTranslation()
   const methods = useForm<FormValues>({
     resolver: yupResolver(createCouponSchema),
@@ -73,7 +78,7 @@ export const CreateForm = () => {
                   label={t("coupons.form.productName")}
                   name="productName"
                   options={productOptions}
-                  placeholder="Select product"
+                  placeholder={t("coupons.form.productName")}
                 />
                 <InputField className="bg-[var(--theme-light-gray)] py-3"
                   label={t("coupons.form.couponCode")}
@@ -90,7 +95,7 @@ export const CreateForm = () => {
                   label={t("coupons.form.discountType")}
                   name="discountType"
                   options={discountOptions}
-                  placeholder="Select discount type"
+                  placeholder={t("coupons.form.discountType")}
                 />
                 
                 <InputField className="bg-[var(--theme-light-gray)] py-3"
@@ -132,7 +137,8 @@ export const CreateForm = () => {
                   type="submit"
                   className="bg-orange-500 hover:bg-orange-600  font-bold py-3 px-8 rounded-lg transition-all duration-200"
                 >
-                 {t("coupons.form.addCoupon")}
+                  {formData ? t("coupons.form.updateCoupon") : t("coupons.form.addCoupon")}
+                 
                 </button>
               </div>
             </form>

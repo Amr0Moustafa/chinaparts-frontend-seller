@@ -8,41 +8,39 @@ import { ShippingInfoCard } from "../product/ShippingInfoCard";
 import { PricingInventoryCard } from "../product/PricingInventoryCard";
 import VariantForm from "../product/VariantForm";
 import { VehicleForm } from "../product/VehicleCompatibilityForm";
-import CategoryTags  from "../product/CategoryTagsCard";
+import CategoryTags from "../product/CategoryTagsCard";
 import { useTranslation } from "react-i18next";
-
-
 
 export const Stepper: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const { t } =useTranslation();
-const steps = [
-  {
-    id: 1,
-    title: t("createproduct.stepper.steps.1.title"),
-    subtitle: t("createproduct.stepper.steps.1.subtitle"),
-  },
-  {
-    id: 2,
-    title: t("createproduct.stepper.steps.2.title"),
-    subtitle: t("createproduct.stepper.steps.2.subtitle"),
-  },
-  {
-    id: 3,
-    title: t("createproduct.stepper.steps.3.title"),
-    subtitle: t("createproduct.stepper.steps.3.subtitle"),
-  },
-  {
-    id: 4,
-    title: t("createproduct.stepper.steps.4.title"),
-    subtitle: t("createproduct.stepper.steps.4.subtitle"),
-  },
-  {
-    id: 5,
-    title: t("createproduct.stepper.steps.5.title"),
-    subtitle: t("createproduct.stepper.steps.5.subtitle"),
-  },
-];
+  const { t } = useTranslation();
+  const steps = [
+    {
+      id: 1,
+      title: t("createproduct.stepper.steps.1.title"),
+      subtitle: t("createproduct.stepper.steps.1.subtitle"),
+    },
+    {
+      id: 2,
+      title: t("createproduct.stepper.steps.2.title"),
+      subtitle: t("createproduct.stepper.steps.2.subtitle"),
+    },
+    {
+      id: 3,
+      title: t("createproduct.stepper.steps.3.title"),
+      subtitle: t("createproduct.stepper.steps.3.subtitle"),
+    },
+    {
+      id: 4,
+      title: t("createproduct.stepper.steps.4.title"),
+      subtitle: t("createproduct.stepper.steps.4.subtitle"),
+    },
+    {
+      id: 5,
+      title: t("createproduct.stepper.steps.5.title"),
+      subtitle: t("createproduct.stepper.steps.5.subtitle"),
+    },
+  ];
 
   const renderSectionContent = () => {
     switch (currentStep) {
@@ -56,26 +54,26 @@ const steps = [
       case 2:
         return (
           <div className="space-y-5">
-              <VariantForm/>
+            <VariantForm />
           </div>
         );
       case 3:
         return (
           <div className="space-y-5">
-              <VehicleForm/>
+            <VehicleForm />
           </div>
         );
       case 4:
         return (
           <div className="space-y-5">
-            <PricingInventoryCard/>
-           <ShippingInfoCard />
+            <PricingInventoryCard />
+            <ShippingInfoCard />
           </div>
         );
       case 5:
         return (
           <div className="space-y-5">
-           <CategoryTags/>
+            <CategoryTags />
           </div>
         );
       default:
@@ -88,30 +86,44 @@ const steps = [
       {/* Stepper */}
       <div
         className="
-          flex 
-          md:justify-between 
-          items-center 
-           
-          pb-4 
-          mb-6 
-          overflow-x-auto 
-          md:overflow-visible 
-          gap-4
-          
-        "
+    flex 
+    lg:items-center 
+    
+    justify-center
+    gap-4 md:gap-0
+    pb-4 
+    mb-6 
+    
+    scrollbar-thin scrollbar-thumb-gray-300
+  "
       >
         {steps.map((step, index) => (
-          <StepItem
-            key={step.id}
-            number={step.id}
-            title={step.title}
-            subtitle={step.subtitle}
-            isActive={currentStep === step.id}
-            isCompleted={currentStep > step.id}
-            onClick={() => setCurrentStep(step.id)}
-            isLast={index === steps.length - 1}
-          />
+           <div key={step.id} className="lg:shrink-0">
+      <StepItem
+        number={step.id}
+        title={step.title}
+        subtitle={step.subtitle}
+        isActive={currentStep === step.id}
+        isCompleted={currentStep > step.id}
+        onClick={() => setCurrentStep(step.id)}
+        isLast={index === steps.length - 1}
+      />
+    </div>
         ))}
+      </div>
+
+      {/* title stepper */}
+      <div className=" md:hidden block flex items-center justify-center mb-6">
+        <h2
+          className={`  text-xl font-semibold ${
+            currentStep ===
+            steps.map((step) => step.id).find((id) => id === currentStep)
+              ? "text-orange-500"
+              : "text-gray-800"
+          }`}
+        >
+          {steps[currentStep - 1].title}
+        </h2>
       </div>
 
       {/* Section Content */}
@@ -131,7 +143,7 @@ const steps = [
           onClick={() => setCurrentStep((prev) => prev + 1)}
           disabled={currentStep === steps.length}
         >
-           {t("createproduct.stepper.buttons.next")}
+          {t("createproduct.stepper.buttons.next")}
         </button>
       </div>
     </div>

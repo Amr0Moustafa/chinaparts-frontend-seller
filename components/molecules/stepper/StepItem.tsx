@@ -23,9 +23,10 @@ export const StepItem: React.FC<StepItemProps> = ({
   isLast = false,
 }) => {
   return (
-    <div className="flex items-center w-full ">
+    <>
+     <div className="flex items-center justify-center md:justify-start  w-full ">
       <div
-        className="flex flex-col md:flex-row items-center gap-3 cursor-pointer bg-orange-50 md:px-4 md:py-2"
+        className="flex flex-col lg:flex-row items-center gap-3 cursor-pointer bg-orange-50 md:px-4 md:py-2"
         onClick={onClick}
       >
         <StepCircle
@@ -35,19 +36,27 @@ export const StepItem: React.FC<StepItemProps> = ({
         />
         <div>
           <div
-            className={`text-sm font-semibold ${
+            className={` hidden md:block text-sm font-semibold ${
               isActive ? "text-orange-500" : "text-gray-800"
             }`}
           >
             {title}
           </div>
-          <div className="text-xs text-gray-500">{subtitle}</div>
+          <div className="hidden lg:block text-xs text-gray-500">{subtitle}</div>
         </div>
       </div>
 
       {!isLast && (
-        <div className="flex-1 h-px bg-gray-300 mx-4"></div>
+        <div className=" flex-1 h-px bg-gray-300 mx-2"></div>
       )}
     </div>
+
+
+   
+    
+    </>
+   
+
+
   );
 };

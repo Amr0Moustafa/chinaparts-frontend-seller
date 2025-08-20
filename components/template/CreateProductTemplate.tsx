@@ -39,10 +39,10 @@ export const CreateProductTemplate = () => {
             </div>
 
             {/*   add product  steps*/}
-                <div className="flex items-center justify-center">
+                <div className="flex items-center justify-center mt-6">
                   <div className="text-center">
-                    <h2 className="text-3xl font-bold text-orange-500">{t("createproduct.steps.title")}</h2>
-                    <p className="text-md  text-gray-600">{t("createproduct.steps.description")}</p>
+                    <h2 className="text-lg lg:text-3xl font-bold text-orange-500">{t("createproduct.steps.title")}</h2>
+                    <p className=" text-sm lg:text-md  text-gray-600">{t("createproduct.steps.description")}</p>
                   </div>
                 </div>
               <Stepper/>

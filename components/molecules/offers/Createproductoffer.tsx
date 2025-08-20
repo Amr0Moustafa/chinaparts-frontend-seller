@@ -16,6 +16,9 @@ type FormValues = {
   endDate: string;
 };
 
+interface  ProductOfferProps{
+  formData?:FormValues
+}
 // Dropdown options
 const offerNameOptions = [
   { value: "all", label: "All Products" },
@@ -28,7 +31,7 @@ const productOptions = [
   { value: "car", label: "Car Accessories" },
   { value: "laptop", label: "Laptop" },
 ];
-export const Createproductoffer = () => {
+export const Createproductoffer = ({formData}:ProductOfferProps) => {
   const { t } = useTranslation();
   const methods = useForm<FormValues>({
     resolver: yupResolver(createProductOfferSchema),
@@ -112,7 +115,8 @@ export const Createproductoffer = () => {
                 type="submit"
                 className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-lg transition-all duration-200"
               >
-                {t("offers.form.createOffer")}
+                {formData ? t("offers.form.updateOffer") : t("offers.form.createOffer")}
+                
               </button>
             </div>
           </form>
