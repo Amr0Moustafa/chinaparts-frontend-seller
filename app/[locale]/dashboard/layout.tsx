@@ -5,6 +5,7 @@ import { I18n_Provider } from "@/providers/i18nprovider";
 import Sidebar from "@/components/shared/Sidebar";
 import Header from "@/components/shared/Header";
 import Image from "next/image";
+import { ReduxProvider } from "@/providers/Reduxprovider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,24 +37,31 @@ export default function RootLayout({
       >
         {" "}
         <I18n_Provider>
-          <div className="min-h-screen flex bg-gray-50">
-             <aside className="w-64 flex-shrink-0 bg-white border-r border-gray-200 hidden md:flex flex-col min-h-screen">
-      <div className="px-6 py-5 flex items-center border-b border-gray-100">
-        <Image src="/logo.webp" alt="Logo" width={150} height={150} className="h-10 w-auto" />
-      </div>
-      <Sidebar />
-    </aside>
-      
+          <ReduxProvider>
+            <div className="min-h-screen flex bg-gray-50">
+              <aside className="w-64 flex-shrink-0 bg-white border-r border-gray-200 hidden md:flex flex-col min-h-screen">
+                <div className="px-6 py-5 flex items-center border-b border-gray-100">
+                  <Image
+                    src="/logo.webp"
+                    alt="Logo"
+                    width={150}
+                    height={150}
+                    className="h-10 w-auto"
+                  />
+                </div>
+                <Sidebar />
+              </aside>
 
-      <div className="flex-1 flex flex-col">
-        <Header />
+              <div className="flex-1 flex flex-col">
+                <Header />
 
-        <main className="flex-1 p-2 md:p-6 overflow-auto">
-          {children}
-        </main>
-      </div>
-    </div>
-          </I18n_Provider>
+                <main className="flex-1 p-2 md:p-6 overflow-auto">
+                  {children}
+                </main>
+              </div>
+            </div>
+          </ReduxProvider>
+        </I18n_Provider>
       </body>
     </html>
   );

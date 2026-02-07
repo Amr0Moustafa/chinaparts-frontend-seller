@@ -452,17 +452,61 @@
       "skuLabel": "SKU",
       "skuPlaceholder": "BP-TC-001",
       "manufacturerLabel": "Manufacturer",
-      "manufacturerPlaceholder": "OEM, Bosch, Wagner..."
+      "manufacturerPlaceholder": "OEM, Bosch, Wagner...",
+      "priorityLabel": "Priority in appearance",
+      "priorityPlaceholder": "e.g.: High, Medium, Low",
+      "prioritydesc": "Controls the appearance of the section at the beginning, the higher the number, the more it appears before other products. For example, if this section has a priority of 9 and a section has a priority of 7, 9 will appear before 7.",
+      "categoryLabel": "Category",
+      "categoryPlaceholder": "e.g.: Brakes, Brake Pads, etc.",
+      "nameRequired": "Product name is required",
+      "nameMinLength": "Name must be at least 3 characters",
+      "nameMaxLength": "Name must not exceed 200 characters",
+      "skuRequired": "SKU is required",
+      "skuInvalid": "SKU must contain only uppercase letters, numbers, and hyphens",
+      "manufacturerRequired": "Manufacturer is required",
+      "manufacturerMinLength": "Manufacturer must be at least 2 characters",
+      "priorityRequired": "Priority is required",
+      "priorityMin": "Priority must be 0 or greater",
+      "priorityMax": "Priority must be 100 or less",
+      "priorityNumber": "Priority must be a number"
+    },
+    "productDescription": {
+      "title": "Product Description",
+      "descriptionLabel": "Product Description",
+      "descriptionPlaceholder": "Describe your product...",
+      "detailedDescriptionLabel": "Product Details",
+      "detailedDescriptionPlaceholder": "Provide detailed information about your product...",
+      "shippingLabel": "Product Shipping",
+      "shippingPlaceholder": "Shipping information...",
+      "returnsLabel": "Product Returns",
+      "returnsPlaceholder": "Returns policy...",
+      "descriptionRequired": "Description is required",
+      "descriptionMinLength": "Description must be at least 10 characters",
+      "descriptionMaxLength": "Description must not exceed 500 characters",
+      "detailedDescriptionRequired": "Detailed description is required",
+      "detailedDescriptionMinLength": "Detailed description must be at least 20 characters",
+      "detailedDescriptionMaxLength": "Detailed description must not exceed 2000 characters",
+      "shippingRequired": "Shipping information is required",
+      "shippingMinLength": "Shipping information must be at least 10 characters",
+      "returnsRequired": "Returns policy is required",
+      "returnsMinLength": "Returns policy must be at least 10 characters"
     },
     "images": {
       "title": "Product Images",
-      "mainimage": "Main Image",
       "recommended": "Recommended",
       "image1": "Image 1",
       "image2": "Image 2",
       "image3": "Image 3",
       "image4": "Image 4",
-      "formatNote": "JPG, PNG, WebP"
+      "mainimage": "Upload main product image",
+      "formatNote": "PNG / JPG – Max 5MB",
+      "hint": "You must upload at least one image (max 4)",
+      "validation": {
+        "required": "At least one image is required",
+        "max": "Maximum {{max}} images allowed",
+        "type": "Only image files are allowed",
+        "size": "Image size must be less than {{size}}MB"
+      }
     },
     "pricingInventory": {
       "title": "Pricing & Inventory",
@@ -471,13 +515,25 @@
       "quantityInStock": "Quantity in Stock",
       "trackQuantity": "Track quantity"
     },
-    "shippingInfo": {
-      "title": "Shipping info",
+   "shippingInfo": {
+      "title": "Shipping Information",
       "weight": "Weight (lbs)",
-      "length": "Length (in)",
-      "width": "Width (in)",
-      "height": "Height (in)",
-      "fragile": "Fragile item"
+      "length": "Length (inches)",
+      "width": "Width (inches)",
+      "height": "Height (inches)",
+      "fragile": "Fragile Item",
+      "validation": {
+        "weightNumber": "Weight must be a number",
+        "weightRequired": "Weight is required",
+        "weightPositive": "Weight must be positive",
+        "weightMin": "Weight must be at least 0.01",
+        "lengthNumber": "Length must be a number",
+        "lengthPositive": "Length must be positive",
+        "widthNumber": "Width must be a number",
+        "widthPositive": "Width must be positive",
+        "heightNumber": "Height must be a number",
+        "heightPositive": "Height must be positive"
+      }
     },
     "variantForm": {
       "title": "Variants",
@@ -495,17 +551,32 @@
         "price": "Price",
         "quantity": "Quantity",
         "addVariant": "Add Variant"
-        
       },
       "table": {
         "title": "Added Variants",
         "type": "Type",
         "value": "Value",
         "price": "Price",
+        "category": "Category",
         "quantity": "Quantity"
       }
     },
     "vehicleForm": {
+      "validation": {
+        "vehicleTypeRequired": "Vehicle type is required",
+        "brandRequired": "Brand is required",
+        "modelRequired": "Model is required",
+        "yearRequired": "Year is required",
+        "bodyTypeRequired": "Body type is required"
+      },
+      "loading": "Loading...",
+      "error": "Failed to load vehicle data. Please try again.",
+      "retry": "Retry",
+      "modelsError": "Failed to load models",
+      "compatModelsError": "Failed to load compatibility models",
+      "selectBrandfirst": "Select a brand first",
+      "selectMakefirst": "Select a make first",
+      "noModels": "No models available",
       "mainVehicle": {
         "title": "Main Vehicle",
         "fields": {
@@ -517,32 +588,30 @@
           "bodyType": "Body Type"
         },
         "placeholders": {
-          "vehicleType": "Select Vehicle",
-          "brand": "Select Brand",
-          "model": "Select Model",
-          "year": "Select Year",
-          "partNumber": "Enter Part Number",
-          "bodyType": "Select Body Type"
+          "vehicleType": "Select vehicle type",
+          "brand": "Select brand",
+          "model": "Select model",
+          "year": "Select year",
+          "partNumber": "Enter part number",
+          "bodyType": "Select body type"
         }
       },
       "compatibility": {
         "title": "Vehicle Compatibility",
-        "addButton": "Add Another Vehicle",
+        "addButton": "Add Compatibility",
         "fields": {
           "vehicleType": "Vehicle Type",
           "bodyType": "Body Type",
           "make": "Make",
           "model": "Model",
-          "yearRange": "Year Range",
-          "partNumber": "Part Number"
+          "yearRange": "Year Range"
         },
         "placeholders": {
-          "vehicleType": "Select Vehicle",
-          "bodyType": "Select Body Type",
-          "make": "Select Make",
-          "model": "Select Model",
-          "yearRange": "Select Year Range",
-          "partNumber": "Enter Part Number"
+          "vehicleType": "Select vehicle type",
+          "bodyType": "Select body type",
+          "make": "Select make",
+          "model": "Select model",
+          "yearRange": "Select year range"
         }
       },
       "submit": {
@@ -555,7 +624,10 @@
       "subcategoryLabel": "Subcategory",
       "tagsLabel": "Tags",
       "tagsPlaceholder": "Enter tag and press Enter",
-      "addButton": "Add"
+      "addButton": "Add",
+      "categoryRequired": "Category is required",
+      "tagsMinLength": "At least one tag is required",
+      "tagsMaxLength": "Maximum 10 tags allowed"
     },
     "productSummary": {
       "title": "Product Summary",
@@ -590,25 +662,23 @@
           "subtitle": "Basic details and images"
         },
         "2": {
-          "title": "Variants",
-          "subtitle": "Product variants"
+          "title": "Pricing & Variants",
+          "subtitle": "Product variants and Price"
         },
         "3": {
-          "title": "Compatibility",
-          "subtitle": "Compatible vehicles"
+          "title": "Compatibility & Shipping",
+          "subtitle": "Vehicles and shipping details"
         },
+
         "4": {
-          "title": "Pricing & Shipping",
-          "subtitle": "Price and shipping details"
-        },
-        "5": {
           "title": "Review & Submit",
           "subtitle": "Category, tags and final review"
         }
       },
       "buttons": {
         "previous": "Previous",
-        "next": "Next"
+        "next": "Next",
+        "submit": "Submit"
       }
     }
   }

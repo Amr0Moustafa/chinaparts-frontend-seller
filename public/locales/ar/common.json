@@ -457,17 +457,61 @@
       "skuLabel": "الرمز (SKU)",
       "skuPlaceholder": "BP-TC-001",
       "manufacturerLabel": "المُصنّع",
-      "manufacturerPlaceholder": "OEM, Bosch, Wagner..."
+      "manufacturerPlaceholder": "OEM, Bosch, Wagner...",
+      "priorityLabel": "الاولوية في الظهور",
+      "priorityPlaceholder": "مثلا: عالي, متوسط, منخفض",
+      "prioritydesc": "يتحكم في ظهور القسم في البداية، كلما كان الرقم أكبر ظهر قبل منتجات أخرى. مثلاً إذا كان هذا القسم له الأولوية 9 وقسم آخر له الأولوية 7، فسيظهر 9 قبل 7.",
+      "categoryLabel": "الفئة",
+      "categoryPlaceholder": "مثلا: فرامل, مكابح, إلخ",
+      "nameRequired": "اسم المنتج مطلوب",
+      "nameMinLength": "يجب ألا يقل اسم المنتج عن 3 أحرف",
+      "nameMaxLength": "يجب ألا يزيد اسم المنتج عن 200 حرف",
+      "skuRequired": "رمز SKU مطلوب",
+      "skuInvalid": "يجب أن يحتوي SKU على أحرف كبيرة وأرقام وشرطات فقط",
+      "manufacturerRequired": "اسم الشركة المصنعة مطلوب",
+      "manufacturerMinLength": "يجب ألا يقل اسم الشركة المصنعة عن حرفين",
+      "priorityRequired": "الأولوية مطلوبة",
+      "priorityMin": "يجب أن تكون الأولوية 0 أو أكثر",
+      "priorityMax": "يجب ألا تتجاوز الأولوية 100",
+      "priorityNumber": "يجب إدخال رقم صحيح للأولوية"
+    },
+    "productDescription": {
+      "title": "وصف المنتج",
+      "descriptionLabel": "وصف المنتج",
+      "descriptionPlaceholder": "صف منتجك...",
+      "detailedDescriptionLabel": "تفاصيل المنتج",
+      "detailedDescriptionPlaceholder": "أدخل التفاصيل الكاملة عن منتجك...",
+      "shippingLabel": "شحن المنتج",
+      "shippingPlaceholder": "معلومات الشحن...",
+      "returnsLabel": "إرجاع المنتج",
+      "returnsPlaceholder": "سياسة الإرجاع...",
+      "descriptionRequired": "الوصف مطلوب",
+      "descriptionMinLength": "يجب ألا يقل الوصف عن 10 أحرف",
+      "descriptionMaxLength": "يجب ألا يزيد الوصف عن 500 حرف",
+      "detailedDescriptionRequired": "الوصف التفصيلي مطلوب",
+      "detailedDescriptionMinLength": "يجب ألا يقل الوصف التفصيلي عن 20 حرفًا",
+      "detailedDescriptionMaxLength": "يجب ألا يزيد الوصف التفصيلي عن 2000 حرف",
+      "shippingRequired": "معلومات الشحن مطلوبة",
+      "shippingMinLength": "يجب ألا تقل معلومات الشحن عن 10 أحرف",
+      "returnsRequired": "سياسة الإرجاع مطلوبة",
+      "returnsMinLength": "يجب ألا تقل سياسة الإرجاع عن 10 أحرف"
     },
     "images": {
       "title": "صور المنتج",
-      "mainimage": "الصورة الرئيسية",
       "recommended": "مستحسن",
       "image1": "الصورة 1",
       "image2": "الصورة 2",
       "image3": "الصورة 3",
       "image4": "الصورة 4",
-      "formatNote": "JPG, PNG, WebP"
+      "mainimage": "رفع الصورة الرئيسية للمنتج",
+      "formatNote": "PNG / JPG – الحد الأقصى 5 ميغابايت",
+      "hint": "يجب رفع صورة واحدة على الأقل (الحد الأقصى 4)",
+      "validation": {
+        "required": "يجب رفع صورة واحدة على الأقل",
+        "max": "يمكن رفع {{max}} صور كحد أقصى",
+        "type": "يجب أن تكون الملفات صورًا فقط",
+        "size": "يجب ألا يزيد حجم الصورة عن {{size}} ميغابايت"
+      }
     },
     "pricingInventory": {
       "title": "التسعير والمخزون",
@@ -482,7 +526,19 @@
       "length": "الطول (بوصة)",
       "width": "العرض (بوصة)",
       "height": "الارتفاع (بوصة)",
-      "fragile": "منتج قابل للكسر"
+      "fragile": "عنصر قابل للكسر",
+      "validation": {
+        "weightNumber": "يجب أن يكون الوزن رقمًا",
+        "weightRequired": "الوزن مطلوب",
+        "weightPositive": "يجب أن يكون الوزن موجبًا",
+        "weightMin": "يجب أن يكون الوزن 0.01 على الأقل",
+        "lengthNumber": "يجب أن يكون الطول رقمًا",
+        "lengthPositive": "يجب أن يكون الطول موجبًا",
+        "widthNumber": "يجب أن يكون العرض رقمًا",
+        "widthPositive": "يجب أن يكون العرض موجبًا",
+        "heightNumber": "يجب أن يكون الارتفاع رقمًا",
+        "heightPositive": "يجب أن يكون الارتفاع موجبًا"
+      }
     },
     "variantForm": {
       "title": "الخيارات",
@@ -506,10 +562,26 @@
         "type": "النوع",
         "value": "القيمة",
         "price": "السعر",
+        "category": "القسم",
         "quantity": "الكمية"
       }
     },
     "vehicleForm": {
+      "validation": {
+        "vehicleTypeRequired": "نوع المركبة مطلوب",
+        "brandRequired": "العلامة التجارية مطلوبة",
+        "modelRequired": "الموديل مطلوب",
+        "yearRequired": "السنة مطلوبة",
+        "bodyTypeRequired": "نوع الهيكل مطلوب"
+      },
+      "loading": "جاري التحميل...",
+      "error": "فشل تحميل بيانات المركبة. يرجى المحاولة مرة أخرى.",
+      "retry": "إعادة المحاولة",
+      "modelsError": "فشل تحميل الموديلات",
+      "compatModelsError": "فشل تحميل موديلات التوافق",
+      "selectBrandfirst": "اختر العلامة التجارية أولاً",
+      "selectMakefirst": "اختر الصانع أولاً",
+      "noModels": "لا توجد موديلات متاحة",
       "mainVehicle": {
         "title": "المركبة الرئيسية",
         "fields": {
@@ -521,7 +593,7 @@
           "bodyType": "نوع الهيكل"
         },
         "placeholders": {
-          "vehicleType": "اختر المركبة",
+          "vehicleType": "اختر نوع المركبة",
           "brand": "اختر العلامة التجارية",
           "model": "اختر الموديل",
           "year": "اختر السنة",
@@ -530,23 +602,21 @@
         }
       },
       "compatibility": {
-        "title": "التوافق مع المركبات",
-        "addButton": "إضافة مركبة أخرى",
+        "title": "توافق المركبات",
+        "addButton": "إضافة توافق",
         "fields": {
           "vehicleType": "نوع المركبة",
           "bodyType": "نوع الهيكل",
           "make": "الصانع",
           "model": "الموديل",
-          "yearRange": "النطاق الزمني",
-          "partNumber": "رقم القطعة"
+          "yearRange": "نطاق السنوات"
         },
         "placeholders": {
-          "vehicleType": "اختر المركبة",
+          "vehicleType": "اختر نوع المركبة",
           "bodyType": "اختر نوع الهيكل",
           "make": "اختر الصانع",
           "model": "اختر الموديل",
-          "yearRange": "اختر النطاق الزمني",
-          "partNumber": "أدخل رقم القطعة"
+          "yearRange": "اختر نطاق السنوات"
         }
       },
       "submit": {
@@ -559,7 +629,10 @@
       "subcategoryLabel": "الفئة الفرعية",
       "tagsLabel": "الوسوم",
       "tagsPlaceholder": "أدخل الوسم واضغط Enter",
-      "addButton": "إضافة"
+      "addButton": "إضافة",
+       "categoryRequired": "التصنيف مطلوب",
+      "tagsMinLength": "يجب اختيار وسم واحد على الأقل",
+      "tagsMaxLength": "الحد الأقصى المسموح به هو 10 وسوم"
     },
     "productSummary": {
       "title": "ملخص المنتج",
@@ -591,28 +664,25 @@
       "steps": {
         "1": {
           "title": "معلومات المنتج والوسائط",
-          "subtitle": "التفاصيل الأساسية والصور"
+          "subtitle": "البيانات الأساسية والصور"
         },
         "2": {
-          "title": "المتغيرات",
-          "subtitle": "أنواع المنتج"
+          "title": "التسعير والمتغيرات",
+          "subtitle": "خيارات المنتج والأسعار"
         },
         "3": {
-          "title": "التوافق",
-          "subtitle": "المركبات المتوافقة"
+          "title": "التوافق والشحن",
+          "subtitle": "المركبات وتفاصيل الشحن"
         },
         "4": {
-          "title": "التسعير والشحن",
-          "subtitle": "تفاصيل السعر والشحن"
-        },
-        "5": {
-          "title": "مراجعة وإرسال",
-          "subtitle": "الفئات والعلامات والمراجعة النهائية"
+          "title": "المراجعة والإرسال",
+          "subtitle": "التصنيف، الوسوم والمراجعة النهائية"
         }
       },
       "buttons": {
         "previous": "السابق",
-        "next": "التالي"
+        "next": "التالي",
+        "submit": "إرسال"
       }
     }
   }

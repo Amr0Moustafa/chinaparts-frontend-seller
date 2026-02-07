@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { InputField } from "@/components/atoms/input";
 import SelectField from "@/components/atoms/SelectField";
@@ -19,20 +19,51 @@ import {
 } from "@/components/ui/dialog";
 import { useTranslation } from "react-i18next";
 
-type Variant = {
+interface Variant {
   id: number;
   type: string;
   value: string;
   price: string;
   quantity: number;
-};
+}
 
-export default function VariantFormCard() {
+interface VariantCardProps {
+  productId: string | null;
+  onValidationChange?: (isValid: boolean) => void;
+  onDataChange?: (data: any) => void;
+  initialValues?: {
+    variants?: Variant[];
+  };
+}
+
+export default function VariantFormCard({
+  productId,
+  onValidationChange,
+  onDataChange,
+  initialValues,
+}: VariantCardProps) {
   const { t } = useTranslation();
   const methods = useForm();
   const { handleSubmit, reset } = methods;
 
-  const [variants, setVariants] = useState<Variant[]>([]);
+  const [variants, setVariants] = useState<Variant[]>(
+    initialValues?.variants || []
+  );
+
+  // Notify parent when variants change
+  useEffect(() => {
+    if (onDataChange) {
+      onDataChange({
+        product_id: productId,
+        variants: variants,
+      });
+    }
+
+    // Validate: at least one variant should exist (optional)
+    if (onValidationChange) {
+      onValidationChange(variants.length > 0);
+    }
+  }, [variants, productId, onDataChange, onValidationChange]);
 
   // add new variant
   const onSubmit = (data: any) => {
@@ -64,7 +95,14 @@ export default function VariantFormCard() {
           <CardTitle className="flex items-center justify-between gap-1">
             <div className="flex items-center gap-1">
               <Palette className="text-orange-500" />
-              <h5 className="font-bold">{t("createproduct.variantForm.title")}</h5>
+              <h5 className="font-bold">
+                {t("createproduct.variantForm.title")}
+              </h5>
+              {productId && (
+                <span className="text-xs text-gray-500 ml-2">
+                  (Product ID: {productId})
+                </span>
+              )}
             </div>
 
             {/* Dialog Trigger */}
@@ -99,7 +137,9 @@ export default function VariantFormCard() {
                     <InputField
                       name="variantType"
                       label={t("createproduct.variantForm.dialog.typeName")}
-                      placeholder={t("createproduct.variantForm.dialog.typeName")}
+                      placeholder={t(
+                        "createproduct.variantForm.dialog.typeName"
+                      )}
                     />
 
                     <DialogFooter className="flex justify-end gap-3">
@@ -134,7 +174,7 @@ export default function VariantFormCard() {
                   label={t("createproduct.variantForm.form.variantType")}
                   options={[
                     { label: "Color", value: "Color" },
-                    { label:"Material", value: "Material" },
+                    { label: "Material", value: "Material" },
                   ]}
                   placeholder={t("createproduct.variantForm.form.variantType")}
                   className="bg-[var(--theme-light-gray)]"
@@ -143,7 +183,9 @@ export default function VariantFormCard() {
                 <InputField
                   name="variantValue"
                   label={t("createproduct.variantForm.form.variantValue")}
-                  placeholder={t("createproduct.variantForm.form.variantValue")}
+                  placeholder={t(
+                    "createproduct.variantForm.form.variantValue"
+                  )}
                   className="bg-[var(--theme-light-gray)]"
                 />
 
@@ -174,13 +216,25 @@ export default function VariantFormCard() {
       </Card>
 
       {/* Table to show variants */}
-      <DynamicTable
+      {/* <DynamicTable
         title={t("createproduct.variantForm.table.title")}
         columns={[
-          { header: t("createproduct.variantForm.table.type"), accessor: "type" },
-          { header: t("createproduct.variantForm.table.value"), accessor: "value" },
-          { header: t("createproduct.variantForm.table.price"), accessor: "price" },
-          { header: t("createproduct.variantForm.table.quantity"), accessor: "quantity" },
+          {
+            header: t("createproduct.variantForm.table.type"),
+            accessor: "type",
+          },
+          {
+            header: t("createproduct.variantForm.table.value"),
+            accessor: "value",
+          },
+          {
+            header: t("createproduct.variantForm.table.price"),
+            accessor: "price",
+          },
+          {
+            header: t("createproduct.variantForm.table.quantity"),
+            accessor: "quantity",
+          },
         ]}
         data={variants}
         onEdit={(item) => handleEdit(item)}
@@ -188,7 +242,7 @@ export default function VariantFormCard() {
         dialogaccept={false}
         dialogreject={false}
         dialogshow={false}
-      />
+      /> */}
     </>
   );
-};
+}

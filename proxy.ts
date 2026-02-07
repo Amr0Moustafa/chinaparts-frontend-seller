@@ -4,7 +4,7 @@ import i18nConfig from './i18nConfig';
 
 const PUBLIC_FILE = /\.(.*)$/;
 
-export function middleware(request: NextRequest): NextResponse | undefined {
+export function proxy(request: NextRequest): NextResponse | undefined {
   const { pathname } = request.nextUrl;
 
   // Skip internal/asset routes

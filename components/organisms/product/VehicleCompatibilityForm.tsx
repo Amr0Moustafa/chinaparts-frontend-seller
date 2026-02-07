@@ -1,187 +1,506 @@
 "use client";
 
-import { FC } from "react";
-import { useForm, FormProvider } from "react-hook-form";
+import { FC, useEffect, useRef, useState } from "react";
+import { useForm, FormProvider, useFormContext } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { InputField } from "@/components/atoms/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import SelectField from "@/components/atoms/SelectField";
-import { Car, Plus, Truck } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-export const VehicleForm: FC = () => {
-  const { t } = useTranslation();
-  const methods = useForm(); // ✅ initialize RHF
+import {
+  useGetBrandsQuery,
+  useGetVehicleTypesQuery,
+  useGetVehicleModelsByBrandQuery,
+  useGetVehicleBodyTypesQuery,
+} from "@/features/sellerAttributes";
 
-  const onSubmit = (data: any) => {
-    console.log("Form data:", data);
-  };
+/* ===============================
+   Types
+================================ */
+interface SelectOption {
+  label: string;
+  value: string;
+}
+
+interface CompatibilityItem {
+  type_id?: string;
+  body_type_id?: string;
+  brand?: string;
+  model_id?: string;
+  year?: string;
+}
+
+interface MainVehicle {
+  type_id: string;
+  body_type_id: string;
+  brand: string;
+  model_id: string;
+  year: string;
+}
+
+interface VehicleFormValues {
+  mainVehicle: MainVehicle;
+  compatibility: CompatibilityItem[];
+}
+
+interface VehiclePayload {
+  vehicles: {
+    year: string;
+    type_id: string;
+    model_id: string;
+    body_type_id: string;
+    is_main: boolean;
+  }[];
+}
+export interface VehicleData {
+  year: string;
+  type_id: string;
+  model_id: string;
+  body_type_id: string;
+  is_main: boolean;
+}
+interface VehicleFormProps {
+  onDataChange?: (data: VehicleData[]) => void;
+  onValidationChange?: (isValid: boolean) => void;
+}
+
+interface CompatibilityFormItemProps {
+  index: number;
+  brandOptions: SelectOption[];
+  vehicleTypeOptions: SelectOption[];
+  bodyTypeOptions: SelectOption[];
+  yearOptions: SelectOption[];
+  onRemove: () => void;
+  canRemove: boolean;
+}
+
+/* ===============================
+   Validation Schema
+================================ */
+const vehicleSchema = yup.object({
+  mainVehicle: yup.object({
+    type_id: yup.string().required("Vehicle type is required"),
+    body_type_id: yup.string().required("Body type is required"),
+    brand: yup.string().required("Brand is required"),
+    model_id: yup.string().required("Model is required"),
+    year: yup.string().required("Year is required"),
+  }),
+  compatibility: yup
+    .array()
+    .of(
+      yup.object({
+        type_id: yup.string().optional(),
+        body_type_id: yup.string().optional(),
+        brand: yup.string().optional(),
+        model_id: yup.string().optional(),
+        year: yup.string().optional(),
+      }),
+    )
+    .required(),
+});
+
+/* ===============================
+   Compatibility Item Component
+================================ */
+const CompatibilityFormItem: FC<CompatibilityFormItemProps> = ({
+  index,
+  brandOptions,
+  vehicleTypeOptions,
+  bodyTypeOptions,
+  yearOptions,
+  onRemove,
+  canRemove,
+}) => {
+  const { t } = useTranslation();
+  const { setValue } = useFormContext<VehicleFormValues>();
+  // State to hold the selected brand
+  const [selectedBrand, setSelectedBrand] = useState<string>("");
+
+  // Reset model when brand changes
+  useEffect(() => {
+    if (selectedBrand) {
+      setValue(`compatibility.${index}.model_id`, "");
+    }
+  }, [selectedBrand, index, setValue]);
+
+  // Only fetch models if brand is selected and valid
+  const shouldFetchModels = Boolean(
+    selectedBrand && selectedBrand.trim() !== "",
+  );
+
+  // Fetch models using RTK Query
+  const { data: modelsData, isLoading: modelsLoading } =
+    useGetVehicleModelsByBrandQuery(selectedBrand || "", {
+      skip: !shouldFetchModels,
+    });
+  const modelOptions: SelectOption[] =
+    modelsData?.data?.map((m: any) => ({
+      label: m.name,
+      value: String(m.id),
+    })) || [];
 
   return (
-    <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
-        
-        {/* Main Vehicle */}
-        <Card className="bg-white border border-gray-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-1">
-              <Car className="text-orange-500" />
-              <h5 className="font-bold">{t("createproduct.vehicleForm.mainVehicle.title")}</h5>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <SelectField
-                name="vehicleType"
-                label={t("createproduct.vehicleForm.mainVehicle.fields.vehicleType")}
-                options={[
-                  { label: "Car", value: "car" },
-                  { label: "Truck", value: "truck" },
-                ]}
-                placeholder={t("createproduct.vehicleForm.mainVehicle.placeholders.vehicleType")}
-                className="bg-[var(--theme-light-gray)]"
-              />
-              <SelectField
-                name="brand"
-                label={t("createproduct.vehicleForm.mainVehicle.fields.brand")}
-                options={[
-                  { label: "Toyota", value: "toyota" },
-                  { label: "Honda", value: "honda" },
-                ]}
-                placeholder={t("createproduct.vehicleForm.mainVehicle.placeholders.brand")}
-                className="bg-[var(--theme-light-gray)]"
-              />
-              <SelectField
-                name="model"
-                label={t("createproduct.vehicleForm.mainVehicle.fields.model")}
-                options={[
-                  { label: "Camry", value: "camry" },
-                  { label: "Civic", value: "civic" },
-                ]}
-                placeholder={t("createproduct.vehicleForm.mainVehicle.placeholders.model")}
-                className="bg-[var(--theme-light-gray)]"
-              />
-              <SelectField
-                name="year"
-                label={t("createproduct.vehicleForm.mainVehicle.fields.year")}
-                options={[
-                  { label: "2020", value: "2020" },
-                  { label: "2021", value: "2021" },
-                ]}
-                placeholder={t("createproduct.vehicleForm.mainVehicle.placeholders.year")}
-                className="bg-[var(--theme-light-gray)]"
-              />
-              <InputField
-                name="partNumber"
-                label={t("createproduct.vehicleForm.mainVehicle.fields.partNumber")}
-                placeholder={t("createproduct.vehicleForm.mainVehicle.placeholders.partNumber")}
-                className="bg-[var(--theme-light-gray)]"
-              />
-              <SelectField
-                name="bodyType"
-                label={t("createproduct.vehicleForm.mainVehicle.fields.bodyType")}
-                options={[
-                  { label: "SUV", value: "suv" },
-                  { label: "Sedan", value: "sedan" },
-                ]}
-                placeholder={t("createproduct.vehicleForm.mainVehicle.placeholders.bodyType")}
-                className="bg-[var(--theme-light-gray)]"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Vehicle Compatibility */}
-        <Card className="bg-white border border-gray-300">
-          <CardHeader className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-1">
-              <Truck className="text-orange-500" />
-              <h5 className="font-bold">{t("createproduct.vehicleForm.compatibility.title")}</h5>
-            </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              className="py-2 px-4 font-bold text-gray-900 bg-white border border-gray-300"
-            >
-              <Plus className="text-orange-500" /> {t("createproduct.vehicleForm.compatibility.addButton")}
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <SelectField
-                name="compatVehicleType"
-                label={t("createproduct.vehicleForm.compatibility.fields.vehicleType")}
-                options={[
-                  { label: "Car", value: "car" },
-                  { label: "Truck", value: "truck" },
-                ]}
-                placeholder={t("createproduct.vehicleForm.compatibility.placeholders.vehicleType")}
-                className="bg-[var(--theme-light-gray)]"
-              />
-              <SelectField
-                name="compatBodyType"
-                label={t("createproduct.vehicleForm.compatibility.fields.bodyType")}
-                options={[
-                  { label: "4x4", value: "4x4" },
-                  { label: "SUV", value: "suv" },
-                ]}
-                placeholder={t("createproduct.vehicleForm.compatibility.placeholders.bodyType")}
-                className="bg-[var(--theme-light-gray)]"
-              />
-              <SelectField
-                name="compatMake"
-                label={t("createproduct.vehicleForm.compatibility.fields.make")}
-                options={[
-                  { label: "Toyota", value: "toyota" },
-                  { label: "Honda", value: "honda" },
-                ]}
-                placeholder={t("createproduct.vehicleForm.compatibility.placeholders.make")}
-                className="bg-[var(--theme-light-gray)]"
-              />
-              <SelectField
-                name="compatModel"
-                label={t("createproduct.vehicleForm.compatibility.fields.model")}
-                options={[
-                  { label: "Camry", value: "camry" },
-                  { label: "Corolla", value: "corolla" },
-                ]}
-                placeholder={t("createproduct.vehicleForm.compatibility.placeholders.model")}
-                className="bg-[var(--theme-light-gray)]"
-              />
-              <SelectField
-                name="yearRange"
-                label={t("createproduct.vehicleForm.compatibility.fields.yearRange")}
-                options={[
-                  { label: "2018-2020", value: "2018-2020" },
-                  { label: "2021-2023", value: "2021-2023" },
-                ]}
-                placeholder={t("createproduct.vehicleForm.compatibility.placeholders.yearRange")}
-                className="bg-[var(--theme-light-gray)]"
-              />
-              <InputField
-                name="compatPartNumber"
-                label={t("createproduct.vehicleForm.compatibility.fields.partNumber")}
-                placeholder={t("createproduct.vehicleForm.compatibility.placeholders.partNumber")}
-                className="bg-[var(--theme-light-gray)]"
-              />
-            </div>
-            {/* Submit */}
+    <div className="border border-gray-300 rounded-lg p-4 relative space-y-4">
+      {canRemove && (
         <Button
-          type="submit"
-          className="bg-orange-500 mt-4 text-white px-4 py-2 rounded-md"
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={onRemove}
+          className="absolute top-2 right-2 text-red-500"
+          aria-label="Remove compatibility item"
         >
-          {t("createproduct.vehicleForm.submit.saveVehicle")}
+          <X className="w-4 h-4" />
         </Button>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <SelectField
+          name={`compatibility.${index}.type_id`}
+          label={t(
+            "createproduct.vehicleForm.compatibility.fields.vehicleType",
+          )}
+          options={vehicleTypeOptions}
+        />
+
+        <SelectField
+          name={`compatibility.${index}.body_type_id`}
+          label={t("createproduct.vehicleForm.compatibility.fields.bodyType")}
+          options={bodyTypeOptions}
+        />
+
+        <SelectField
+          name={`compatibility.${index}.brand`}
+          label={t("createproduct.vehicleForm.mainVehicle.fields.brand")}
+          options={brandOptions}
+          onChange={(e: any) => setSelectedBrand(e.target.value)} // update state
+        />
+
+        <SelectField
+          name={`compatibility.${index}.model_id`}
+          label={t("createproduct.vehicleForm.compatibility.fields.model")}
+          options={modelOptions}
+          disabled={!shouldFetchModels || modelsLoading}
+        />
+
+        <SelectField
+          name={`compatibility.${index}.year`}
+          label={t("createproduct.vehicleForm.compatibility.fields.yearRange")}
+          options={yearOptions}
+        />
+      </div>
+    </div>
+  );
+};
+
+/* ===============================
+   Main Vehicle Form Component
+================================ */
+export const VehicleForm: FC<VehicleFormProps> = ({
+  onDataChange,
+  onValidationChange,
+}) => {
+  const { t } = useTranslation();
+  const onDataChangeRef = useRef(onDataChange);
+  const onValidationChangeRef = useRef(onValidationChange);
+
+  // Keep refs updated
+  useEffect(() => {
+    onDataChangeRef.current = onDataChange;
+    onValidationChangeRef.current = onValidationChange;
+  }, [onDataChange, onValidationChange]);
+
+  /* ===============================
+     Form Setup
+  ================================ */
+  const methods = useForm<VehicleFormValues>({
+    resolver: yupResolver(vehicleSchema),
+    mode: "onChange",
+    defaultValues: {
+      mainVehicle: {
+        type_id: "",
+        body_type_id: "",
+        brand: "",
+        model_id: "",
+        year: "",
+      },
+      compatibility: [
+        {
+          type_id: "",
+          body_type_id: "",
+          brand: "",
+          model_id: "",
+          year: "",
+        },
+      ],
+    },
+  });
+
+  const { watch, formState, setValue } = methods;
+  const mainVehicle = watch("mainVehicle");
+  /* ===============================
+     Data Fetching
+  ================================ */
+  const { data: brandsData } = useGetBrandsQuery();
+  const { data: vehicleTypesData } = useGetVehicleTypesQuery();
+  const { data: bodyTypesData } = useGetVehicleBodyTypesQuery();
+  const [selectBrand, setselectBrand] = useState<string>("");
+  console.log(selectBrand);
+  const { data: mainModelsData, isLoading: mainModelsLoading } =
+    useGetVehicleModelsByBrandQuery(selectBrand || "", {
+      refetchOnMountOrArgChange: true,
+    });
+
+  // Reset main vehicle model when brand changes
+  useEffect(() => {
+    if (selectBrand) {
+      setValue("mainVehicle.model_id", "");
+    }
+  }, [selectBrand, setValue]);
+
+  /* ===============================
+     Options Mapping
+  ================================ */
+  const brandOptions: SelectOption[] =
+    brandsData?.data?.map((b: any) => ({
+      label: b.name,
+      value: String(b.id),
+    })) || [];
+
+  const vehicleTypeOptions: SelectOption[] =
+    vehicleTypesData?.data?.map((t: any) => ({
+      label: t.name,
+      value: String(t.id),
+    })) || [];
+
+  const bodyTypeOptions: SelectOption[] =
+    bodyTypesData?.data?.map((b: any) => ({
+      label: b.name,
+      value: String(b.id),
+    })) || [];
+
+  const mainModelOptions: SelectOption[] =
+    mainModelsData?.data?.map((m: any) => ({
+      label: m.name,
+      value: String(m.id),
+    })) || [];
+  const yearOptions: SelectOption[] = Array.from({ length: 30 }).map((_, i) => {
+    const year = 1995 + i; // just the year
+    return {
+      label: `${year}`,
+      value: `${year}`,
+    };
+  });
+
+  /* ===============================
+     Payload Builder
+  ================================ */
+  const buildVehiclesPayload = (values: VehicleFormValues): VehicleData[] => {
+    const vehicles: VehicleData[] = [];
+
+    const main = values.mainVehicle;
+    if (main?.year && main?.type_id && main?.model_id && main?.body_type_id) {
+      const year = main.year.includes("-")
+        ? main.year.split("-")[0]
+        : main.year;
+      vehicles.push({
+        year,
+        type_id: main.type_id,
+        model_id: main.model_id,
+        body_type_id: main.body_type_id,
+        is_main: true,
+      });
+    }
+
+    values.compatibility?.forEach((c) => {
+      if (c?.year && c?.type_id && c?.model_id && c?.body_type_id) {
+        const year = c.year.includes("-") ? c.year.split("-")[0] : c.year;
+        vehicles.push({
+          year,
+          type_id: c.type_id,
+          model_id: c.model_id,
+          body_type_id: c.body_type_id,
+          is_main: false,
+        });
+      }
+    });
+
+    return vehicles; // ✅ Returns array directly
+  };
+
+  /* ===============================
+     Effects
+  ================================ */
+
+  useEffect(() => {
+    if (!mainVehicle) return;
+
+    // Only save if all required fields are filled
+    const { year, type_id, model_id, body_type_id } = mainVehicle;
+    if (year && type_id && model_id && body_type_id) {
+      // Build payload as array with just the main vehicle
+      const payload: VehicleData[] = [
+        {
+          year,
+          type_id,
+          model_id,
+          body_type_id,
+          is_main: true,
+        },
+      ];
+
+      console.log("Auto-saving main vehicle:", payload);
+      onDataChangeRef.current?.(payload);
+    }
+  }, [mainVehicle]);
+
+  // Watch form changes and notify parent
+  useEffect(() => {
+    const subscription = watch((values) => {
+      const payload = buildVehiclesPayload(values as VehicleFormValues);
+      onDataChangeRef.current?.(payload); // ✅ payload is VehicleData[]
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
+
+  // Notify parent of validation state changes
+  useEffect(() => {
+    onValidationChangeRef.current?.(formState.isValid);
+  }, [formState.isValid]);
+
+  const compatibility = watch("compatibility") ?? [];
+
+  /* ===============================
+     Handlers
+  ================================ */
+  const handleAddCompatibility = () => {
+    setValue("compatibility", [
+      ...compatibility,
+      {
+        type_id: "",
+        body_type_id: "",
+        brand: "",
+        model_id: "",
+        year: "",
+      },
+    ]);
+  };
+
+  const handleSaveCompatibility = () => {
+    // Get current form values
+    const values = methods.getValues();
+
+    // Build payload using your existing builder
+    const payload = buildVehiclesPayload(values);
+
+    // Call parent callback if provided
+    onDataChange?.(payload);
+  };
+
+  const handleRemoveCompatibility = (index: number) => {
+    setValue(
+      "compatibility",
+      compatibility.filter((_, i) => i !== index),
+    );
+  };
+
+  /* ===============================
+     Render
+  ================================ */
+  return (
+    <FormProvider {...methods}>
+      <div className="space-y-6">
+        {/* MAIN VEHICLE */}
+        <Card className="border border-gray-300">
+          <CardHeader>
+            <CardTitle>
+              {t("createproduct.vehicleForm.mainVehicle.title")}
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <SelectField
+              name="mainVehicle.type_id"
+              label={t(
+                "createproduct.vehicleForm.mainVehicle.fields.vehicleType",
+              )}
+              options={vehicleTypeOptions}
+            />
+
+            <SelectField
+              name="mainVehicle.body_type_id"
+              label={t("createproduct.vehicleForm.mainVehicle.fields.bodyType")}
+              options={bodyTypeOptions}
+            />
+
+            <SelectField
+              name="mainVehicle.brand"
+              label={t("createproduct.vehicleForm.mainVehicle.fields.brand")}
+              options={brandOptions}
+              onChange={(e: any) => setselectBrand(e.target.value)}
+            />
+
+            <SelectField
+              name="mainVehicle.model_id"
+              label={t("createproduct.vehicleForm.mainVehicle.fields.model")}
+              options={mainModelOptions}
+              disabled={mainModelsLoading}
+            />
+
+            <SelectField
+              name="mainVehicle.year"
+              label={t("createproduct.vehicleForm.mainVehicle.fields.year")}
+              options={yearOptions}
+            />
           </CardContent>
         </Card>
 
-        
-      </form>
+        {/* COMPATIBILITY */}
+        <Card className="border border-gray-300">
+          <CardHeader>
+            <CardTitle>
+              {t("createproduct.vehicleForm.compatibility.title")}
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent className="space-y-4">
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleAddCompatibility}
+                className="flex items-center border border-gray-300"
+              >
+                <Plus className="w-4 h-4 mr-2 text-[var(--theme-color-accent)]" />
+                {t("createproduct.vehicleForm.compatibility.addButton")}
+              </Button>
+            </div>
+
+            {compatibility.map((_, index) => (
+              <CompatibilityFormItem
+                key={index}
+                index={index}
+                brandOptions={brandOptions}
+                vehicleTypeOptions={vehicleTypeOptions}
+                bodyTypeOptions={bodyTypeOptions}
+                yearOptions={yearOptions}
+                canRemove={compatibility.length > 1}
+                onRemove={() => handleRemoveCompatibility(index)}
+              />
+            ))}
+            <Button
+              type="button"
+              className="bg-[var(--theme-color-accent)] text-white "
+              onClick={handleSaveCompatibility}
+            >
+              {t("createproduct.vehicleForm.submit.saveVehicle")}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </FormProvider>
   );
 };

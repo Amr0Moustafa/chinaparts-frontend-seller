@@ -12,6 +12,8 @@ interface Props {
   options: Option[];
   placeholder?: string;
   className?: string; // ✅ allow custom styles
+  disabled?: boolean;
+  onChange?:(e:any)=>void;
 }
 
 const SelectField: React.FC<Props> = ({
@@ -19,7 +21,9 @@ const SelectField: React.FC<Props> = ({
   name,
   options,
   placeholder,
-  className
+  className,
+  disabled,
+  onChange
 }) => {
   const {
     register,
@@ -35,6 +39,8 @@ const SelectField: React.FC<Props> = ({
       <select
         {...register(name)}
         className={`w-full px-4 py-2  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500  ${className || ""}`}
+        disabled={disabled}
+        onChange={onChange}
       >
         <option value="">{placeholder || "Select an option"}</option>
         {options.map((opt) => (
