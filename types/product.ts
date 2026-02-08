@@ -40,12 +40,7 @@ export interface ProductSeller {
 /* =======================
    DIMENSIONS
 ======================= */
-export interface ProductDimensions {
-  weight: string;
-  height: string;
-  width: string;
-  length: string;
-}
+
 
 /* =======================
    RATING
@@ -93,16 +88,20 @@ export interface Product {
   description: string;
   slug: string;
   sku: string;
-
+  priority:string;
   manufacturer_name: string | null;
   details_info: string | null;
   shipping_info: string | null;
   return_info: string | null;
-
+category_id:string;
+sub_category_id:string;
   category: ProductCategory;
   seller: ProductSeller;
   brand: BrandCategory;
-  dimensions: ProductDimensions;
+ weight: string;
+  height: string;
+  width: string;
+  length: string;
   is_fragile: boolean;
   stock_quantity: number;
   specifications: Record<string, string>;

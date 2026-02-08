@@ -685,5 +685,11 @@
         "submit": "إرسال"
       }
     }
+  },
+   "updateproduct": {
+    "header": {
+      "UpdateProduct": "تعديل المنتج",
+      "saveAsDraft": "حفظ كمسودة"
+    }
   }
 }

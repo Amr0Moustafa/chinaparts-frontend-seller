@@ -3,10 +3,13 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "../atoms/Button";
 import { useTranslation } from "react-i18next";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Stepper } from "../organisms/stepper/Stepper";
 export const UpdateProductTemplate = () => {
   const { i18n, t } = useTranslation();
+  const params = useParams<{ productId: string }>();
+
+  const productId = params.productId;
   const router = useRouter();
   const direction = i18n.dir();
   return (
@@ -27,13 +30,13 @@ export const UpdateProductTemplate = () => {
           )}
           <h5 className="text-xl font-bold text-slate-800">
             {" "}
-            {t("createproduct.header.addNewProduct")}
+            {t("updateproduct.header.UpdateProduct")}
           </h5>
         </div>
         {/* publish product */}
         <div className="flex-shrink-0">
           <Button
-            text={t("createproduct.header.saveAsDraft")}
+            text={t("updateproduct.header.saveAsDraft")}
             className="px-2 md:py-2 md:px-3 font-bold text-gray-900 bg-white border border-gray-300 w-auto"
           />
         </div>
@@ -50,7 +53,7 @@ export const UpdateProductTemplate = () => {
           </p>
         </div>
       </div>
-      <Stepper />
+      <Stepper product_id={productId} />
     </div>
   );
 };

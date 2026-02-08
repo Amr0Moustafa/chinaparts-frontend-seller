@@ -681,5 +681,11 @@
         "submit": "Submit"
       }
     }
+  },
+   "updateproduct": {
+    "header": {
+      "UpdateProduct": "Update Product",
+      "saveAsDraft": "Save as Draft"
+    }
   }
 }

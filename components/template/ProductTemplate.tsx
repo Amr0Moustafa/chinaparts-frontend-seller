@@ -17,6 +17,7 @@ import { Product } from "@/types/product";
 
 export const ProductTemplate = () => {
   const { t } = useTranslation();
+  
    const router=useRouter()
   const { data: productdata, isLoading: productloading } =
     useGetProductsQuery();

@@ -28,7 +28,7 @@ export async function GET(req: NextRequest, context: Params) {
 
 export async function PUT(req: NextRequest, context: Params) {
   const seller_token = req.cookies.get("seller_token")?.value;
-  const body = await req.json();
+  const body = await req.formData();
   const { product } = await context.params;
   try {
     const res = await axios.put(`${BASE_URL}/products/${product}`, body, {

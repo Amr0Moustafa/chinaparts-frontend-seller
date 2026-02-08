@@ -689,5 +689,11 @@
         "submit": "提交"
       }
     }
+  },
+   "updateproduct": {
+    "header": {
+      "UpdateProduct": "更新产品",
+      "saveAsDraft": "保存为草稿"
+    }
   }
 }

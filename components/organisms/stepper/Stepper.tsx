@@ -20,9 +20,8 @@ import { ProductSummaryCard } from "../product/ProductSummaryCard";
 import {
   useCreateProductMutation,
   useUpdateProductMutation,
+  useGetProductByIdQuery,
 } from "@/features/products";
-import { AlertCircle, CheckCircle2, X } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 /* ==================== Types ==================== */
 type StepperFormValues = {
@@ -44,6 +43,8 @@ type StepValidationState = Record<number, boolean>;
 type ProductImagesData = {
   main_image: File | null;
   images: File[];
+  main_image_url?: string;
+  images_url?: string[];
 };
 
 type ShippingData = {
@@ -94,6 +95,8 @@ const INITIAL_CATEGORY_TAGS: StepperFormValues = {
 const INITIAL_PRODUCT_IMAGES: ProductImagesData = {
   main_image: null,
   images: [],
+  main_image_url: "",
+  images_url: [],
 };
 
 const INITIAL_SHIPPING_DATA: ShippingData = {
@@ -105,16 +108,21 @@ const INITIAL_SHIPPING_DATA: ShippingData = {
 };
 
 /* ==================== Component ==================== */
-export const Stepper: React.FC = () => {
+interface StepperProps {
+  product_id?: string | number;
+}
+
+export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
   const { t } = useTranslation();
-  const router=useRouter()
+  const isEditMode = !!product_id;
+
   /* ------------------ State ------------------ */
   const [currentStep, setCurrentStep] = useState(1);
   const [stepValidation, setStepValidation] = useState<StepValidationState>(
-    INITIAL_STEP_VALIDATION
+    INITIAL_STEP_VALIDATION,
   );
   const [step1Validation, setStep1Validation] = useState<Step1ValidationState>(
-    INITIAL_STEP1_VALIDATION
+    INITIAL_STEP1_VALIDATION,
   );
 
   // Step 1 Data
@@ -123,26 +131,31 @@ export const Stepper: React.FC = () => {
   const [productDescriptionData, setProductDescriptionData] =
     useState<ProductDescriptionData>(INITIAL_PRODUCT_DESCRIPTION);
   const [categoryTagsData, setCategoryTagsData] = useState<StepperFormValues>(
-    INITIAL_CATEGORY_TAGS
+    INITIAL_CATEGORY_TAGS,
   );
-  const [productImagesData, setProductImagesData] =
-    useState<ProductImagesData>(INITIAL_PRODUCT_IMAGES);
+  const [productImagesData, setProductImagesData] = useState<ProductImagesData>(
+    INITIAL_PRODUCT_IMAGES,
+  );
 
   // Step 2 Data
   const [variantData, setVariantData] = useState<any>(null);
 
   // Step 3 Data
   const [vehicleData, setVehicleData] = useState<VehicleData[]>([]);
-  const [shippingData, setShippingData] =
-    useState<ShippingData>(INITIAL_SHIPPING_DATA);
+  const [shippingData, setShippingData] = useState<ShippingData>(
+    INITIAL_SHIPPING_DATA,
+  );
 
-  // Product ID (returned from step 1)
-  const [productId, setProductId] = useState<number | null>(null);
+  // Product ID (returned from step 1 or passed as prop)
+  const [productId, setProductId] = useState<number | null>(
+    product_id ? Number(product_id) : null,
+  );
 
   // UI State
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessages, setErrorMessages] = useState<string[]>([]);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [isDataLoaded, setIsDataLoaded] = useState(false); // ✅ NEW: Track if data is loaded
 
   /* ------------------ API Hooks ------------------ */
   const [createProduct, { isLoading: createLoading }] =
@@ -150,41 +163,132 @@ export const Stepper: React.FC = () => {
   const [updateProduct, { isLoading: updateLoading }] =
     useUpdateProductMutation();
 
+  // Fetch existing product data if in edit mode
+  const {
+    data: existingProduct,
+    isLoading: isLoadingProduct,
+    error: productError,
+  } = useGetProductByIdQuery(product_id ?? 0, {
+    skip: !product_id,
+  });
+
   /* ------------------ React Hook Form ------------------ */
   const formMethods = useForm<StepperFormValues>({
     defaultValues: INITIAL_CATEGORY_TAGS,
     mode: "onChange",
   });
 
-  /* ==================== Error Handler ==================== */
-  const handleApiError = (error: any) => {
-    console.error("API Error:", error);
+  /* ------------------ Load Existing Product Data ------------------ */
+  useEffect(() => {
+    if (existingProduct?.data) {
+      const product = existingProduct.data;
 
-    // Clear previous messages
-    setErrorMessages([]);
-    setSuccessMessage(null);
+      console.log("🔍 Loading existing product data:", product);
 
-    // Handle different error formats
-    if (error?.data?.error?.errors) {
-      // Format: { error: { errors: ["msg1", "msg2"] } }
-      setErrorMessages(error.data.error.errors);
-    } else if (error?.data?.errors) {
-      // Format: { errors: ["msg1", "msg2"] }
-      setErrorMessages(error.data.errors);
-    } else if (error?.data?.error?.message) {
-      // Format: { error: { message: "msg" } }
-      setErrorMessages([error.data.error.message]);
-    } else if (error?.data?.message) {
-      // Format: { message: "msg" }
-      setErrorMessages([error.data.message]);
-    } else if (error?.message) {
-      // Standard error object
-      setErrorMessages([error.message]);
-    } else {
-      // Unknown error format
-      setErrorMessages(["An unexpected error occurred. Please try again."]);
+      // Set product ID FIRST
+      if (product.id && !productId) {
+        setProductId(product.id);
+      }
+
+      // Load Product Info
+      const newProductInfo = {
+        name: product.name || "",
+        sku: product.sku || "",
+        manufacturer_name: product.manufacturer_name || "",
+        priority: product.priority || "",
+      };
+      setProductInfoData(newProductInfo);
+      console.log("📝 Product Info loaded:", newProductInfo);
+
+      // Load Category & Tags
+      const newCategoryTags = {
+        category_id: product.category_id?.toString() || "",
+        sub_category_id: product.sub_category_id?.toString() || "",
+        tags: product.tags?.map((tag: any) => tag.id) || [],
+      };
+      setCategoryTagsData(newCategoryTags);
+      console.log("🏷️ Category Tags loaded:", newCategoryTags);
+
+      // Load Description
+      const newDescription = {
+        description: product.description || "",
+        details_info: product.details_info || "",
+        shipping_info: product.shipping_info || "",
+        return_info: product.return_info || "",
+      };
+      setProductDescriptionData(newDescription);
+      console.log("📄 Description loaded:", newDescription);
+
+      // Load Images
+      const newImages = {
+        main_image: null,
+        images: [],
+        main_image_url: product.main_image || "",
+        images_url:
+          product.images?.map((img: any) => img.image || img.url || img) || [],
+      };
+      setProductImagesData(newImages);
+      console.log("🖼️ Images loaded:", newImages);
+
+      // Load Shipping Data
+      if (product.weight || product.height || product.width || product.length) {
+        const newShipping = {
+          weight: Number(product.weight) || 0,
+          height: Number(product.height) || 0,
+          width: Number(product.width) || 0,
+          length: Number(product.length) || 0,
+          is_fragile: product.is_fragile || false,
+        };
+        setShippingData(newShipping);
+        console.log("📦 Shipping loaded:", newShipping);
+      }
+
+      // Load Vehicle Data
+      if (product.vehicles && Array.isArray(product.vehicles)) {
+        setVehicleData(product.vehicles);
+        console.log("🚗 Vehicles loaded:", product.vehicles);
+      }
+
+      // Load Variant Data
+      if (product.variants) {
+        setVariantData(product.variants);
+        console.log("🎨 Variants loaded:", product.variants);
+      }
+
+      // ✅ Mark data as loaded
+      setIsDataLoaded(true);
+      console.log("✅ All data loaded successfully");
+    } else if (!isEditMode) {
+      // ✅ For create mode, mark as loaded immediately
+      setIsDataLoaded(true);
+      console.log("✅ Create mode - ready to use");
     }
-  };
+  }, [existingProduct, isEditMode]);
+
+  /* ------------------ Debug Effect ------------------ */
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("📊 Current State:", {
+        productInfoData,
+        categoryTagsData,
+        productDescriptionData,
+        productImagesData,
+        shippingData,
+        vehicleData,
+        productId,
+        isDataLoaded,
+      });
+    }
+  }, [
+    productInfoData,
+    categoryTagsData,
+    productDescriptionData,
+    productImagesData,
+    shippingData,
+    vehicleData,
+    productId,
+    isDataLoaded,
+  ]);
 
   /* ==================== API Functions ==================== */
 
@@ -215,7 +319,7 @@ export const Stepper: React.FC = () => {
     formData.append("shipping_info", data.productDescription.shipping_info);
     formData.append("return_info", data.productDescription.return_info);
 
-    // Add images
+    // Add images (only if new files are selected)
     if (data.productImages.main_image) {
       formData.append("main_image", data.productImages.main_image);
     }
@@ -223,29 +327,39 @@ export const Stepper: React.FC = () => {
       formData.append(`images[${index}]`, image);
     });
 
-    try {
-      const response = await createProduct(formData).unwrap();
-      console.log("Step 1 API Response:", response);
+    let response;
+
+    if (isEditMode && productId) {
+      // Update existing product
+      response = await updateProduct({
+        id: productId,
+        data: formData,
+      }).unwrap();
+      console.log("Step 1 Update Response:", response);
+      setMessage("Product updated successfully!");
+    } else {
+      // Create new product
+      response = await createProduct(formData).unwrap();
+      console.log("Step 1 Create Response:", response);
+      setMessage("Product created successfully!");
 
       // Store the product ID from the response
       if (response?.data?.id) {
         setProductId(response.data.id);
       }
-
-      // Clear errors and show success
-      setErrorMessages([]);
-      setSuccessMessage("Product created successfully!");
-
-      return response;
-    } catch (error) {
-      handleApiError(error);
-      throw error;
     }
+
+    return response;
   };
 
   const submitStep2Data = async (data: any) => {
     console.log("Submitting step 2 data:", data);
     // TODO: Implement variant API call
+    // const response = await updateProduct({
+    //   id: productId,
+    //   data: data
+    // }).unwrap();
+    // return response;
   };
 
   const submitStep3Data = async () => {
@@ -268,30 +382,27 @@ export const Stepper: React.FC = () => {
 
     console.log("Request body:", body);
 
-    try {
-      const response = await updateProduct({
-        id: productId,
-        data: body,
-      }).unwrap();
+    const response = await updateProduct({
+      id: productId,
+      data: body,
+    }).unwrap();
 
-      // Clear errors and show success
-      setErrorMessages([]);
-      setSuccessMessage("Shipping and vehicle information updated successfully!");
+    console.log("Step 3 API Response:", response);
+    setMessage("Product updated successfully!");
+    setSubmitError(null);
 
-      return response;
-    } catch (error) {
-      handleApiError(error);
-      throw error;
-    }
+    return response;
   };
 
   const submitStep4Data = async () => {
     if (!productId) {
       throw new Error("Product ID is missing");
     }
-     router.push('/dashboard/products')
-    // console.log("Finalizing product:", productId);
+
+    console.log("Finalizing product:", productId);
     // TODO: Implement final submission API call
+    // const response = await finalizeProduct(productId).unwrap();
+    // return response;
   };
 
   /* ------------------ Memoized Steps ------------------ */
@@ -318,7 +429,7 @@ export const Stepper: React.FC = () => {
         subtitle: t("createproduct.stepper.steps.4.subtitle"),
       },
     ],
-    [t]
+    [t],
   );
 
   /* ------------------ Effects ------------------ */
@@ -330,20 +441,6 @@ export const Stepper: React.FC = () => {
       return { ...prev, 1: allValid };
     });
   }, [step1Validation]);
-
-  // Debug logging
-  useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      console.log("Vehicle data changed:", vehicleData);
-      console.log("Shipping data changed:", shippingData);
-    }
-  }, [vehicleData, shippingData]);
-
-  // Clear messages when step changes
-  useEffect(() => {
-    setErrorMessages([]);
-    setSuccessMessage(null);
-  }, [currentStep]);
 
   /* ------------------ Handlers ------------------ */
   const handleValidationChange = useCallback(
@@ -360,40 +457,46 @@ export const Stepper: React.FC = () => {
         });
       }
     },
-    []
+    [],
   );
 
   const handleProductInfoChange = useCallback((data: ProductInfoData) => {
+    console.log("📝 Product info changed:", data);
     setProductInfoData(data);
   }, []);
 
   const handleProductDescriptionChange = useCallback(
     (data: ProductDescriptionData) => {
+      console.log("📄 Description changed:", data);
       setProductDescriptionData(data);
     },
-    []
+    [],
   );
 
   const handleCategoryChange = useCallback((data: StepperFormValues) => {
+    console.log("🏷️ Category changed:", data);
     setCategoryTagsData(data);
   }, []);
 
   const handleProductImagesChange = useCallback((data: ProductImagesData) => {
+    console.log("🖼️ Images changed:", data);
     setProductImagesData(data);
   }, []);
 
   const handleVariantDataChange = useCallback((data: any) => {
+    console.log("🎨 Variant changed:", data);
     setVariantData(data);
   }, []);
 
   const handleShippingDataChange = useCallback((data: ShippingData | null) => {
     if (data) {
+      console.log("📦 Shipping changed:", data);
       setShippingData(data);
     }
   }, []);
 
   const handleVehicleDataChange = useCallback((data: VehicleData[]) => {
-    console.log("Vehicle data received in Stepper:", data);
+    console.log("🚗 Vehicle data received in Stepper:", data);
     setVehicleData(data);
   }, []);
 
@@ -405,27 +508,21 @@ export const Stepper: React.FC = () => {
     setCurrentStep((prev) => Math.max(1, prev - 1));
   }, []);
 
-  const dismissError = (index: number) => {
-    setErrorMessages((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const dismissSuccess = () => {
-    setSuccessMessage(null);
-  };
-
   /* ------------------ Submit Logic for Each Step ------------------ */
   const handleNextStep = useCallback(async () => {
+    setSubmitError(null);
     setIsSubmitting(true);
 
     try {
       switch (currentStep) {
         case 1: {
-          await submitStep1Data({
+          const response = await submitStep1Data({
             productInfo: productInfoData,
             categoryTags: categoryTagsData,
             productDescription: productDescriptionData,
             productImages: productImagesData,
           });
+          console.log("Step 1 submitted successfully:", response);
           break;
         }
 
@@ -434,12 +531,14 @@ export const Stepper: React.FC = () => {
             product_id: productId,
             ...variantData,
           };
-          await submitStep2Data(step2Data);
+          const response = await submitStep2Data(step2Data);
+          console.log("Step 2 submitted successfully:", response);
           break;
         }
 
         case 3: {
-          await submitStep3Data();
+          const response = await submitStep3Data();
+          console.log("Step 3 submitted successfully:", response);
           break;
         }
 
@@ -450,8 +549,13 @@ export const Stepper: React.FC = () => {
       // Move to next step after successful submission
       setCurrentStep((prev) => Math.min(TOTAL_STEPS, prev + 1));
     } catch (error) {
-      // Error is already handled in submitStepXData functions
       console.error(`Error submitting step ${currentStep}:`, error);
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : `Failed to submit step ${currentStep} data`,
+      );
+      setMessage(null);
     } finally {
       setIsSubmitting(false);
     }
@@ -465,23 +569,33 @@ export const Stepper: React.FC = () => {
     variantData,
     vehicleData,
     shippingData,
+    isEditMode,
   ]);
 
   const handleFinalSubmit = useCallback(async () => {
+    setSubmitError(null);
     setIsSubmitting(true);
 
     try {
-      await submitStep4Data();
-      setSuccessMessage("Product finalized successfully!");
+      const response = await submitStep4Data();
+      console.log("Product finalized successfully:", response);
+      setMessage(
+        isEditMode
+          ? "Product updated successfully!"
+          : "Product created successfully!",
+      );
       // TODO: Redirect to product page
       // router.push(`/products/${productId}`);
     } catch (error) {
-      // Error is already handled in submitStep4Data
       console.error("Error finalizing product:", error);
+      setSubmitError(
+        error instanceof Error ? error.message : "Failed to finalize product",
+      );
+      setMessage(null);
     } finally {
       setIsSubmitting(false);
     }
-  }, [productId]);
+  }, [productId, isEditMode]);
 
   /* ------------------ Computed Values ------------------ */
   const canProceedToNextStep = stepValidation[currentStep];
@@ -490,11 +604,15 @@ export const Stepper: React.FC = () => {
 
   /* ------------------ Render Content ------------------ */
   const renderSectionContent = useCallback(() => {
+    // ✅ Create a unique key that changes when data is loaded
+    const dataKey = isEditMode ? `${productId}-${isDataLoaded}` : "new";
+
     switch (currentStep) {
       case 1:
         return (
           <div className="space-y-5">
             <ProductInfoCard
+              key={`product-info-${dataKey}`}
               onValidationChange={(isValid) =>
                 handleValidationChange(1, isValid, "productInfo")
               }
@@ -503,6 +621,7 @@ export const Stepper: React.FC = () => {
             />
 
             <CategoryTagsCard
+              key={`category-tags-${dataKey}`}
               onValidationChange={(isValid) =>
                 handleValidationChange(1, isValid, "categoryTags")
               }
@@ -511,6 +630,7 @@ export const Stepper: React.FC = () => {
             />
 
             <ProductDescriptionCard
+              key={`description-${dataKey}`}
               onValidationChange={(isValid) =>
                 handleValidationChange(1, isValid, "productDescription")
               }
@@ -519,6 +639,7 @@ export const Stepper: React.FC = () => {
             />
 
             <ProductImagesCard
+              key={`images-${dataKey}`}
               onValidationChange={(isValid) =>
                 handleValidationChange(1, isValid, "images")
               }
@@ -531,6 +652,13 @@ export const Stepper: React.FC = () => {
       case 2:
         return (
           <div className="space-y-5">
+            {/* <VariantForm
+              productId={productId}
+              onDataChange={handleVariantDataChange}
+              onValidationChange={(isValid) =>
+                handleValidationChange(2, isValid)
+              }
+            /> */}
             <div className="p-8 text-center border rounded-lg">
               <p className="text-gray-500">Variant form coming soon...</p>
             </div>
@@ -541,17 +669,21 @@ export const Stepper: React.FC = () => {
         return (
           <div className="space-y-5">
             <VehicleForm
+              key={`vehicle-${dataKey}`}
               onDataChange={handleVehicleDataChange}
               onValidationChange={(isValid) =>
                 handleValidationChange(3, isValid)
               }
+              initialData={vehicleData}
             />
             <ShippingInfoCard
+              key={`shipping-${dataKey}`}
               productId={productId}
               onDataChange={handleShippingDataChange}
               onValidationChange={(isValid) =>
                 handleValidationChange(3, isValid)
               }
+              initialData={shippingData}
             />
           </div>
         );
@@ -574,7 +706,7 @@ export const Stepper: React.FC = () => {
                 height: String(shippingData.height),
                 is_fragile: shippingData.is_fragile,
               }}
-              vehicles={vehicleData}
+              // vehicles={vehicleData}
             />
           </div>
         );
@@ -585,6 +717,8 @@ export const Stepper: React.FC = () => {
   }, [
     currentStep,
     productId,
+    isDataLoaded,
+    isEditMode,
     handleValidationChange,
     handleProductInfoChange,
     handleCategoryChange,
@@ -601,6 +735,80 @@ export const Stepper: React.FC = () => {
     shippingData,
     vehicleData,
   ]);
+
+  /* ------------------ Loading State ------------------ */
+  if (isLoadingProduct && isEditMode) {
+    return (
+      <div className="max-w-7xl mx-auto mt-5 flex justify-center items-center min-h-[400px]">
+        <div className="text-center">
+          <svg
+            className="animate-spin h-10 w-10 text-orange-500 mx-auto mb-4"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+          <p className="text-gray-600">Loading product data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ Don't render forms until data is loaded
+  if (isEditMode && !isDataLoaded) {
+    return (
+      <div className="max-w-7xl mx-auto mt-5 flex justify-center items-center min-h-[400px]">
+        <div className="text-center">
+          <svg
+            className="animate-spin h-10 w-10 text-orange-500 mx-auto mb-4"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+          <p className="text-gray-600">Preparing form...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (productError && isEditMode) {
+    return (
+      <div className="max-w-7xl mx-auto mt-5">
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-600">
+            Error loading product data. Please try again.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   /* ------------------ JSX ------------------ */
   return (
@@ -634,43 +842,16 @@ export const Stepper: React.FC = () => {
         </div>
 
         {/* Success Message */}
-        {successMessage && (
-          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
-            <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="text-sm text-green-600">{successMessage}</p>
-            </div>
-            <button
-              onClick={dismissSuccess}
-              className="text-green-600 hover:text-green-800"
-              aria-label="Dismiss"
-            >
-              <X className="w-4 h-4" />
-            </button>
+        {message && (
+          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-sm text-green-600">{message}</p>
           </div>
         )}
 
-        {/* Error Messages */}
-        {errorMessages.length > 0 && (
-          <div className="mb-4 space-y-2">
-            {errorMessages.map((error, index) => (
-              <div
-                key={index}
-                className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3"
-              >
-                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <p className="text-sm text-red-600">{error}</p>
-                </div>
-                <button
-                  onClick={() => dismissError(index)}
-                  className="text-red-600 hover:text-red-800"
-                  aria-label="Dismiss"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
+        {/* Error Message */}
+        {submitError && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600">{submitError}</p>
           </div>
         )}
 

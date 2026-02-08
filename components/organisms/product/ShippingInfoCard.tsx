@@ -9,13 +9,13 @@ import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useEffect, useRef, useMemo, useCallback } from "react";
+import { useEffect, useRef, useMemo } from "react";
 
 interface ShippingInfoCardProps {
   productId: number | null;
   onValidationChange?: (isValid: boolean) => void;
   onDataChange?: (data: any) => void;
-  initialValues?: {
+  initialData?: {
     weight?: number;
     length?: number;
     width?: number;
@@ -28,7 +28,7 @@ export const ShippingInfoCard = ({
   productId,
   onValidationChange,
   onDataChange,
-  initialValues,
+  initialData,
 }: ShippingInfoCardProps) => {
   const { t } = useTranslation();
 
@@ -75,16 +75,17 @@ export const ShippingInfoCard = ({
     register,
     control,
     watch,
+    reset,
     formState: { isValid, errors },
   } = useForm({
     resolver: yupResolver(shippingSchema),
     mode: "onChange",
     defaultValues: {
-      weight: initialValues?.weight || undefined,
-      length: initialValues?.length || undefined,
-      width: initialValues?.width || undefined,
-      height: initialValues?.height || undefined,
-      is_fragile: initialValues?.is_fragile || false,
+      weight: initialData?.weight || undefined,
+      length: initialData?.length || undefined,
+      width: initialData?.width || undefined,
+      height: initialData?.height || undefined,
+      is_fragile: initialData?.is_fragile || false,
     },
   });
 
@@ -97,6 +98,19 @@ export const ShippingInfoCard = ({
     onDataChangeRef.current = onDataChange;
     onValidationChangeRef.current = onValidationChange;
   }, [onDataChange, onValidationChange]);
+
+  // Reset form when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      reset({
+        weight: initialData.weight || undefined,
+        length: initialData.length || undefined,
+        width: initialData.width || undefined,
+        height: initialData.height || undefined,
+        is_fragile: initialData.is_fragile || false,
+      });
+    }
+  }, [initialData, reset]);
 
   // Watch form changes and send to parent
   useEffect(() => {
