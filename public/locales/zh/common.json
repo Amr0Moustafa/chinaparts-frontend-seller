@@ -695,5 +695,15 @@
       "UpdateProduct": "更新产品",
       "saveAsDraft": "保存为草稿"
     }
+  },
+  "dialog": {
+    "approve": {
+      "title": "确认批准",
+      "description": "您确定要批准此项目吗？"
+    },
+    "reject": {
+      "title": "确认拒绝",
+      "description": "您确定要拒绝此项目吗？"
+    }
   }
 }

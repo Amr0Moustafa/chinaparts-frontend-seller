@@ -11,6 +11,7 @@ import { SubOrder } from "@/types/order";
 import {
   useGetSubOrdersQuery,
   useGetSubOrdersSalesReportQuery,
+  useUpdateSubOrderStatusMutation,
 } from "@/features/sellerSubOrders";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
@@ -21,6 +22,9 @@ export const OrderTemplate = () => {
   // ✅ Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 10;
+
+  // ✅ Mutation hook for updating order status
+  const [updateStatus, { isLoading: isUpdating }] = useUpdateSubOrderStatusMutation();
 
   // ✅ Fetch orders from API with pagination
   const { 
@@ -68,6 +72,45 @@ export const OrderTemplate = () => {
     };
   }, [orders, salesReport, meta.total]);
 
+  // ✅ Handle accept order (confirm)
+  const handleAcceptOrder = async (item: SubOrder) => {
+    try {
+      await updateStatus({
+        id: item.id,
+        status: "confirmed",
+      }).unwrap();
+      
+      // Optional: Show success message
+      console.log(`Order ${item.sub_order_number} confirmed successfully`);
+    } catch (error) {
+      // Optional: Show error message
+      console.error("Failed to confirm order:", error);
+    }
+  };
+
+  // ✅ Handle reject order (cancel) with notes
+  const handleRejectOrder = async (item: SubOrder & { reject_notes?: string }) => {
+    try {
+      const payload: any = {
+        id: item.id,
+        status: "cancelled",
+      };
+
+      // Add notes if provided
+      if (item.reject_notes) {
+        payload.notes = item.reject_notes;
+      }
+
+      await updateStatus(payload).unwrap();
+      
+      // Optional: Show success message
+      console.log(`Order ${item.sub_order_number} cancelled successfully`);
+    } catch (error) {
+      // Optional: Show error message
+      console.error("Failed to cancel order:", error);
+    }
+  };
+
   // ✅ Handle page change
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -103,21 +146,26 @@ export const OrderTemplate = () => {
     { 
       id: "status",
       header: t("order.table.status"), 
-      accessor: (item) => (
-        <span
-          className={`px-2 py-1 rounded text-xs font-medium ${
-            item.status === "delivered"
-              ? "bg-green-100 text-green-800"
-              : item.status === "shipped"
-              ? "bg-blue-100 text-blue-800"
-              : item.status === "processing"
-              ? "bg-yellow-100 text-yellow-800"
-              : "bg-red-100 text-red-800"
-          }`}
-        >
-          {item.status_label || item.status}
-        </span>
-      )
+      accessor: (item) => {
+        const statusColors: Record<string, string> = {
+          pending: "bg-orange-100 text-orange-800",
+          confirmed: "bg-blue-100 text-blue-800",
+          processing: "bg-yellow-100 text-yellow-800",
+          shipped: "bg-blue-100 text-blue-800",
+          out_for_delivery: "bg-orange-100 text-orange-800",
+          delivered: "bg-green-100 text-green-800",
+          cancelled: "bg-red-100 text-red-800",
+          refunded: "bg-gray-100 text-gray-800",
+        };
+
+        const colorClass = statusColors[item.status] || "bg-gray-100 text-gray-800";
+
+        return (
+          <span className={`px-2 py-1 rounded text-xs font-medium ${colorClass}`}>
+            {item.status_label || item.status}
+          </span>
+        );
+      }
     },
   ];
 
@@ -222,8 +270,8 @@ export const OrderTemplate = () => {
           columns={orderColumns}
           data={orders}
           onShow={(item) => router.push(`/dashboard/orders/${item.id}`)}
-          onAccept={(item) => console.log("Accept:", item)}
-          onReject={(item) => console.log("Reject:", item)}
+          onAccept={handleAcceptOrder}
+          onReject={handleRejectOrder}
           dialogaccept={true}
           dialogreject={true}
           dialogshow={false}

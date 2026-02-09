@@ -8,7 +8,7 @@ import { ProductImagesCard } from "../product/ProductImagesCard";
 import { ShippingInfoCard } from "../product/ShippingInfoCard";
 import { PricingInventoryCard } from "../product/PricingInventoryCard";
 import VariantForm from "../product/VariantForm";
-import { VehicleForm, VehicleData } from "../product/VehicleCompatibilityForm";
+import { VehicleData, VehicleForm } from "../product/VehicleCompatibilityForm";
 import { useTranslation } from "react-i18next";
 import { CategoryTagsCard } from "../product/CategoryTagsCard";
 import {
@@ -243,10 +243,36 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
         console.log("📦 Shipping loaded:", newShipping);
       }
 
-      // Load Vehicle Data
-      if (product.vehicles && Array.isArray(product.vehicles)) {
-        setVehicleData(product.vehicles);
-        console.log("🚗 Vehicles loaded:", product.vehicles);
+      // ✅ Load Vehicle Data - transform from API format to VehicleData format
+      if (product.main_vehicle || product.compatible_vehicles) {
+        const transformedVehicles: VehicleData[] = [];
+        
+        // Add main vehicle
+        if (product.main_vehicle) {
+          transformedVehicles.push({
+            year: product.main_vehicle.year,
+            type_id: String(product.main_vehicle.type?.id || ""),
+            model_id: String(product.main_vehicle.model?.id || ""),
+            body_type_id: String(product.main_vehicle.body_type?.id || ""),
+            is_main: true,
+          });
+        }
+        
+        // Add compatible vehicles
+        if (product.compatible_vehicles && Array.isArray(product.compatible_vehicles)) {
+          product.compatible_vehicles.forEach((vehicle: any) => {
+            transformedVehicles.push({
+              year: vehicle.year,
+              type_id: String(vehicle.type?.id || ""),
+              model_id: String(vehicle.model?.id || ""),
+              body_type_id: String(vehicle.body_type?.id || ""),
+              is_main: false,
+            });
+          });
+        }
+        
+        setVehicleData(transformedVehicles);
+        console.log("🚗 Vehicles loaded:", transformedVehicles);
       }
 
       // Load Variant Data
@@ -301,6 +327,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     const formData = new FormData();
 
     // Add product info
+    formData.append("store_step", "1");
     formData.append("name", data.productInfo.name);
     formData.append("sku", data.productInfo.sku);
     formData.append("manufacturer_name", data.productInfo.manufacturer_name);
@@ -372,6 +399,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     console.log("Shipping data:", shippingData);
 
     const body = {
+      store_step: "3",
       vehicles: vehicleData,
       weight: shippingData.weight,
       height: shippingData.height,

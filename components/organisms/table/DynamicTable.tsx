@@ -31,8 +31,8 @@ export interface DynamicTableProps<T extends Record<string, any>> {
   onShow?: (row: T) => void;
   onEdit?: (row: T) => void;
   onDelete?: (row: T) => void;
-  onAccept?: (row: T) => void;
-  onReject?: (row: T) => void;
+  onAccept?: (row: T) => void | Promise<void>;
+  onReject?: (row: T) => void | Promise<void>;
   
   // Dialog options
   dialogshow?: boolean;
@@ -97,8 +97,8 @@ interface ActionButtonsProps<T> {
   onShow?: (row: T) => void;
   onEdit?: (row: T) => void;
   onDelete?: (row: T) => void;
-  onAccept?: (row: T) => void;
-  onReject?: (row: T) => void;
+  onAccept?: (row: T) => void | Promise<void>;
+  onReject?: (row: T) => void | Promise<void>;
   dialogshow?: boolean;
   dialogdelete?: boolean;
   dialogaccept?: boolean;
@@ -118,6 +118,25 @@ function ActionButtons<T extends Record<string, any>>({
   dialogreject,
 }: ActionButtonsProps<T>) {
   const { t } = useTranslation();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectNotes, setRejectNotes] = useState("");
+
+  const handleAcceptConfirm = async () => {
+    if (onAccept) {
+      await onAccept(row);
+      setIsDialogOpen(false);
+    }
+  };
+
+  const handleRejectConfirm = async (notes?: string) => {
+    if (onReject) {
+      // Pass the row with notes to the handler
+      await onReject({ ...row, reject_notes: notes || rejectNotes });
+      setRejectDialogOpen(false);
+      setRejectNotes(""); // Clear notes after submission
+    }
+  };
 
   return (
     <div className="flex gap-2">
@@ -185,7 +204,7 @@ function ActionButtons<T extends Record<string, any>>({
       {/* Accept Button */}
       {onAccept && (
         dialogaccept ? (
-          <Dialog>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <button
                 className="text-green-600 hover:text-green-800 transition-colors"
@@ -198,7 +217,7 @@ function ActionButtons<T extends Record<string, any>>({
               title={t("dialog.approve.title")}
               description={t("dialog.approve.description")}
               orderId={row.id}
-              onConfirm={() => onAccept(row)}
+              onConfirm={handleAcceptConfirm}
             />
           </Dialog>
         ) : (
@@ -215,7 +234,7 @@ function ActionButtons<T extends Record<string, any>>({
       {/* Reject Button */}
       {onReject && (
         dialogreject ? (
-          <Dialog>
+          <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
             <DialogTrigger asChild>
               <button
                 className="text-red-600 hover:text-red-800 transition-colors"
@@ -228,7 +247,7 @@ function ActionButtons<T extends Record<string, any>>({
               title={t("dialog.reject.title")}
               description={t("dialog.reject.description")}
               orderId={row.id}
-              onConfirm={() => onReject(row)}
+              onConfirm={handleRejectConfirm}
             />
           </Dialog>
         ) : (

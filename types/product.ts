@@ -78,6 +78,40 @@ export interface ProductVariant {
 }
 
 
+/* =======================
+   VEHICLE TYPES
+======================= */
+
+export interface VehicleType {
+  id: number;
+  name: string;
+}
+
+export interface VehicleModel {
+  id: number;
+  name: string;
+  brand: {
+    id: number;
+    name: string;
+  } | null;
+}
+
+export interface VehicleBodyType {
+  id: number;
+  name: string;
+}
+
+export interface Vehicle {
+  id: number;
+  year: string;
+  name: string;
+  type: VehicleType;
+  model: VehicleModel;
+  body_type: VehicleBodyType;
+  type_id: string;
+  model_id: string;
+  body_type_id: string;
+}
 
 /* =======================
    PRODUCT (API MODEL)
@@ -111,6 +145,8 @@ sub_category_id:string;
   images: string[];
   tags: string[];
   vehicles: any[];
+  main_vehicle: Vehicle | null;
+  compatible_vehicles: Vehicle[];
 
   variants: ProductVariant[];
   // reviews:Review[];

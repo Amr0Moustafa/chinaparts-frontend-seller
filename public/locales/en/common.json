@@ -687,5 +687,15 @@
       "UpdateProduct": "Update Product",
       "saveAsDraft": "Save as Draft"
     }
+  },
+  "dialog": {
+    "approve": {
+      "title": "Approve Item",
+      "description": "Are you sure you want to approve this item?"
+    },
+    "reject": {
+      "title": "Reject Item",
+      "description": "Are you sure you want to reject this item?"
+    }
   }
 }

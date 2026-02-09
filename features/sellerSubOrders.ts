@@ -47,16 +47,30 @@ export const sellerSubOrdersApi = createApi({
 
     /* =============================
        PATCH /sub-orders/{id}/status
+       Updated to support optional notes field
     ============================= */
-    updateSubOrderStatus: builder.mutation<any, { id: string | number; status: string }>({
-      query: ({ id, status }) => ({
-        url: `sub-orders/${id}/status`,
-        method: "PATCH",
-        body: { status },
-      }),
+    updateSubOrderStatus: builder.mutation<
+      any,
+      { id: string | number; status: string; notes?: string }
+    >({
+      query: ({ id, status, notes }) => {
+        const body: { status: string; notes?: string } = { status };
+        
+        // Only include notes if provided
+        if (notes) {
+          body.notes = notes;
+        }
+
+        return {
+          url: `sub-orders/${id}/status`,
+          method: "PATCH",
+          body,
+        };
+      },
       invalidatesTags: (_r, _e, { id }) => [
         { type: "SubOrder", id },
         "SubOrders",
+        "SalesReport",
       ],
     }),
   }),
