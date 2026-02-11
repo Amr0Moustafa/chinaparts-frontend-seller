@@ -59,6 +59,7 @@
     "sku": "رمز SKU",
     "price": "السعر",
     "stock": "المخزون",
+    "category": "التصنيف",
     "status": "الحالة",
     "actions": "الإجراءات",
     "view": "عرض",
@@ -268,7 +269,8 @@
       "usageLimit": "حد الاستخدام",
       "startDate": "تاريخ البدء",
       "endDate": "تاريخ الانتهاء",
-      "addCoupon": "إضافة كوبون"
+      "addCoupon": "إضافة كوبون",
+      "updateCoupon": "تحديث كوبون"
     }
   },
   "offers": {
@@ -312,7 +314,8 @@
       "offerPrice": "سعر العرض ($)",
       "startDate": "تاريخ البدء",
       "endDate": "تاريخ الانتهاء",
-      "createOffer": "إنشاء عرض"
+      "createOffer": "إنشاء عرض",
+      "updateOffer": "تحديث العرض"
     }
   },
   "storeSetting": {
@@ -436,5 +439,350 @@
     "stock": "المخزون",
     "viewProduct": "عرض المنتج",
     "typeMessagePlaceholder": "اكتب رسالتك..."
+  },
+  "createproduct": {
+    "header": {
+      "addNewProduct": "إضافة منتج جديد",
+      "saveAsDraft": "حفظ كمسودة"
+    },
+    "steps": {
+      "title": "إضافة منتج جديد",
+      "description": "أنشئ قائمة منتج شاملة في 4 خطوات سهلة"
+    },
+    "productInfo": {
+      "title": "معلومات المنتج",
+      "nameLabel": "اسم المنتج",
+      "namePlaceholder": "مثال: فرامل – تويوتا كامري 2013-2022",
+      "descriptionLabel": "وصف المنتج",
+      "descriptionPlaceholder": "صف منتجك...",
+      "skuLabel": "الرمز (SKU)",
+      "skuPlaceholder": "BP-TC-001",
+      "manufacturerLabel": "المُصنّع",
+      "manufacturerPlaceholder": "OEM, Bosch, Wagner...",
+      "priorityLabel": "الاولوية في الظهور",
+      "priorityPlaceholder": "مثلا: عالي, متوسط, منخفض",
+      "prioritydesc": "يتحكم في ظهور القسم في البداية، كلما كان الرقم أكبر ظهر قبل منتجات أخرى. مثلاً إذا كان هذا القسم له الأولوية 9 وقسم آخر له الأولوية 7، فسيظهر 9 قبل 7.",
+      "categoryLabel": "الفئة",
+      "categoryPlaceholder": "مثلا: فرامل, مكابح, إلخ",
+      "nameRequired": "اسم المنتج مطلوب",
+      "nameMinLength": "يجب ألا يقل اسم المنتج عن 3 أحرف",
+      "nameMaxLength": "يجب ألا يزيد اسم المنتج عن 200 حرف",
+      "skuRequired": "رمز SKU مطلوب",
+      "skuInvalid": "يجب أن يحتوي SKU على أحرف كبيرة وأرقام وشرطات فقط",
+      "manufacturerRequired": "اسم الشركة المصنعة مطلوب",
+      "manufacturerMinLength": "يجب ألا يقل اسم الشركة المصنعة عن حرفين",
+      "priorityRequired": "الأولوية مطلوبة",
+      "priorityMin": "يجب أن تكون الأولوية 0 أو أكثر",
+      "priorityMax": "يجب ألا تتجاوز الأولوية 100",
+      "priorityNumber": "يجب إدخال رقم صحيح للأولوية"
+    },
+    "productDescription": {
+      "title": "وصف المنتج",
+      "descriptionLabel": "وصف المنتج",
+      "descriptionPlaceholder": "صف منتجك...",
+      "detailedDescriptionLabel": "تفاصيل المنتج",
+      "detailedDescriptionPlaceholder": "أدخل التفاصيل الكاملة عن منتجك...",
+      "shippingLabel": "شحن المنتج",
+      "shippingPlaceholder": "معلومات الشحن...",
+      "returnsLabel": "إرجاع المنتج",
+      "returnsPlaceholder": "سياسة الإرجاع...",
+      "descriptionRequired": "الوصف مطلوب",
+      "descriptionMinLength": "يجب ألا يقل الوصف عن 10 أحرف",
+      "descriptionMaxLength": "يجب ألا يزيد الوصف عن 500 حرف",
+      "detailedDescriptionRequired": "الوصف التفصيلي مطلوب",
+      "detailedDescriptionMinLength": "يجب ألا يقل الوصف التفصيلي عن 20 حرفًا",
+      "detailedDescriptionMaxLength": "يجب ألا يزيد الوصف التفصيلي عن 2000 حرف",
+      "shippingRequired": "معلومات الشحن مطلوبة",
+      "shippingMinLength": "يجب ألا تقل معلومات الشحن عن 10 أحرف",
+      "returnsRequired": "سياسة الإرجاع مطلوبة",
+      "returnsMinLength": "يجب ألا تقل سياسة الإرجاع عن 10 أحرف"
+    },
+    "images": {
+      "title": "صور المنتج",
+      "recommended": "مستحسن",
+      "image1": "الصورة 1",
+      "image2": "الصورة 2",
+      "image3": "الصورة 3",
+      "image4": "الصورة 4",
+      "mainimage": "رفع الصورة الرئيسية للمنتج",
+      "formatNote": "PNG / JPG – الحد الأقصى 5 ميغابايت",
+      "hint": "يجب رفع صورة واحدة على الأقل (الحد الأقصى 4)",
+      "validation": {
+        "required": "يجب رفع صورة واحدة على الأقل",
+        "max": "يمكن رفع {{max}} صور كحد أقصى",
+        "type": "يجب أن تكون الملفات صورًا فقط",
+        "size": "يجب ألا يزيد حجم الصورة عن {{size}} ميغابايت"
+      }
+    },
+    "pricingInventory": {
+      "title": "التسعير والمخزون",
+      "price": "السعر",
+      "costPerItem": "تكلفة الوحدة",
+      "quantityInStock": "الكمية في المخزون",
+      "trackQuantity": "تتبع الكمية"
+    },
+    "shippingInfo": {
+      "title": "معلومات الشحن",
+      "weight": "الوزن (رطل)",
+      "length": "الطول (بوصة)",
+      "width": "العرض (بوصة)",
+      "height": "الارتفاع (بوصة)",
+      "fragile": "عنصر قابل للكسر",
+      "validation": {
+        "weightNumber": "يجب أن يكون الوزن رقمًا",
+        "weightRequired": "الوزن مطلوب",
+        "weightPositive": "يجب أن يكون الوزن موجبًا",
+        "weightMin": "يجب أن يكون الوزن 0.01 على الأقل",
+        "lengthNumber": "يجب أن يكون الطول رقمًا",
+        "lengthPositive": "يجب أن يكون الطول موجبًا",
+        "widthNumber": "يجب أن يكون العرض رقمًا",
+        "widthPositive": "يجب أن يكون العرض موجبًا",
+        "heightNumber": "يجب أن يكون الارتفاع رقمًا",
+        "heightPositive": "يجب أن يكون الارتفاع موجبًا"
+      }
+    },
+    "variantForm": {
+      "title": "الخيارات",
+      "addVariantType": "إضافة نوع خيار",
+      "dialog": {
+        "title": "إضافة نوع خيار جديد",
+        "description": "أنشئ نوع خيار مخصص لقطع الغيار",
+        "typeName": "اسم النوع",
+        "cancel": "إلغاء",
+        "addType": "إضافة النوع"
+      },
+      "form": {
+        "variantType": "نوع الخيار",
+        "variantValue": "قيمة الخيار",
+        "price": "السعر",
+        "quantity": "الكمية",
+        "addVariant": "إضافة خيار"
+      },
+      "table": {
+        "title": "الخيارات المضافة",
+        "type": "النوع",
+        "value": "القيمة",
+        "price": "السعر",
+        "category": "القسم",
+        "quantity": "الكمية"
+      }
+    },
+    "vehicleForm": {
+      "validation": {
+        "vehicleTypeRequired": "نوع المركبة مطلوب",
+        "brandRequired": "العلامة التجارية مطلوبة",
+        "modelRequired": "الموديل مطلوب",
+        "yearRequired": "السنة مطلوبة",
+        "bodyTypeRequired": "نوع الهيكل مطلوب"
+      },
+      "loading": "جاري التحميل...",
+      "error": "فشل تحميل بيانات المركبة. يرجى المحاولة مرة أخرى.",
+      "retry": "إعادة المحاولة",
+      "modelsError": "فشل تحميل الموديلات",
+      "compatModelsError": "فشل تحميل موديلات التوافق",
+      "selectBrandfirst": "اختر العلامة التجارية أولاً",
+      "selectMakefirst": "اختر الصانع أولاً",
+      "noModels": "لا توجد موديلات متاحة",
+      "mainVehicle": {
+        "title": "المركبة الرئيسية",
+        "fields": {
+          "vehicleType": "نوع المركبة",
+          "brand": "العلامة التجارية",
+          "model": "الموديل",
+          "year": "السنة",
+          "partNumber": "رقم القطعة",
+          "bodyType": "نوع الهيكل"
+        },
+        "placeholders": {
+          "vehicleType": "اختر نوع المركبة",
+          "brand": "اختر العلامة التجارية",
+          "model": "اختر الموديل",
+          "year": "اختر السنة",
+          "partNumber": "أدخل رقم القطعة",
+          "bodyType": "اختر نوع الهيكل"
+        }
+      },
+      "compatibility": {
+        "title": "توافق المركبات",
+        "addButton": "إضافة توافق",
+        "fields": {
+          "vehicleType": "نوع المركبة",
+          "bodyType": "نوع الهيكل",
+          "make": "الصانع",
+          "model": "الموديل",
+          "brand": "العلامة التجارية",
+          "year": "السنة"
+        },
+        "placeholders": {
+          "vehicleType": "اختر نوع المركبة",
+          "bodyType": "اختر نوع الهيكل",
+          "make": "اختر الصانع",
+          "model": "اختر الموديل",
+          "yearRange": "اختر نطاق السنوات"
+        }
+      },
+      "submit": {
+        "saveVehicle": "حفظ المركبة"
+      }
+    },
+    "categoryTags": {
+      "title": "الفئة والوسوم",
+      "categoryLabel": "الفئة",
+      "subcategoryLabel": "الفئة الفرعية",
+      "tagsLabel": "الوسوم",
+      "tagsPlaceholder": "أدخل الوسم واضغط Enter",
+      "addButton": "إضافة",
+       "categoryRequired": "التصنيف مطلوب",
+      "tagsMinLength": "يجب اختيار وسم واحد على الأقل",
+      "tagsMaxLength": "الحد الأقصى المسموح به هو 10 وسوم"
+    },
+    "productSummary": {
+      "title": "ملخص المنتج",
+      "basicInfo": {
+        "title": "المعلومات الأساسية",
+        "name": "الاسم",
+        "sku": "الرمز",
+        "manufacturer": "المُصنّع",
+        "price": "السعر"
+      },
+      "variantsCompatibility": {
+        "title": "الخيارات والتوافق",
+        "variants": "الخيارات",
+        "mainVehicle": "المركبة الرئيسية"
+      },
+      "shippingInfo": {
+        "title": "معلومات الشحن",
+        "dimensions": "الأبعاد",
+        "weight": "الوزن",
+        "fragile": "قابل للكسر"
+      },
+      "categoryTags": {
+        "title": "الفئة والوسوم",
+        "category": "الفئة",
+        "tags": "الوسوم"
+      }
+    },
+    "stepper": {
+      "steps": {
+        "1": {
+          "title": "معلومات المنتج والوسائط",
+          "subtitle": "البيانات الأساسية والصور"
+        },
+        "2": {
+          "title": "التسعير والمتغيرات",
+          "subtitle": "خيارات المنتج والأسعار"
+        },
+        "3": {
+          "title": "التوافق والشحن",
+          "subtitle": "المركبات وتفاصيل الشحن"
+        },
+        "4": {
+          "title": "المراجعة والإرسال",
+          "subtitle": "التصنيف، الوسوم والمراجعة النهائية"
+        }
+      },
+      "buttons": {
+        "previous": "السابق",
+        "next": "التالي",
+        "submit": "إرسال"
+      }
+    }
+  },
+   "updateproduct": {
+    "header": {
+      "UpdateProduct": "تعديل المنتج",
+      "saveAsDraft": "حفظ كمسودة"
+    }
+  },
+  "dialog": {
+    "approve": {
+      "title": "تأكيد الموافقة",
+      "description": "هل أنت متأكد أنك تريد الموافقة على هذا العنصر؟"
+    },
+    "reject": {
+      "title": "تأكيد الرفض",
+      "description": "هل أنت متأكد أنك تريد رفض هذا العنصر؟"
+    }
+  },
+  "productdetails": {
+    "header": {
+      "ProductDetails": "تفاصيل المنتج"
+    },
+    "buttons": {
+      "update": "تحديث المنتج",
+      "delete": "حذف",
+      "back": "العودة للمنتجات"
+    },
+    "sections": {
+      "description": "وصف المنتج",
+      "variants": "المتغيرات",
+      "compatibility": "التوافق مع المركبات",
+      "specifications": "المواصفات"
+    },
+    "status": {
+      "inStock": "متوفر",
+      "outOfStock": "غير متوفر",
+      "draft": "مسودة",
+      "published": "منشور"
+    },
+    "pricing": {
+      "brand": "العلامة التجارية",
+      "discount": "خصم"
+    },
+    "stock": {
+      "stock": "المخزون",
+      "units": "وحدات",
+      "supplier": "المورد"
+    },
+    "rating": {
+      "reviews": "تقييمات"
+    },
+    "tags": {
+      "title": "الوسوم"
+    },
+    "features": {
+      "details": "معلومات تفصيلية",
+      "shipping": "معلومات الشحن",
+      "return": "سياسة الإرجاع"
+    },
+    "table": {
+      "type": "النوع",
+      "value": "القيمة",
+      "price": "السعر",
+      "supplier": "المورد",
+      "actions": "الإجراءات"
+    },
+    "vehicle": {
+      "main": "المركبة الرئيسية",
+      "compatible": "المركبات المتوافقة",
+      "type": "النوع",
+      "model": "الموديل",
+      "bodyType": "نوع الهيكل",
+      "year": "السنة"
+    },
+    "specs": {
+      "manufacturer": "الشركة المصنعة",
+      "category": "الفئة",
+      "brand": "العلامة التجارية",
+      "weight": "الوزن",
+      "dimensions": "الأبعاد",
+      "height": "الارتفاع",
+      "width": "العرض",
+      "length": "الطول",
+      "fragile": "قابل للكسر",
+      "status": "الحالة",
+      "sku": "رمز المنتج",
+      "slug": "الرابط",
+      "created": "تاريخ الإنشاء",
+      "updated": "آخر تحديث"
+    },
+    "variants": {
+      "color": "اللون",
+      "material": "المادة",
+      "size": "الحجم"
+    },
+    "loading": "جاري تحميل تفاصيل المنتج...",
+    "error": "خطأ في تحميل المنتج",
+    "notFound": "المنتج غير موجود"
   }
 }

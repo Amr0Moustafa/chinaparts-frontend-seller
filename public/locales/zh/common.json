@@ -59,6 +59,7 @@
     "sku": "SKU 编号",
     "price": "价格",
     "stock": "库存",
+    "category": "分类",
     "status": "状态",
     "actions": "操作",
     "view": "查看",
@@ -230,7 +231,6 @@
     "uploadImages": "上传图片",
     "messageCustomer": "联系客户",
     "productDescriptionPlaceholder": "描述您的产品、其功能、兼容性和优势..."
-
   },
   "coupons": {
     "title": "折扣优惠券",
@@ -256,8 +256,8 @@
       "of": "的",
       "coupons": "优惠券"
     },
-    "form":{
-       "productName": "产品名称",
+    "form": {
+      "productName": "产品名称",
       "couponCode": "优惠码",
       "couponTitle": "优惠标题",
       "discountType": "折扣类型",
@@ -278,7 +278,6 @@
         { "value": "20", "label": "20%" }
       ]
     }
-    
   },
   "offers": {
     "title": "产品优惠与特价",
@@ -314,7 +313,7 @@
       "of": "共",
       "offers": "个优惠"
     },
-    "form":{
+    "form": {
       "offerName": "优惠名称",
       "productName": "产品名称",
       "originalPrice": "原价 ($)",
@@ -322,77 +321,76 @@
       "startDate": "开始日期",
       "endDate": "结束日期",
       "createOffer": "创建优惠"
-      
     }
   },
-  "storeSetting":{
+  "storeSetting": {
     "title": "商店设置",
     "saveChanges": "保存更改",
     "store": {
-    "information": "商店信息",
-    "name": "商店名称",
-    "namePlaceholder": "输入商店名称",
-    "description": "商店描述",
-    "descriptionPlaceholder": "输入商店描述...",
-    "mainImage": "主图片",
-    "recommended": "推荐尺寸 : 800x800 像素",
-    "formats": "JPG, PNG, WebP"
+      "information": "商店信息",
+      "name": "商店名称",
+      "namePlaceholder": "输入商店名称",
+      "description": "商店描述",
+      "descriptionPlaceholder": "输入商店描述...",
+      "mainImage": "主图片",
+      "recommended": "推荐尺寸 : 800x800 像素",
+      "formats": "JPG, PNG, WebP"
+    },
+    "location": {
+      "contact": "位置与联系方式",
+      "businessAddress": "营业地址",
+      "businessAddressPlaceholder": "输入营业地址",
+      "city": "城市",
+      "cityPlaceholder": "输入城市",
+      "zipCode": "邮政编码",
+      "zipCodePlaceholder": "输入邮政编码",
+      "phoneNumber": "电话号码",
+      "phoneNumberPlaceholder": "输入电话号码",
+      "email": "电子邮箱",
+      "emailPlaceholder": "输入电子邮箱"
+    },
+    "shipping": {
+      "information": "运输公司信息",
+      "companyName": "公司名称",
+      "companyNamePlaceholder": "输入公司名称",
+      "companyContact": "联系电话",
+      "companyContactPlaceholder": "输入联系电话",
+      "companyLogo": "上传公司标志",
+      "addAnother": "+ 添加另一家公司",
+      "saveCompanies": "保存运输公司"
+    }
   },
-  "location": {
-    "contact": "位置与联系方式",
-    "businessAddress": "营业地址",
-    "businessAddressPlaceholder": "输入营业地址",
-    "city": "城市",
-    "cityPlaceholder": "输入城市",
-    "zipCode": "邮政编码",
-    "zipCodePlaceholder": "输入邮政编码",
-    "phoneNumber": "电话号码",
-    "phoneNumberPlaceholder": "输入电话号码",
+  "account": {
+    "title": "账户设置",
+    "saveChanges": "保存更改",
+    "toast": {
+      "success": "账户设置已成功保存！"
+    },
+    "personalInfo": "个人信息",
+    "firstName": "名字",
+    "lastName": "姓氏",
     "email": "电子邮箱",
-    "emailPlaceholder": "输入电子邮箱"
+    "phone": "电话号码",
+    "securitySettings": "安全设置",
+    "currentPassword": "当前密码",
+    "newPassword": "新密码",
+    "confirmPassword": "确认新密码",
+    "enableTwoFactor": "启用双重身份验证",
+    "companyLegal": "公司法律信息",
+    "updateLegal": "更新法律信息",
+    "taxId": "税务识别号 (TIN)",
+    "registrationNumber": "商业注册号",
+    "taxCertificate": "上传税务证书 (PDF 或图片)",
+    "commercialRegistration": "上传商业注册文件",
+    "notifications": "通知偏好",
+    "newOrders": "新订单通知",
+    "customerMessages": "客户消息",
+    "lowStock": "库存不足提醒",
+    "weeklyReports": "每周销售报告",
+    "marketingEmails": "营销邮件"
   },
-  "shipping": {
-    "information": "运输公司信息",
-    "companyName": "公司名称",
-    "companyNamePlaceholder": "输入公司名称",
-    "companyContact": "联系电话",
-    "companyContactPlaceholder": "输入联系电话",
-    "companyLogo": "上传公司标志",
-    "addAnother": "+ 添加另一家公司",
-    "saveCompanies": "保存运输公司"
-  }
-  },
-  "account":{
-  "title": "账户设置",
-  "saveChanges": "保存更改",
-  "toast": {
-    "success": "账户设置已成功保存！"
-  },
-  "personalInfo": "个人信息",
-  "firstName": "名字",
-  "lastName": "姓氏",
-  "email": "电子邮箱",
-  "phone": "电话号码",
-  "securitySettings": "安全设置",
-  "currentPassword": "当前密码",
-  "newPassword": "新密码",
-  "confirmPassword": "确认新密码",
-  "enableTwoFactor": "启用双重身份验证",
-  "companyLegal": "公司法律信息",
-  "updateLegal": "更新法律信息",
-  "taxId": "税务识别号 (TIN)",
-  "registrationNumber": "商业注册号",
-  "taxCertificate": "上传税务证书 (PDF 或图片)",
-  "commercialRegistration": "上传商业注册文件",
-  "notifications": "通知偏好",
-  "newOrders": "新订单通知",
-  "customerMessages": "客户消息",
-  "lowStock": "库存不足提醒",
-  "weeklyReports": "每周销售报告",
-  "marketingEmails": "营销邮件"
-},
 
- "salesreport": {
+  "salesreport": {
     "title": "销售报告",
     "description": "分析您的表现并跟踪增长",
     "exportPdf": "导出 PDF",
@@ -411,17 +409,17 @@
     "avgRating": "平均评分",
     "productCategoryPerformance": "产品类别表现",
     "category": "类别",
-  "subcategory": "子类别",
+    "subcategory": "子类别",
     "topSellingProducts": "前五畅销产品",
-     "bestSelling": {
-    "productName": "产品名称",
-    "quantitySold": "销售数量",
-    "revenue": "收入",
-    "platformCommission": "平台佣金",
-    "trend": "趋势"
-  }
+    "bestSelling": {
+      "productName": "产品名称",
+      "quantitySold": "销售数量",
+      "revenue": "收入",
+      "platformCommission": "平台佣金",
+      "trend": "趋势"
+    }
   },
- "messages": {
+  "messages": {
     "title": "消息",
     "markAllRead": "全部标记为已读",
     "unreadMessages": "未读消息",
@@ -445,6 +443,351 @@
     "stock": "库存",
     "viewProduct": "查看产品",
     "typeMessagePlaceholder": "输入您的消息..."
+  },
+  "createproduct": {
+    "header": {
+      "addNewProduct": "添加新产品",
+      "saveAsDraft": "保存为草稿"
+    },
+    "steps": {
+      "title": "添加新产品",
+      "description": "通过 4 个简单步骤创建完整的产品列表"
+    },
+    "productInfo": {
+      "title": "产品信息",
+      "nameLabel": "产品名称",
+      "namePlaceholder": "例如：刹车片 – 丰田凯美瑞 2013-2022",
+      "descriptionLabel": "产品描述",
+      "descriptionPlaceholder": "描述您的产品...",
+      "skuLabel": "SKU",
+      "skuPlaceholder": "BP-TC-001",
+      "manufacturerLabel": "制造商",
+      "manufacturerPlaceholder": "OEM, Bosch, Wagner...",
+      "priorityLabel": "优先级在开头的显示",
+      "priorityPlaceholder": "例如：高、中、低",
+      "prioritydesc": "控制部分在开头的显示，数字越高显示越靠前。例如，如果此部分的优先级为9，而另一部分的优先级为7，则9将显示在7之前。",
+      "categoryLabel": "类别",
+      "categoryPlaceholder": "例如：刹车、刹车片等",
+      "nameRequired": "产品名称是必填项",
+      "nameMinLength": "产品名称至少需要 3 个字符",
+      "nameMaxLength": "产品名称不能超过 200 个字符",
+      "skuRequired": "SKU 是必填项",
+      "skuInvalid": "SKU 只能包含大写字母、数字和连字符",
+      "manufacturerRequired": "制造商是必填项",
+      "manufacturerMinLength": "制造商名称至少需要 2 个字符",
+      "priorityRequired": "优先级是必填项",
+      "priorityMin": "优先级必须大于或等于 0",
+      "priorityMax": "优先级不能超过 100",
+      "priorityNumber": "优先级必须是数字"
+    },
+    "productDescription": {
+      "title": "产品描述",
+      "descriptionLabel": "产品描述",
+      "descriptionPlaceholder": "描述您的产品...",
+      "detailedDescriptionLabel": "详细描述",
+      "detailedDescriptionPlaceholder": "输入产品详细信息...",
+      "shippingLabel": "配送信息",
+      "shippingPlaceholder": "配送信息...",
+      "returnsLabel": "商品退货",
+      "returnsPlaceholder": "退货政策...",
+      "descriptionRequired": "产品描述是必填项",
+      "descriptionMinLength": "产品描述至少需要 10 个字符",
+      "descriptionMaxLength": "产品描述不能超过 500 个字符",
+      "detailedDescriptionRequired": "详细描述是必填项",
+      "detailedDescriptionMinLength": "详细描述至少需要 20 个字符",
+      "detailedDescriptionMaxLength": "详细描述不能超过 2000 个字符",
+      "shippingRequired": "配送信息是必填项",
+      "shippingMinLength": "配送信息至少需要 10 个字符",
+      "returnsRequired": "退货政策是必填项",
+      "returnsMinLength": "退货政策至少需要 10 个字符"
+    },
+    "images": {
+      "title": "产品图片",
+      "recommended": "推荐",
+      "image1": "图片 1",
+      "image2": "图片 2",
+      "image3": "图片 3",
+      "image4": "图片 4",
+      "mainimage": "上传主产品图片",
+      "formatNote": "PNG / JPG – 最大 5MB",
+      "hint": "必须至少上传一张图片（最多 4 张）",
+      "validation": {
+        "required": "至少需要上传一张图片",
+        "max": "最多允许上传 {{max}} 张图片",
+        "type": "只允许上传图片文件",
+        "size": "图片大小必须小于 {{size}}MB"
+      }
+    },
+    "pricingInventory": {
+      "title": "定价与库存",
+      "price": "价格",
+      "costPerItem": "单件成本",
+      "quantityInStock": "库存数量",
+      "trackQuantity": "跟踪库存"
+    },
+    "shippingInfo": {
+      "title": "运输信息",
+      "weight": "重量（磅）",
+      "length": "长度（英寸）",
+      "width": "宽度（英寸）",
+      "height": "高度（英寸）",
+      "fragile": "易碎物品",
+      "validation": {
+        "weightNumber": "重量必须是数字",
+        "weightRequired": "重量为必填项",
+        "weightPositive": "重量必须为正数",
+        "weightMin": "重量必须至少为 0.01",
+        "lengthNumber": "长度必须是数字",
+        "lengthPositive": "长度必须为正数",
+        "widthNumber": "宽度必须是数字",
+        "widthPositive": "宽度必须为正数",
+        "heightNumber": "高度必须是数字",
+        "heightPositive": "高度必须为正数"
+      }
+    },
+    "variantForm": {
+      "title": "产品规格",
+      "addVariantType": "添加规格类型",
+      "dialog": {
+        "title": "添加新规格类型",
+        "description": "为您的汽车零件创建自定义规格类型",
+        "typeName": "类型名称",
+        "cancel": "取消",
+        "addType": "添加类型"
+      },
+      "form": {
+        "variantType": "规格类型",
+        "variantValue": "规格值",
+        "price": "价格",
+        "quantity": "数量",
+        "addVariant": "添加规格"
+      },
+      "table": {
+        "title": "已添加的规格",
+        "type": "类型",
+        "value": "值",
+        "price": "价格",
+        "category": "类别",
+        "quantity": "数量"
+      }
+    },
+    "vehicleForm": {
+      "validation": {
+        "vehicleTypeRequired": "车辆类型为必填项",
+        "brandRequired": "品牌为必填项",
+        "modelRequired": "型号为必填项",
+        "yearRequired": "年份为必填项",
+        "bodyTypeRequired": "车身类型为必填项"
+      },
+      "loading": "加载中...",
+      "error": "加载车辆数据失败。请重试。",
+      "retry": "重试",
+      "modelsError": "加载型号失败",
+      "compatModelsError": "加载兼容型号失败",
+      "selectBrandfirst": "请先选择品牌",
+      "selectMakefirst": "请先选择制造商",
+      "noModels": "没有可用的型号",
+      "mainVehicle": {
+        "title": "主要车辆",
+        "fields": {
+          "vehicleType": "车辆类型",
+          "brand": "品牌",
+          "model": "型号",
+          "year": "年份",
+          "partNumber": "零件编号",
+          "bodyType": "车身类型"
+        },
+        "placeholders": {
+          "vehicleType": "选择车辆类型",
+          "brand": "选择品牌",
+          "model": "选择型号",
+          "year": "选择年份",
+          "partNumber": "输入零件编号",
+          "bodyType": "选择车身类型"
+        }
+      },
+      "compatibility": {
+        "title": "车辆兼容性",
+        "addButton": "添加兼容性",
+        "fields": {
+          "vehicleType": "车辆类型",
+          "bodyType": "车身类型",
+          "make": "制造商",
+          "brand": "品牌",
+          "model": "型号",
+          "year": "年份"
+        },
+        "placeholders": {
+          "vehicleType": "选择车辆类型",
+          "bodyType": "选择车身类型",
+          "make": "选择制造商",
+          "model": "选择型号",
+          "yearRange": "选择年份范围"
+        }
+      },
+      "submit": {
+        "saveVehicle": "保存车辆"
+      }
+    },
+    "categoryTags": {
+      "title": "类别与标签",
+      "categoryLabel": "类别",
+      "subcategoryLabel": "子类别",
+      "tagsLabel": "标签",
+      "tagsPlaceholder": "输入标签并按 Enter",
+      "addButton": "添加",
+      "categoryRequired": "必须选择分类",
+      "tagsMinLength": "至少需要选择一个标签",
+      "tagsMaxLength": "最多允许 10 个标签"
+    },
+    "productSummary": {
+      "title": "产品摘要",
+      "basicInfo": {
+        "title": "基本信息",
+        "name": "名称",
+        "sku": "SKU",
+        "manufacturer": "制造商",
+        "price": "价格"
+      },
+      "variantsCompatibility": {
+        "title": "规格与兼容性",
+        "variants": "规格",
+        "mainVehicle": "主要车辆"
+      },
+      "shippingInfo": {
+        "title": "运输信息",
+        "dimensions": "尺寸",
+        "weight": "重量",
+        "fragile": "易碎"
+      },
+      "categoryTags": {
+        "title": "类别与标签",
+        "category": "类别",
+        "tags": "标签"
+      }
+    },
+    "stepper": {
+      "steps": {
+        "1": {
+          "title": "产品信息与媒体",
+          "subtitle": "基本信息和图片"
+        },
+        "2": {
+          "title": "定价与规格",
+          "subtitle": "产品规格和价格"
+        },
+        "3": {
+          "title": "兼容性与配送",
+          "subtitle": "车辆与配送信息"
+        },
+        "4": {
+          "title": "审核并提交",
+          "subtitle": "分类、标签和最终确认"
+        }
+      },
+      "buttons": {
+        "previous": "上一步",
+        "next": "下一步",
+        "submit": "提交"
+      }
+    }
+  },
+   "updateproduct": {
+    "header": {
+      "UpdateProduct": "更新产品",
+      "saveAsDraft": "保存为草稿"
+    }
+  },
+  "dialog": {
+    "approve": {
+      "title": "确认批准",
+      "description": "您确定要批准此项目吗？"
+    },
+    "reject": {
+      "title": "确认拒绝",
+      "description": "您确定要拒绝此项目吗？"
+    }
+  },
+  "productdetails": {
+    "header": {
+      "ProductDetails": "产品详情"
+    },
+    "buttons": {
+      "update": "更新产品",
+      "delete": "删除",
+      "back": "返回产品列表"
+    },
+    "sections": {
+      "description": "产品描述",
+      "variants": "变体",
+      "compatibility": "车辆兼容性",
+      "specifications": "规格参数"
+    },
+    "status": {
+      "inStock": "有货",
+      "outOfStock": "缺货",
+      "draft": "草稿",
+      "published": "已发布"
+    },
+    "pricing": {
+      "brand": "品牌",
+      "discount": "折扣"
+    },
+    "stock": {
+      "stock": "库存",
+      "units": "件",
+      "supplier": "供应商"
+    },
+    "rating": {
+      "reviews": "评论"
+    },
+    "tags": {
+      "title": "标签"
+    },
+    "features": {
+      "details": "详细信息",
+      "shipping": "配送信息",
+      "return": "退货政策"
+    },
+    "table": {
+      "type": "类型",
+      "value": "值",
+      "price": "价格",
+      "supplier": "供应商",
+      "actions": "操作"
+    },
+    "vehicle": {
+      "main": "主车辆",
+      "compatible": "兼容车辆",
+      "type": "类型",
+      "model": "型号",
+      "bodyType": "车身类型",
+      "year": "年份"
+    },
+    "specs": {
+      "manufacturer": "制造商",
+      "category": "分类",
+      "brand": "品牌",
+      "weight": "重量",
+      "dimensions": "尺寸",
+      "height": "高度",
+      "width": "宽度",
+      "length": "长度",
+      "fragile": "易碎",
+      "status": "状态",
+      "sku": "SKU编码",
+      "slug": "链接",
+      "created": "创建时间",
+      "updated": "最后更新"
+    },
+    "variants": {
+      "color": "颜色",
+      "material": "材质",
+      "size": "尺寸"
+    },
+    "loading": "正在加载产品详情...",
+    "error": "加载产品时出错",
+    "notFound": "找不到产品"
   }
 
 }

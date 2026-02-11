@@ -1,6 +1,6 @@
 "use client";
-import { FC } from "react";
-import { Package, CheckCircle, Truck, MapPin, ArrowLeft, ArrowRight } from "lucide-react";
+import { FC, useState } from "react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { ProductInformation } from "@/components/organisms/order/ProductInformation";
 import { CustomerInformation } from "@/components/organisms/order/CustomerInformation";
 import { PaymentInformation } from "@/components/organisms/order/PaymentInformation";
@@ -9,53 +9,216 @@ import { OrderTimeline } from "@/components/organisms/order/OrderTimeline";
 import { ActionButtons } from "@/components/molecules/order/ActionButtons";
 import { OrderDataDetails } from "@/types/order";
 import { useTranslation } from "react-i18next";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
+import {
+  useGetSubOrderByIdQuery,
+  useUpdateSubOrderStatusMutation,
+} from "@/features/sellerSubOrders";
 
 export const OrderDetailsTemplate: FC = () => {
   const { i18n, t } = useTranslation();
   const router = useRouter();
+  const params = useParams();
   const direction = i18n.dir();
-  // Sample data (replace with props or API data)
-  const orderData:OrderDataDetails  = {
-    orderId: "ORD-001",
-    product: {
-      name: "Air Filter - Honda Civic",
-      sku: "AF-HC-2024",
-      orderDate: "June 10, 2024",
-      quantity: 1,
-      price: 24.99,
-      image: "/images/product/Vector.png",
-    },
-    customer: {
-      name: "Sarah Johnson",
-      email: "sarah.johnson@email.com",
-      phone: "+1 (555) 123-4567",
-      address: "123 Main Street, Apt 4B, New York, NY 10001",
-    },
-    payment: {
-      subtotal: 516.88,
-      tax: 52.12,
-      shipping: 5.99,
-      total: 524.99,
-    },
-    status: "Shipped",
-    timeline: [
-  { icon: "Package", title: "Order Processed", date: "June 13, 2024 - 2:30 PM", isCompleted: true },
-  { icon: "CheckCircle", title: "Shipped", date: "June 14, 2024 - 2:30 PM", isActive: true },
-  { icon: "Truck", title: "Out for Delivery", date: "June 14, 2024 - 2:30 PM", isActive: false },
-  { icon: "MapPin", title: "Delivered", date: "June 14, 2024 - 2:30 PM", isActive: false },
-]
 
+  const orderId = Number(params?.id);
+  const [statusUpdateError, setStatusUpdateError] = useState<string | null>(
+    null,
+  );
+
+  // Fetch order details from API
+  const {
+    data: orderResponse,
+    isLoading,
+    error,
+  } = useGetSubOrderByIdQuery(orderId, {
+    skip: !orderId,
+  });
+
+  // Status update mutation
+  const [updateStatus, { isLoading: isUpdatingStatus }] =
+    useUpdateSubOrderStatusMutation();
+
+  // Transform API data to match component structure
+  const transformOrderData = (apiData: any): OrderDataDetails => {
+    const firstItem = apiData.items[0];
+
+    const subtotal = parseFloat(apiData.subtotal);
+    const tax = parseFloat(apiData.tax);
+    const total = parseFloat(apiData.total);
+    const shipping = total - subtotal - tax;
+
+    const timeline = apiData.status_history.map((history: any, index: any) => {
+      const isCompleted = index < apiData.status_history.length - 1;
+      const isActive = index === apiData.status_history.length - 1;
+
+      return {
+        icon: getIconForStatus(history.to_status),
+        title: history.to_status
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (l: any) => l.toUpperCase()),
+        date: new Date(history.created_at).toLocaleString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        isCompleted,
+        isActive,
+      };
+    });
+
+    return {
+      orderId: apiData.sub_order_number,
+      product: {
+        name: firstItem.product_name,
+        sku: firstItem.product_sku,
+        orderDate: new Date(apiData.created_at).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        quantity: firstItem.quantity,
+        price: parseFloat(firstItem.price),
+        image: firstItem.product_image,
+      },
+      customer: {
+        name: `${apiData.customer.first_name} ${apiData.customer.last_name}`,
+        email: apiData.customer.email,
+        phone: apiData.customer.phone,
+        address: buildAddress(apiData.shipping_address),
+      },
+      payment: {
+        subtotal,
+        tax,
+        shipping: shipping > 0 ? shipping : 0,
+        total,
+      },
+      status: apiData.status_label,
+      timeline,
+    };
   };
+
+  const getIconForStatus = (status: string): string => {
+    const statusMap: Record<string, string> = {
+      pending: "Package",
+      confirmed: "CheckCircle",
+      shipped: "Truck",
+      out_for_delivery: "Truck",
+      delivered: "MapPin",
+      cancelled: "XCircle",
+    };
+    return statusMap[status] || "Package";
+  };
+
+  const buildAddress = (address: any): string => {
+    const parts = [
+      address.address_line_1,
+      address.address_line_2,
+      address.city,
+      address.state,
+      address.country,
+      address.postal_code,
+    ].filter(Boolean);
+
+    return parts.join(", ");
+  };
+
+  // Handle status update
+  const handleStatusUpdate = async (newStatus: string) => {
+    setStatusUpdateError(null);
+
+    try {
+      await updateStatus({
+        id: orderId,
+        status: newStatus,
+      }).unwrap();
+
+      // Success - the query will automatically refetch due to invalidatesTags
+    } catch (err: any) {
+      const errorMessage =
+        err?.data?.message || "Failed to update order status";
+      setStatusUpdateError(errorMessage);
+      console.error("Failed to update status:", err);
+    }
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading order details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !orderResponse?.data) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h3 className="text-red-800 font-semibold mb-2">
+              Error Loading Order
+            </h3>
+            <p className="text-red-600 text-sm">
+              Failed to load order details. Please try again.
+            </p>
+            <button
+              onClick={() => router.back()}
+              className="mt-4 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const orderData = transformOrderData(orderResponse.data);
+
+  // Add console log to debug
+  console.log('Order Response Data:', orderResponse.data);
+  console.log('Status from API:', orderResponse.data.status);
+  console.log('Status Label from API:', orderResponse.data.status_label);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="w-full mx-auto md:p-6 ">
-         <div className="flex items-center   mb-6 ">
-          {direction === 'rtl' ? (<ArrowRight onClick={() => router.back()} className="text-orange-500" />) : (<ArrowLeft  onClick={() => router.back()} className="text-orange-500" />) }
-                 
-                 <h5 className="text-xl font-bold text-slate-800">{t("orderdetails.title")}</h5>
-              </div>
+      <div className="w-full mx-auto md:p-6">
+        <div className="flex items-center gap-3 mb-6">
+          {direction === "rtl" ? (
+            <ArrowRight
+              onClick={() => router.back()}
+              className="text-orange-500 cursor-pointer hover:text-orange-600"
+            />
+          ) : (
+            <ArrowLeft
+              onClick={() => router.back()}
+              className="text-orange-500 cursor-pointer hover:text-orange-600"
+            />
+          )}
+          <h5 className="text-xl font-bold text-slate-800">
+            {t("orderdetails.title")} - {orderData.orderId}
+          </h5>
+        </div>
+
+        {/* Status Update Error Alert */}
+        {statusUpdateError && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-800 text-sm">{statusUpdateError}</p>
+            <button
+              onClick={() => setStatusUpdateError(null)}
+              className="text-red-600 text-xs underline mt-2"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -70,13 +233,59 @@ export const OrderDetailsTemplate: FC = () => {
 
           {/* Right Column */}
           <div className="space-y-6">
-            <OrderStatus status={orderData.status} />
+            <OrderStatus
+              status={orderResponse.data.status}  
+              orderId={orderResponse.data.id}
+              canUpdate={orderResponse.data.can_be_updated}
+            />
             <OrderTimeline timeline={orderData.timeline} />
             <div className="bg-white border border-gray-300 p-4 rounded-lg">
-                <ActionButtons />
-                </div>            
+              <ActionButtons
+                orderId={orderResponse.data.id}
+                canUpdate={orderResponse.data.can_be_updated}
+                canCancel={orderResponse.data.can_be_cancelled}
+              />
+            </div>
           </div>
         </div>
+
+        {/* Additional Items Section (if multiple items) */}
+        {/* {orderResponse.data.items.length > 1 && (
+          <div className="mt-6 bg-white border border-gray-300 p-6 rounded-lg">
+            <h6 className="text-lg font-bold mb-4">All Items in this Order</h6>
+            <div className="space-y-4">
+              {orderResponse.data.items.map((item: any) => (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-4 p-4 border rounded-lg"
+                >
+                  <img
+                    src={item.product_image}
+                    alt={item.product_name}
+                    className="w-16 h-16 object-cover rounded"
+                  />
+                  <div className="flex-1">
+                    <h6 className="font-semibold">{item.product_name}</h6>
+                    <p className="text-sm text-gray-600">
+                      SKU: {item.product_sku}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Quantity: {item.quantity}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold">
+                      ${parseFloat(item.total).toFixed(2)}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      ${parseFloat(item.price).toFixed(2)} each
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )} */}
       </div>
     </div>
   );

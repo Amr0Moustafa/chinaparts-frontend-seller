@@ -1,116 +1,150 @@
 "use client";
 
+import React, { useState } from "react";
 import {
-  Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogClose,
+  DialogFooter,
 } from "@/components/ui/dialog";
-
-import { X } from "lucide-react";
-import Image from "next/image";
-import { ProductDetailsDialogProps } from "@/types/product";
 import { Button } from "@/components/ui/button";
-import { useTranslation } from "react-i18next";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
-interface ActionDialogProps {
-  orderId: string;
+interface RejectDialogProps {
   title: string;
   description: string;
-  type: "approve" | "reject";
-  isOpen?: boolean;
-  onClose?: () => void;
-  onConfirm?: () => void;
-  onCancel?: () => void;
+  orderId: string | number;
+  onConfirm: (notes?: string) => void | Promise<void>;
 }
-export const ActionDialog = ({
-  orderId,
+
+export const RejectDialog: React.FC<RejectDialogProps> = ({
   title,
   description,
-  type,
-  isOpen,
-  onClose,
+  orderId,
   onConfirm,
-}: ActionDialogProps) => {
-  const { i18n, t } = useTranslation();
-  const direction = i18n.dir();
+}) => {
+  const [notes, setNotes] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleConfirm = () => {
-    onConfirm?.();
-    onClose?.();
+  const handleConfirm = async () => {
+    setIsSubmitting(true);
+    try {
+      await onConfirm(notes);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <DialogContent
-      showCloseButton={false}
-      className={`w-full max-w-md border-2 border-0 bg-white rounded-lg shadow-lg p-0 ${
-        direction === "rtl" ? "text-right" : "text-left"
-      }`}
-    >
-      {/* Header */}
-      <div className=" px-4 py-3  rounded-t-lg">
-        <div className="flex justify-between items-center">
-          <DialogTitle className=" font-semibold text-lg lg:text-2xl">
-            {title} #{orderId}
-          </DialogTitle>
+    <DialogContent className="sm:max-w-[500px] bg-white">
+      <DialogHeader>
+        <DialogTitle>{title}</DialogTitle>
+        <DialogDescription>{description}</DialogDescription>
+      </DialogHeader>
+
+      <div className="space-y-4 py-4">
+        {/* Order ID Display */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-700">Order ID:</span>
+          <span className="text-sm text-gray-900 font-semibold">{orderId}</span>
+        </div>
+
+        {/* Notes Input */}
+        <div className="space-y-2">
+          <Label htmlFor="reject-notes" className="text-sm font-medium">
+            Reason for Rejection (Optional)
+          </Label>
+          <Textarea
+            id="reject-notes"
+            placeholder="Enter the reason for rejecting this order..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={4}
+            className="resize-none"
+          />
+          <p className="text-xs text-gray-500">
+            This note will be saved with the order cancellation.
+          </p>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="p-4">
-          <DialogDescription className="text-lg  leading-relaxed mb-6">
-          {description}
-        </DialogDescription>
-        {type === "reject" && (
-          <>
-          <DialogDescription className="text-md font-bold leading-relaxed mb-6">
-          {description}
-        </DialogDescription>
-          <div className="mb-6">
-            <textarea
-              placeholder="Reason for rejection..."
-              className="w-full p-3 border border-gray-300 rounded-md resize-none h-20 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-            />
-          </div>
-          </>
-          
-        )}
-
-        {/* Action Buttons */}
-       <div className=" dialog_footer flex justify-end gap-3 mt-5">
- 
- <DialogClose asChild>
-  <Button
-    variant="outline"
-    className="md:py-2 md:px-3 font-bold text-gray-900 bg-white border border-gray-300"
-  >
-    Cancel
-  </Button>
-</DialogClose>
-
-<DialogClose asChild>
-   <Button
-    onClick={handleConfirm}
-    className={`py-3 px-5 font-bold bg-orange-500 hover:bg-orange-600 `}
-  >
-    {type === "approve" ? t("confirm") : t("submit")}
-  </Button>
-</DialogClose>
- 
-</div>
-
-      </div>
+      <DialogFooter>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            setNotes("");
+          }}
+          disabled={isSubmitting}
+        >
+          Clear
+        </Button>
+        <Button
+          type="button"
+          variant="destructive"
+          onClick={handleConfirm}
+          disabled={isSubmitting}
+          className="bg-red-500 hover:bg-red-600 text-white"
+        >
+          {isSubmitting ? "Rejecting..." : "Reject Order"}
+        </Button>
+      </DialogFooter>
     </DialogContent>
   );
 };
 
-export const ApproveDialog = (props: Omit<ActionDialogProps, "type">) => (
-  <ActionDialog {...props} type="approve" />
-);
+// ApproveDialog remains the same
+interface ApproveDialogProps {
+  title: string;
+  description: string;
+  orderId: string | number;
+  onConfirm: () => void | Promise<void>;
+}
 
-export const RejectDialog = (props: Omit<ActionDialogProps, "type">) => (
-  <ActionDialog {...props} type="reject" />
-);
+export const ApproveDialog: React.FC<ApproveDialogProps> = ({
+  title,
+  description,
+  orderId,
+  onConfirm,
+}) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleConfirm = async () => {
+    setIsSubmitting(true);
+    try {
+      await onConfirm();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <DialogContent className="sm:max-w-[425px] bg-white">
+      <DialogHeader>
+        <DialogTitle>{title}</DialogTitle>
+        <DialogDescription>{description}</DialogDescription>
+      </DialogHeader>
+
+      {/* <div className="py-4">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-700">Order ID:</span>
+          <span className="text-sm text-gray-900 font-semibold">{orderId}</span>
+        </div>
+      </div> */}
+
+      <DialogFooter>
+        <Button
+          type="button"
+          variant="default"
+          onClick={handleConfirm}
+          disabled={isSubmitting}
+          className="bg-green-600 hover:bg-green-700"
+        >
+          {isSubmitting ? "Confirming..." : "Confirm Order"}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  );
+};

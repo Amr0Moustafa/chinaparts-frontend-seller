@@ -1,213 +1,290 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { FaRegEye, FaCheck } from "react-icons/fa6";
-import { IoClose } from "react-icons/io5";
-import { BiEdit } from "react-icons/bi";
-import { MdDeleteOutline, MdContentCopy } from "react-icons/md";
+import React, { useMemo, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { ProductDetailsDialog } from "../dialog/detailsproduct";
-import { Package, CheckCircle, Truck } from "lucide-react";
-
+import { FaRegEye, FaCheck } from "react-icons/fa";
+import { BiEdit } from "react-icons/bi";
+import { MdDeleteOutline } from "react-icons/md";
+import { IoClose } from "react-icons/io5";
 import {
-  ActionDialog,
-  ApproveDialog,
-  RejectDialog,
-} from "../dialog/actiondialog";
-import { FilterTabs } from "./TableFilter";
-import { ProgressBar } from "@/components/atoms/ProgressBar";
+  Dialog,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ApproveDialog, RejectDialog } from "../dialog/actiondialog";
+import { ProductDetailsDialog } from "../dialog/detailsproduct";
 
-type Column<T> = {
+/* ==================== Types ==================== */
+export interface Column<T> {
+  id: string;
   header: string;
-  accessor: keyof T;
-};
+  accessor: keyof T | ((row: T) => React.ReactNode);
+  className?: string;
+}
 
-type DynamicTableProps<T> = {
+export interface DynamicTableProps<T extends Record<string, any>> {
   title: string;
   columns: Column<T>[];
   data: T[];
-  onShow?: (item: T) => void;
-  onEdit?: (item: T) => void;
-  onDelete?: (item: T) => void;
-  onAccept?: (item: T) => void;
-  onReject?: (item: T) => void;
+  
+  // Action handlers
+  onShow?: (row: T) => void;
+  onEdit?: (row: T) => void;
+  onDelete?: (row: T) => void;
+  onAccept?: (row: T) => void | Promise<void>;
+  onReject?: (row: T) => void | Promise<void>;
+  
+  // Dialog options
   dialogshow?: boolean;
   dialogdelete?: boolean;
   dialogaccept?: boolean;
   dialogreject?: boolean;
+  
+  // Filters
   showFilters?: boolean;
   filters?: string[];
-};
-
-/* ------------------------
-   Coupon / small cell components
-   These will be used if your data contains coupon-like values.
-   You can also use them directly in column renderers if preferred.
-   ------------------------ */
-
-type CouponRow = {
-  code: string;
-  title: string;
-  subtitle?: string;
-  discount?: string | { amount: string | number; type?: string };
-  minOrder?: string | number;
-};
-
-function formatCurrency(v: string | number | undefined) {
-  if (v == null) return "";
-  if (typeof v === "number") return `$${v}`;
-  if (typeof v === "string") {
-    if (v.trim() === "") return "";
-    if (/^\$/.test(v.trim())) return v;
-    const num = Number(v);
-    return Number.isFinite(num) ? `$${num}` : v;
-  }
-  return String(v);
+  
+  // Pagination
+  showPagination?: boolean;
+  itemsPerPage?: number;
+  
+  // Loading state
+  isLoading?: boolean;
+  
+  // Empty state
+  emptyMessage?: string;
 }
 
-/* Coupon code capsule with copy button */
-export function CouponCodeCell({ code }: { code: string }) {
-  const [copied, setCopied] = useState(false);
+/* ==================== Filter Tabs Component ==================== */
+interface FilterTabsProps {
+  filters: string[];
+  activeFilter: string;
+  onChange: (filter: string) => void;
+}
 
-  async function handleCopy(e?: React.MouseEvent) {
-    if (e) e.stopPropagation();
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1400);
-    } catch {
-      // ignore clipboard failures
+const FilterTabs: React.FC<FilterTabsProps> = React.memo(({ 
+  filters, 
+  activeFilter, 
+  onChange 
+}) => {
+  const { t } = useTranslation();
+  
+  return (
+    <div className="flex gap-2 flex-wrap">
+      {filters.map((filter) => (
+        <button
+          key={filter}
+          onClick={() => onChange(filter)}
+          className={clsx(
+            "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+            activeFilter === filter
+              ? "bg-orange-500 text-white"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          )}
+        >
+          {t(`filters.${filter}`)}
+        </button>
+      ))}
+    </div>
+  );
+});
+
+FilterTabs.displayName = "FilterTabs";
+
+/* ==================== Action Buttons Component ==================== */
+interface ActionButtonsProps<T> {
+  row: T;
+  onShow?: (row: T) => void;
+  onEdit?: (row: T) => void;
+  onDelete?: (row: T) => void;
+  onAccept?: (row: T) => void | Promise<void>;
+  onReject?: (row: T) => void | Promise<void>;
+  dialogshow?: boolean;
+  dialogdelete?: boolean;
+  dialogaccept?: boolean;
+  dialogreject?: boolean;
+}
+
+function ActionButtons<T extends Record<string, any>>({
+  row,
+  onShow,
+  onEdit,
+  onDelete,
+  onAccept,
+  onReject,
+  dialogshow,
+  dialogdelete,
+  dialogaccept,
+  dialogreject,
+}: ActionButtonsProps<T>) {
+  const { t } = useTranslation();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectNotes, setRejectNotes] = useState("");
+
+  const handleAcceptConfirm = async () => {
+    if (onAccept) {
+      await onAccept(row);
+      setIsDialogOpen(false);
     }
-  }
+  };
+
+  const handleRejectConfirm = async (notes?: string) => {
+    if (onReject) {
+      // Pass the row with notes to the handler
+      await onReject({ ...row, reject_notes: notes || rejectNotes });
+      setRejectDialogOpen(false);
+      setRejectNotes(""); // Clear notes after submission
+    }
+  };
 
   return (
-    <div className="inline-flex items-center gap-2">
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-gray-100 text-sm text-gray-700 font-medium select-all">
-        <span className="tracking-wider">{code}</span>
-      </div>
-
-      <button
-        onClick={handleCopy}
-        title={copied ? "Copied" : "Copy"}
-        aria-label={copied ? "Copied" : `Copy coupon ${code}`}
-        className={clsx(
-          "p-1 rounded-md transition-colors",
-          copied
-            ? "bg-green-50 text-green-600"
-            : "hover:bg-gray-100 text-gray-600"
-        )}
-      >
-        {copied ? (
-          <FaCheck className="w-4 h-4" />
+    <div className="flex gap-2">
+      {/* Show/View Button */}
+      {onShow && (
+        dialogshow ? (
+          <Dialog>
+            <DialogTrigger asChild>
+              <button
+                className="text-gray-700 hover:text-gray-900 transition-colors"
+                aria-label={t("table.view")}
+              >
+                <FaRegEye className="w-5 h-5" />
+              </button>
+            </DialogTrigger>
+            <ProductDetailsDialog product={row} />
+          </Dialog>
         ) : (
-          <MdContentCopy className="w-4 h-4" />
-        )}
-      </button>
+          <button
+            onClick={() => onShow(row)}
+            className="text-gray-700 hover:text-gray-900 transition-colors"
+            aria-label={t("table.view")}
+          >
+            <FaRegEye className="w-5 h-5" />
+          </button>
+        )
+      )}
+
+      {/* Edit Button */}
+      {onEdit && (
+        <button
+          onClick={() => onEdit(row)}
+          className="text-blue-600 hover:text-blue-800 transition-colors"
+          aria-label={t("table.edit")}
+        >
+          <BiEdit className="w-5 h-5" />
+        </button>
+      )}
+
+      {/* Delete Button */}
+      {onDelete && (
+        dialogdelete ? (
+          <Dialog>
+            <DialogTrigger asChild>
+              <button
+                className="text-red-600 hover:text-red-800 transition-colors"
+                aria-label={t("table.delete")}
+              >
+                <MdDeleteOutline className="w-5 h-5" />
+              </button>
+            </DialogTrigger>
+            {/* Add DeleteDialog component */}
+          </Dialog>
+        ) : (
+          <button
+            onClick={() => onDelete(row)}
+            className="text-red-600 hover:text-red-800 transition-colors"
+            aria-label={t("table.delete")}
+          >
+            <MdDeleteOutline className="w-5 h-5" />
+          </button>
+        )
+      )}
+
+      {/* Accept Button */}
+      {onAccept && (
+        dialogaccept ? (
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <button
+                className="text-green-600 hover:text-green-800 transition-colors"
+                aria-label={t("table.accept")}
+              >
+                <FaCheck className="w-5 h-5" />
+              </button>
+            </DialogTrigger>
+            <ApproveDialog
+              title={t("dialog.approve.title")}
+              description={t("dialog.approve.description")}
+              orderId={row.id}
+              onConfirm={handleAcceptConfirm}
+            />
+          </Dialog>
+        ) : (
+          <button
+            onClick={() => onAccept(row)}
+            className="text-green-600 hover:text-green-800 transition-colors"
+            aria-label={t("table.accept")}
+          >
+            <FaCheck className="w-5 h-5" />
+          </button>
+        )
+      )}
+
+      {/* Reject Button */}
+      {onReject && (
+        dialogreject ? (
+          <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+            <DialogTrigger asChild>
+              <button
+                className="text-red-600 hover:text-red-800 transition-colors"
+                aria-label={t("table.reject")}
+              >
+                <IoClose className="w-5 h-5" />
+              </button>
+            </DialogTrigger>
+            <RejectDialog
+              title={t("dialog.reject.title")}
+              description={t("dialog.reject.description")}
+              orderId={row.id}
+              onConfirm={handleRejectConfirm}
+            />
+          </Dialog>
+        ) : (
+          <button
+            onClick={() => onReject(row)}
+            className="text-red-600 hover:text-red-800 transition-colors"
+            aria-label={t("table.reject")}
+          >
+            <IoClose className="w-5 h-5" />
+          </button>
+        )
+      )}
     </div>
   );
 }
 
-/* Title cell: bold orange title + small subtitle */
-export function TitleCell({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle?: string;
-}) {
-  return (
-    <div className="flex flex-col">
-      <div className="text-sm font-semibold text-orange-600 leading-tight">
-        {title}
-      </div>
-      {subtitle ? (
-        <div className="text-xs  text-gray-500 mt-1">{subtitle}</div>
-      ) : null}
-    </div>
-  );
-}
+/* ==================== Helper Functions ==================== */
+const formatValue = (value: any): React.ReactNode => {
+  if (value === null || value === undefined) return "—";
+  if (React.isValidElement(value)) return value;
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+};
 
-/* Discount cell: amount (orange) and small type below */
-export function DiscountCell({
-  discount,
-}: {
-  discount?: string | { amount: string | number; type?: string };
-}) {
-  if (!discount) return null;
-
-  let amountText = "";
-  let typeText = "";
-
-  if (typeof discount === "string") {
-    const pctMatch = discount.match(/(\d+%?)/);
-    if (pctMatch) amountText = pctMatch[1];
-    // try to detect explicit type words
-    const typeMatch = discount.match(
-      /(Percentage|Fixed Amount|Fixed|percentage|fixed amount)/i
-    );
-    if (typeMatch) typeText = typeMatch[1];
-    else {
-      // anything else after the amount that looks like a word
-      const rest = discount.replace(amountText, "").trim();
-      if (rest) typeText = rest;
-    }
-  } else {
-    amountText = String(discount.amount);
-    typeText = discount.type ?? "";
+const getCellValue = <T,>(
+  row: T, 
+  accessor: keyof T | ((row: T) => React.ReactNode)
+): React.ReactNode => {
+  if (typeof accessor === "function") {
+    return accessor(row);
   }
+  const value = row[accessor];
+  return formatValue(value);
+};
 
-  // If amount looks numeric (no %) and type contains fixed => show as currency
-  if (!amountText.includes("%") && /fixed/i.test(typeText)) {
-    const num = Number(amountText);
-    if (Number.isFinite(num)) amountText = `$${num}`;
-  }
-
-  return (
-    <div className="flex flex-col">
-      <div className="text-sm font-semibold text-orange-600">{amountText}</div>
-      {typeText ? (
-        <div className="text-sm font-bold text-gray-500 mt-1">{typeText}</div>
-      ) : null}
-    </div>
-  );
-}
-
-/* Min order small cell */
-export function MinOrderCell({ minOrder }: { minOrder?: string | number }) {
-  return (
-    <div className="text-sm text-gray-700">{formatCurrency(minOrder)}</div>
-  );
-}
-
-/* Full coupon row cell (if you want to render the whole row as a single composed component) */
-export function CouponCell({ row }: { row: CouponRow }) {
-  return (
-    <div className="w-full flex items-start gap-6 py-2">
-      <div className="w-36">
-        <CouponCodeCell code={row.code} />
-      </div>
-
-      <div className="flex-1">
-        <TitleCell title={row.title} subtitle={row.subtitle} />
-      </div>
-
-      <div className="w-36">
-        <DiscountCell discount={row.discount} />
-      </div>
-
-      <div className="w-28">
-        <MinOrderCell minOrder={row.minOrder} />
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------
-   Main DynamicTable component
-   ------------------------ */
-
+/* ==================== Main Component ==================== */
 export function DynamicTable<T extends Record<string, any>>({
   title,
   columns,
@@ -222,403 +299,209 @@ export function DynamicTable<T extends Record<string, any>>({
   dialogaccept,
   dialogreject,
   showFilters = false,
-  filters,
+  filters = [],
+  showPagination = false,
+  itemsPerPage = 10,
+  isLoading = false,
+  emptyMessage,
 }: DynamicTableProps<T>) {
   const { i18n, t } = useTranslation();
   const direction = i18n.dir();
-  const [activeFilter, setActiveFilter] = useState(filters?.[0] ?? "");
+  
+  /* ------------------ State ------------------ */
+  const [activeFilter, setActiveFilter] = useState(filters[0] ?? "");
   const [currentPage, setCurrentPage] = useState(1);
 
+  /* ------------------ Computed Values ------------------ */
+  const hasActions = Boolean(onShow || onEdit || onDelete || onAccept || onReject);
+
+  // Filtered data
+  const filteredData = useMemo(() => {
+    if (!showFilters || !activeFilter) return data;
+    // Add your filter logic here
+    return data;
+  }, [data, activeFilter, showFilters]);
+
+  // Paginated data
+  const paginatedData = useMemo(() => {
+    if (!showPagination) return filteredData;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredData.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredData, currentPage, itemsPerPage, showPagination]);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  /* ------------------ Handlers ------------------ */
+  const handleFilterChange = useCallback((filter: string) => {
+    setActiveFilter(filter);
+    setCurrentPage(1);
+  }, []);
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  /* ------------------ Render ------------------ */
   return (
-    <div className="bg-white shadow-md rounded-lg lg:p-4 p-2 ">
+    <div className="bg-white shadow-md rounded-lg lg:p-4 p-2">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
         <h4 className="text-lg lg:text-xl font-bold text-gray-800">{title}</h4>
         {showFilters && (
           <FilterTabs
-            filters={filters ?? []}
+            filters={filters}
             activeFilter={activeFilter}
-            onChange={(f) => {
-              setActiveFilter(f);
-              setCurrentPage(1);
-            }}
+            onChange={handleFilterChange}
           />
         )}
       </div>
 
-      {/* Desktop Table */}
-      <div className="hidden md:block">
-        <div className="overflow-x-auto  ">
-          <table
-            className="min-w-full divide-y divide-gray-200 text-sm"
-            dir={direction}
-          >
-            <thead>
-              <tr>
-                {columns.map((col, idx) => (
-                  <th
-                    key={idx}
-                    className={clsx(
-                      "px-4 py-3 font-semibold text-gray-900 uppercase tracking-wider",
-                      direction === "rtl" ? "text-right" : "text-left"
-                    )}
-                  >
-                    {col.header}
-                  </th>
-                ))}
-                {(onShow || onEdit || onDelete || onAccept || onReject) && (
-                  <th className="px-4 py-3 font-semibold text-gray-900 uppercase tracking-wider">
-                    {t("table.actions")}
-                  </th>
-                )}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {data.map((row, rowIdx) => (
-                <tr key={rowIdx} className="hover:bg-gray-50">
-                  {columns.map((col, colIdx) => (
-                    <td
-                      key={colIdx}
-                      className={clsx(
-                        "px-4 py-3 whitespace-nowrap align-top",
-                        direction === "rtl" ? "text-right" : "text-left"
-                      )}
-                    >
-                      {formatValue(row[col.accessor])}
-                    </td>
-                  ))}
-                  {(onShow || onEdit || onDelete || onAccept || onReject) && (
-                    <td className="px-4 py-3 whitespace-nowrap flex gap-2">
-                      {onShow && (
-                        dialogshow ? (
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <button
-                                onClick={() => onShow(row)}
-                                className="text-gray-700 hover:underline"
-                                aria-label={t("table.view")}
-                              >
-                                <FaRegEye className="w-5 h-5" />
-                              </button>
-                            </DialogTrigger>
-                            <ProductDetailsDialog product={row} />
-                          </Dialog>
-                        ) : (
-                          <button
-                            onClick={() => onShow(row)}
-                            className="text-gray-700 hover:underline"
-                            aria-label={t("table.view")}
-                          >
-                            <FaRegEye className="w-5 h-5" />
-                          </button>
-                        )
-                      )}
-                      {onEdit && (
-                        <button
-                          onClick={() => onEdit(row)}
-                          className="text-blue-600 hover:underline"
-                          aria-label={t("table.edit")}
-                        >
-                          <BiEdit className="w-5 h-5" />
-                        </button>
-                      )}
-                      {onDelete && (
-                        <button
-                          onClick={() => onDelete(row)}
-                          className="text-red-600 hover:underline"
-                          aria-label={t("table.delete")}
-                        >
-                          <MdDeleteOutline className="w-5 h-5" />
-                        </button>
-                      )}
-                      {onAccept && (
-                        dialogaccept ? (
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <button
-                                onClick={() => onAccept(row)}
-                                className="text-green-600 hover:underline"
-                                aria-label={t("table.accept")}
-                              >
-                                <FaCheck className="w-5 h-5" />
-                              </button>
-                            </DialogTrigger>
-                            <ApproveDialog
-                              title="Approve Order"
-                              description="Please confirm before shipment."
-                              orderId={row.id}
-                              onConfirm={() => onAccept(row)}
-                            />
-                          </Dialog>
-                        ) : (
-                          <button
-                            onClick={() => onAccept(row)}
-                            className="text-green-600 hover:underline"
-                            aria-label={t("table.accept")}
-                          >
-                            <FaCheck className="w-5 h-5" />
-                          </button>
-                        )
-                      )}
-                      {onReject && (
-                        dialogreject ? (
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <button
-                                onClick={() => onReject(row)}
-                                className="text-red-600 hover:underline"
-                                aria-label={t("table.reject")}
-                              >
-                                <IoClose className="w-5 h-5" />
-                              </button>
-                            </DialogTrigger>
-                            <RejectDialog
-                              title="Reject Order"
-                              description="Please provide the reason."
-                              orderId={row.id}
-                              onConfirm={() => onReject(row)}
-                            />
-                          </Dialog>
-                        ) : (
-                          <button
-                            onClick={() => onReject(row)}
-                            className="text-red-600 hover:underline"
-                            aria-label={t("table.reject")}
-                          >
-                            <IoClose className="w-5 h-5" />
-                          </button>
-                        )
-                      )}
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Loading State */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500" />
         </div>
-      </div>
+      ) : paginatedData.length === 0 ? (
+        /* Empty State */
+        <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+          <p className="text-lg font-medium">{emptyMessage || t("table.noData")}</p>
+        </div>
+      ) : (
+        <>
+          {/* Desktop Table */}
+          <div className="hidden md:block">
+            <div className="overflow-x-auto">
+              <table
+                className="min-w-full divide-y divide-gray-200 text-sm"
+                dir={direction}
+              >
+                <thead>
+                  <tr>
+                    {columns.map((col) => (
+                      <th
+                        key={col.id}
+                        className={clsx(
+                          "px-4 py-3 font-semibold text-gray-900 uppercase tracking-wider",
+                          direction === "rtl" ? "text-right" : "text-left",
+                          col.className
+                        )}
+                      >
+                        {col.header}
+                      </th>
+                    ))}
+                    {hasActions && (
+                      <th className="px-4 py-3 font-semibold text-gray-900 uppercase tracking-wider">
+                        {t("table.actions")}
+                      </th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {paginatedData.map((row, rowIdx) => (
+                    <tr key={row.id || rowIdx} className="hover:bg-gray-50 transition-colors">
+                      {columns.map((col) => (
+                        <td
+                          key={col.id}
+                          className={clsx(
+                            "px-4 py-3 whitespace-nowrap",
+                            direction === "rtl" ? "text-right" : "text-left",
+                            col.className
+                          )}
+                        >
+                          {formatValue(getCellValue(row, col.accessor))}
+                        </td>
+                      ))}
+                      {hasActions && (
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <ActionButtons
+                            row={row}
+                            onShow={onShow}
+                            onEdit={onEdit}
+                            onDelete={onDelete}
+                            onAccept={onAccept}
+                            onReject={onReject}
+                            dialogshow={dialogshow}
+                            dialogdelete={dialogdelete}
+                            dialogaccept={dialogaccept}
+                            dialogreject={dialogreject}
+                          />
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-      {/* Mobile Stacked Cards */}
-      <div className="md:hidden space-y-4" dir={direction}>
-        {data.map((row, rowIdx) => (
-          <div
-            key={rowIdx}
-            className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm flex flex-col"
-          >
-            {columns.map((col, colIdx) => (
-              <div key={colIdx} className="flex justify-between mb-2 last:mb-0">
-                <div className="text-[10px] font-semibold text-gray-500 uppercase">
-                  {col.header}
-                </div>
-                <div>{formatValue(row[col.accessor])}</div>
+          {/* Mobile Cards */}
+          <div className="md:hidden space-y-4" dir={direction}>
+            {paginatedData.map((row, rowIdx) => (
+              <div
+                key={row.id || rowIdx}
+                className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm"
+              >
+                {columns.map((col) => (
+                  <div key={col.id} className="flex justify-between mb-2 last:mb-0">
+                    <div className="text-xs font-semibold text-gray-500 uppercase">
+                      {col.header}
+                    </div>
+                    <div className="text-sm">
+                      {formatValue(getCellValue(row, col.accessor))}
+                    </div>
+                  </div>
+                ))}
+                {hasActions && (
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <ActionButtons
+                      row={row}
+                      onShow={onShow}
+                      onEdit={onEdit}
+                      onDelete={onDelete}
+                      onAccept={onAccept}
+                      onReject={onReject}
+                      dialogshow={dialogshow}
+                      dialogdelete={dialogdelete}
+                      dialogaccept={dialogaccept}
+                      dialogreject={dialogreject}
+                    />
+                  </div>
+                )}
               </div>
             ))}
-            {(onShow || onEdit || onDelete || onAccept || onReject) && (
-              <div className="mt-3 flex flex-wrap gap-3">
-                {/* Action buttons same as desktop but with labels */}
-                {/* ... keep same logic but with text-xs label */}
-              </div>
-            )}
           </div>
-        ))}
-      </div>
+
+          {/* Pagination */}
+          {showPagination && totalPages > 1 && (
+            <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+              <div className="text-sm text-gray-600">
+                {t("table.showing")} {(currentPage - 1) * itemsPerPage + 1} -{" "}
+                {Math.min(currentPage * itemsPerPage, filteredData.length)} {t("table.of")}{" "}
+                {filteredData.length}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 rounded bg-gray-100 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 transition-colors"
+                >
+                  {t("table.previous")}
+                </button>
+                <span className="px-3 py-1">
+                  {currentPage} / {totalPages}
+                </span>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 rounded bg-gray-100 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 transition-colors"
+                >
+                  {t("table.next")}
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
-}
-
-/* ------------------------
-   Value formatter
-   - Handles numbers, common status badges, progress fractions,
-   - coupon code capsule (short uppercase token),
-   - discount strings (e.g., "15% Percentage" or "15 Fixed Amount"),
-   - coupon object (if someone passes full row/object)
-   ------------------------ */
-
-function isCouponCodeLike(v: string) {
-  // heuristic: short, uppercase letters/digits, hyphen/underscore allowed, no spaces
-  return /^[A-Z0-9_-]{3,12}$/.test(v);
-}
-function isDateLike(v: string) {
-  // Detects YYYY-MM-DD, DD/MM/YYYY, MM/DD/YYYY, etc.
-  return /^\d{4}-\d{2}-\d{2}$/.test(v) || 
-         /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) || 
-         !isNaN(Date.parse(v));
-}
-
-function formatDateValue(v: string) {
-  const date = new Date(v);
-  if (isNaN(date.getTime())) return v; // fallback if invalid date
-  return date.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
-function parseDiscountString(v: string) {
-  // Try to extract amount and type
-  const amtMatch = v.match(/(\d+%?|\$\d+(?:\.\d{1,2})?)/);
-  const typeMatch = v.match(
-    /(Percentage|Fixed Amount|Fixed|percentage|fixed amount|percentage type)/i
-  );
-  return {
-    amount: amtMatch?.[1] ?? v,
-    type: typeMatch?.[1] ?? v.replace(amtMatch?.[1] ?? "", "").trim(),
-  };
-}
-
-function formatValue(value: any): React.ReactNode {
-  // If someone passed a coupon-like object, render composed CouponCell
-  if (
-    value &&
-    typeof value === "object" &&
-    "code" in value &&
-    "title" in value
-  ) {
-    const row: CouponRow = {
-      code: String(value.code),
-      title: String(value.title),
-      subtitle: value.subtitle ?? value.subtitleText ?? value.description,
-      discount: value.discount ?? value.discountText,
-      minOrder: value.minOrder ?? value.min_order ?? value.min,
-    };
-    return <CouponCell row={row} />;
-  }
-
-  if (typeof value === "number") {
-    return <span>{value}</span>;
-  }
-
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    const lower = trimmed.toLowerCase();
-
-    // Fraction / Usage pattern: "23/100"
-    const frac = trimmed.match(/^\s*(\d+)\s*\/\s*(\d+)\s*$/);
-    if (frac) {
-      const num = parseInt(frac[1], 10);
-      const den = parseInt(frac[2], 10);
-      return <ProgressBar value={num} max={den} />;
-    }
-      if (isDateLike(trimmed)) {
-    return <span className="text-sm text-gray-700">{formatDateValue(trimmed)}</span>;
-  }
-    // Coupon code capsule (heuristic)
-    if (isCouponCodeLike(trimmed)) {
-      return <CouponCodeCell code={trimmed} />;
-    }
-   
-
-
-    // Discount patterns (e.g., "15% Percentage", "15 Fixed Amount", "$5 Fixed Amount", "15%")
-    // only treat as discount when relatively short (avoids mis-detecting titles like "15% Off Brake Parts")
-    if (
-      trimmed.length <= 40 &&
-      (trimmed.includes("%") || /\b(fixed|percentage|%|\$)\b/i.test(trimmed))
-    ) {
-      const { amount, type } = parseDiscountString(trimmed);
-      // If parse yields amount equal to whole string and no explicit type, still render amount
-      return <DiscountCell discount={type ? `${amount} ${type}` : amount} />;
-    }
-
-    // Status badges
-    if (lower.includes("pending")) {
-      return (
-        <span className="text-xs font-semibold px-2 py-1 rounded-full bg-yellow-100 text-yellow-600">
-          {value}
-        </span>
-      );
-    }
-    if (lower.includes("approved")) {
-      return (
-        <span className="text-xs font-semibold px-2 py-1 rounded-full bg-blue-100 text-blue-600">
-          {value}
-        </span>
-      );
-    }
-    if (lower.includes("rejected")) {
-      return (
-        <span className="text-xs font-semibold px-2 py-1 rounded-full bg-red-100 text-red-600">
-          {value}
-        </span>
-      );
-    }
-    if (lower.includes("processing")) {
-      return (
-        <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full bg-green-50 text-blue-600">
-          <Package className="w-4 h-4" /> {value}
-        </span>
-      );
-    }
-
-    if (lower.includes("shipped")) {
-      return (
-        <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full bg-orange-50 text-orange-600">
-          <Truck className="w-4 h-4" /> {value}
-        </span>
-      );
-    }
-
-    if (lower.includes("delivered")) {
-      return (
-        <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full bg-green-50 text-green-600">
-          <CheckCircle className="w-4 h-4" /> {value}
-        </span>
-      );
-    }
-
-    // active / inactive
-    if (lower.includes("active")) {
-      return (
-        <span className="text-xs font-semibold px-2 py-1 rounded-full bg-green-100 text-green-600">
-          {value}
-        </span>
-      );
-    }
-    if (lower.includes("inactive")) {
-      return (
-        <span className="text-xs font-semibold px-2 py-1 rounded-full bg-gray-200 text-gray-500">
-          {value}
-        </span>
-      );
-    }
-
-    // Units logic: "5 units", "0 units"
-    if (trimmed.toLowerCase().includes("units")) {
-      const number = parseInt(trimmed, 10);
-      return (
-        <span
-          className={clsx(
-            "text-xs font-semibold px-2 py-1 rounded-full",
-            number > 0
-              ? "bg-blue-100 text-blue-600"
-              : "bg-orange-100 text-orange-600"
-          )}
-        >
-          {value}
-        </span>
-      );
-    }
-
-    // Currency (min order) plain formatting when it looks like a number or starts with $
-    if (/^\$?\d+(\.\d{1,2})?$/.test(trimmed)) {
-      return (
-        <span className="text-sm text-gray-700">{formatCurrency(trimmed)}</span>
-      );
-    }
-
-    // For longer strings that look like a title/subtitle, render TitleCell-like view smartly
-    // Heuristic: contains more than 2 words and includes "off" or is relatively long -> treat as title line
-    if (trimmed.split(/\s+/).length >= 3 && /off/i.test(trimmed)) {
-      // show first part bold orange, rest as subtitle if there's a linebreak
-      const parts = trimmed.split(/\s*-\s*|\n/);
-      const title = parts[0];
-      const subtitle = parts.slice(1).join(" ").trim() || undefined;
-      return <TitleCell title={title} subtitle={subtitle} />;
-    }
-
-    // fallback plain string
-    return <span>{value}</span>;
-  }
-
-  return value;
 }

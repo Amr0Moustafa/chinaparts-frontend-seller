@@ -7,6 +7,9 @@ import { useTranslation } from "react-i18next";
 interface ActionButtonsProps {
   onContact?: () => void;
   onPrint?: () => void;
+  orderId?: number;
+  canUpdate?: boolean;
+  canCancel?: boolean;
 }
 
 export const ActionButtons: FC<ActionButtonsProps> = ({ onContact, onPrint }) => {
