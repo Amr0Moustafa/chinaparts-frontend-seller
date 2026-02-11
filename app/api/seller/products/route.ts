@@ -7,10 +7,15 @@ export async function GET(req: NextRequest) {
   const seller_token = req.cookies.get("seller_token")?.value;
 
   try {
+    const { searchParams } = new URL(req.url);
+
+    const params = Object.fromEntries(searchParams.entries());
+
     const res = await axios.get(`${BASE_URL}/products`, {
       headers: {
         Authorization: `Bearer ${seller_token}`,
       },
+      params,
     });
 
     return NextResponse.json(res.data);

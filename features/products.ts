@@ -6,6 +6,7 @@ import type {
   ProductCreatePayload,
   ProductUpdatePayload,
   ProductAttributesResponse,
+  GetProductsParams,
 } from "@/types/product";
 
 export const sellerProductsApi = createApi({
@@ -19,10 +20,11 @@ export const sellerProductsApi = createApi({
     /* =============================
        GET /products
     ============================= */
-    getProducts: builder.query<ProductListResponse, void>({
-      query: () => ({
+    getProducts: builder.query<ProductListResponse, GetProductsParams>({
+      query: (params) => ({
         url: "products",
         method: "GET",
+        params,
       }),
       providesTags: ["Products"],
     }),
@@ -111,7 +113,7 @@ export const sellerProductsApi = createApi({
     ============================= */
     updateProductStatus: builder.mutation<
       ProductResponse,
-      { id: number | string; status: string }
+      { id: number | string; status: number }
     >({
       query: ({ id, status }) => ({
         url: `products/${id}/status`,

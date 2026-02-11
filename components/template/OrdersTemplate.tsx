@@ -28,7 +28,7 @@ export const OrderTemplate = () => {
 
   // ✅ Fetch orders from API with pagination
   const { 
-    data: ordersResponse, 
+    data: ordersResponse,
     isLoading: ordersLoading, 
     error: ordersError 
   } = useGetSubOrdersQuery(
@@ -266,7 +266,7 @@ export const OrderTemplate = () => {
 
         {/* Orders Table */}
         <DynamicTable
-          title={t("orderchart.recentorders.title")}
+          title={t("order.title")}
           columns={orderColumns}
           data={orders}
           onShow={(item) => router.push(`/dashboard/orders/${item.id}`)}

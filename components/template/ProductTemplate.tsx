@@ -13,16 +13,28 @@ import { Button } from "../atoms/Button";
 import { redirect, useRouter } from "next/navigation";
 import { useGetProductsQuery } from "@/features/products";
 import { Product } from "@/types/product";
+import { StatusSwitcher } from "../molecules/product/StatusSwitcher";
 
 
 export const ProductTemplate = () => {
   const { t } = useTranslation();
   
    const router=useRouter()
+   const PAGE_SIZE = 5;
+  const [currentPage, setCurrentPage] = useState(1);
   const { data: productdata, isLoading: productloading } =
-    useGetProductsQuery();
-  
-    console.log(productdata)
+    useGetProductsQuery(
+      {
+        page: currentPage,
+        per_page: PAGE_SIZE, 
+        
+      },
+      {
+        refetchOnMountOrArgChange: true,
+      }
+    );
+  // Pagination
+  const pagination=productdata?.meta 
     const productData=productdata?.data || [];
  
    
@@ -46,42 +58,47 @@ export const ProductTemplate = () => {
       </span>
     ),
   },
+  // {
+  //   id: "stock",
+  //   header: t("table.stock"),
+  //   accessor: (row:any) => (
+  //     <span
+  //       className={
+  //         row.stock > 0 ? "text-green-600 font-medium" : "text-red-600"
+  //       }
+  //     >
+  //       {row.stock}
+  //     </span>
+  //   ),
+  // },
+  // {
+  //   id: "status",
+  //   header: t("table.status"),
+  //   accessor: (row:any) => (
+  //     <span
+  //       className={`px-2 py-1 rounded text-xs font-medium ${
+  //         row.status_label === "Active"
+  //           ? "bg-green-100 text-green-700"
+  //           : "bg-gray-100 text-gray-600"
+  //       }`}
+  //     >
+  //       {row.status_label}
+  //     </span>
+  //   ),
+  // },
   {
-    id: "stock",
-    header: t("table.stock"),
-    accessor: (row:any) => (
-      <span
-        className={
-          row.stock > 0 ? "text-green-600 font-medium" : "text-red-600"
-        }
-      >
-        {row.stock}
-      </span>
-    ),
-  },
-  {
-    id: "status",
-    header: t("table.status"),
-    accessor: (row:any) => (
-      <span
-        className={`px-2 py-1 rounded text-xs font-medium ${
-          row.status_label === "Active"
-            ? "bg-green-100 text-green-700"
-            : "bg-gray-100 text-gray-600"
-        }`}
-      >
-        {row.status_label}
-      </span>
-    ),
-  },
+  id: "status",
+  header: t("table.status"),
+  accessor: (row: any) => (
+    <StatusSwitcher
+      id={row.id}
+      currentStatus={row.status}
+    />
+  ),
+}
   
 ];
-  // Pagination
-  const pagination=productdata?.meta
-  const PAGE_SIZE = 5;
-  const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(productData.length / PAGE_SIZE);
-
+  
 
   return (
     <div className="min-h-screen">
@@ -133,10 +150,10 @@ export const ProductTemplate = () => {
           title={t("table.productInventory")}
           columns={productColumns}
           data={productData}
-          onShow={(item) => console.log("Show:", item)}
+          onShow={(item) => router.push(`/dashboard/products/${item.id}/show`)}
           onEdit={(item) => router.push(`/dashboard/products/${item.id}/update`)}
           onDelete={(item) => console.log("Delete:", item)}
-          dialogshow={true}
+          
         />
 
         {/* Pagination */}
@@ -144,7 +161,7 @@ export const ProductTemplate = () => {
           <div className="flex items-center gap-4 w-full">
             <StyledPagination
               currentPage={currentPage}
-              totalPages={totalPages}
+              totalPages={pagination?.total||1}
               onPageChange={setCurrentPage}
               showText={false}
               buttonWrapperClassName="flex justify-between w-full"
@@ -153,8 +170,8 @@ export const ProductTemplate = () => {
 
           <span className=" hidden md:flex text-sm text-gray-500 w-full flex items-end justify-end">
             {t("category.showing")} {(currentPage - 1) * PAGE_SIZE + 1}–
-            {Math.min(currentPage * PAGE_SIZE, productData.length)}{" "}
-            {t("category.of")} {productData.length} {t("category.products")}
+            {Math.min(currentPage * PAGE_SIZE, pagination?.total||0)}{" "}
+            {t("category.of")} {pagination?.total||0} {t("category.products")}
           </span>
         </div>
       </div>

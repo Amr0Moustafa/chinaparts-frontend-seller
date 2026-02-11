@@ -38,7 +38,7 @@ export const RejectDialog: React.FC<RejectDialogProps> = ({
   };
 
   return (
-    <DialogContent className="sm:max-w-[500px]">
+    <DialogContent className="sm:max-w-[500px] bg-white">
       <DialogHeader>
         <DialogTitle>{title}</DialogTitle>
         <DialogDescription>{description}</DialogDescription>
@@ -86,6 +86,7 @@ export const RejectDialog: React.FC<RejectDialogProps> = ({
           variant="destructive"
           onClick={handleConfirm}
           disabled={isSubmitting}
+          className="bg-red-500 hover:bg-red-600 text-white"
         >
           {isSubmitting ? "Rejecting..." : "Reject Order"}
         </Button>
@@ -120,18 +121,18 @@ export const ApproveDialog: React.FC<ApproveDialogProps> = ({
   };
 
   return (
-    <DialogContent className="sm:max-w-[425px]">
+    <DialogContent className="sm:max-w-[425px] bg-white">
       <DialogHeader>
         <DialogTitle>{title}</DialogTitle>
         <DialogDescription>{description}</DialogDescription>
       </DialogHeader>
 
-      <div className="py-4">
+      {/* <div className="py-4">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-700">Order ID:</span>
           <span className="text-sm text-gray-900 font-semibold">{orderId}</span>
         </div>
-      </div>
+      </div> */}
 
       <DialogFooter>
         <Button

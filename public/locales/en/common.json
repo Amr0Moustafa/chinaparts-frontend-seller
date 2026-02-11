@@ -58,6 +58,7 @@
     "productName": "Product Name",
     "sku": "SKU",
     "price": "Price",
+    "category": "Category",
     "stock": "Stock",
     "status": "Status",
     "actions": "Actions",
@@ -604,7 +605,8 @@
           "bodyType": "Body Type",
           "make": "Make",
           "model": "Model",
-          "yearRange": "Year Range"
+          "year": "Year",
+          "brand": "Brand"
         },
         "placeholders": {
           "vehicleType": "Select vehicle type",
@@ -697,5 +699,86 @@
       "title": "Reject Item",
       "description": "Are you sure you want to reject this item?"
     }
+  },
+   "productdetails": {
+    "header": {
+      "ProductDetails": "Product Details"
+    },
+    "buttons": {
+      "update": "Update Product",
+      "delete": "Delete",
+      "back": "Back to Products"
+    },
+    "sections": {
+      "description": "Product Description",
+      "variants": "Variants",
+      "compatibility": "Vehicle Compatibility",
+      "specifications": "Specifications"
+    },
+    "status": {
+      "inStock": "In Stock",
+      "outOfStock": "Out of Stock",
+      "draft": "Draft",
+      "published": "Published"
+    },
+    "pricing": {
+      "brand": "BRAND",
+      "discount": "OFF"
+    },
+    "stock": {
+      "stock": "Stock",
+      "units": "units",
+      "supplier": "Supplier"
+    },
+    "rating": {
+      "reviews": "reviews"
+    },
+    "tags": {
+      "title": "Tags"
+    },
+    "features": {
+      "details": "Details Info",
+      "shipping": "Shipping Information",
+      "return": "Return Policy"
+    },
+    "table": {
+      "type": "Type",
+      "value": "Value",
+      "price": "Price",
+      "supplier": "Supplier",
+      "actions": "Actions"
+    },
+    "vehicle": {
+      "main": "Main Vehicle",
+      "compatible": "Compatible Vehicles",
+      "type": "Type",
+      "model": "Model",
+      "bodyType": "Body Type",
+      "year": "Year"
+    },
+    "specs": {
+      "manufacturer": "Manufacturer",
+      "category": "Category",
+      "brand": "Brand",
+      "weight": "Weight",
+      "dimensions": "Dimensions",
+      "height": "Height",
+      "width": "Width",
+      "length": "Length",
+      "fragile": "Fragile",
+      "status": "Status",
+      "sku": "SKU",
+      "slug": "Slug",
+      "created": "Created",
+      "updated": "Last Updated"
+    },
+    "variants": {
+      "color": "Color",
+      "material": "Material",
+      "size": "Size"
+    },
+    "loading": "Loading product details...",
+    "error": "Error loading product",
+    "notFound": "Product not found"
   }
 }

@@ -113,6 +113,16 @@ export interface Vehicle {
   body_type_id: string;
 }
 
+export interface ProductTag {
+  id: number;
+  name: string;
+}
+
+export interface ProductImage {
+  id: number;
+  url: string;
+}
+
 /* =======================
    PRODUCT (API MODEL)
 ======================= */
@@ -140,14 +150,16 @@ sub_category_id:string;
   stock_quantity: number;
   specifications: Record<string, string>;
   rating: ProductRating;
-
+  status: number;
+  status_label: string;
   main_image: string;
-  images: string[];
-  tags: string[];
+  images: ProductImage[];
+  tags: ProductTag[];
   vehicles: any[];
   main_vehicle: Vehicle | null;
   compatible_vehicles: Vehicle[];
-
+  price: string;
+  discount_percentage: string;
   variants: ProductVariant[];
   // reviews:Review[];
  average_rating: number;
@@ -397,3 +409,14 @@ export interface FilterResponse {
 }
 
 
+
+export interface GetProductsParams {
+  page?: number;
+  per_page?: number;
+  search?: string;
+  category_id?: number;
+  brand_id?: number;
+  status?: number; // 0=Inactive, 1=Active, 2=Draft
+  sort_by?: string; // created_at
+  sort_order?: "asc" | "desc";
+}

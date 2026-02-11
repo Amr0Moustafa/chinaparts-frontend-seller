@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState, useCallback } from "react";
 import { useForm, FormProvider, useFormContext } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -15,6 +15,7 @@ import {
   useGetVehicleTypesQuery,
   useGetVehicleModelsByBrandQuery,
   useGetVehicleBodyTypesQuery,
+  useGetVehicleModelsQuery,
 } from "@/features/sellerAttributes";
 
 /* ===============================
@@ -110,26 +111,56 @@ const CompatibilityFormItem: FC<CompatibilityFormItemProps> = ({
   const { t } = useTranslation();
   const { setValue, watch } = useFormContext<VehicleFormValues>();
   
-  // Watch the brand for this compatibility item
-  const selectedBrand = watch(`compatibility.${index}.brand`);
+  // State for brand tracking
+  const [selectedBrandId, setSelectedBrandId] = useState("");
+  const [prevBrandId, setPrevBrandId] = useState("");
+  const isInitializedRef = useRef(false);
 
-  // Reset model when brand changes
+  // Watch form value to sync with state (for initialData)
+  const formBrandValue = watch(`compatibility.${index}.brand`);
+
+  // Sync state with form value when it changes from outside (initialData)
   useEffect(() => {
-    if (selectedBrand) {
-      setValue(`compatibility.${index}.model_id`, "");
+    if (formBrandValue && formBrandValue !== selectedBrandId) {
+      console.log(`📥 Syncing compatibility[${index}] brand state from form:`, formBrandValue);
+      setSelectedBrandId(formBrandValue);
+      if (!isInitializedRef.current) {
+        setPrevBrandId(formBrandValue);
+        isInitializedRef.current = true;
+      }
     }
-  }, [selectedBrand, index, setValue]);
+  }, [formBrandValue, selectedBrandId, index]);
 
-  // Only fetch models if brand is selected and valid
-  const shouldFetchModels = Boolean(
-    selectedBrand && selectedBrand.trim() !== "",
-  );
-
-  // Fetch models using RTK Query
+  // Fetch models using RTK Query - will auto fetch when selectedBrandId changes
   const { data: modelsData, isLoading: modelsLoading } =
-    useGetVehicleModelsByBrandQuery(selectedBrand || "", {
-      skip: !shouldFetchModels,
+    useGetVehicleModelsByBrandQuery(selectedBrandId, {
+      skip: !selectedBrandId,
+      refetchOnMountOrArgChange: true,
     });
+
+  // Reset model when brand actually changes (not during initialization)
+  useEffect(() => {
+    if (!isInitializedRef.current) return;
+    
+    // Use a small timeout to debounce and avoid cascading updates
+    const timer = setTimeout(() => {
+      if (selectedBrandId && selectedBrandId !== prevBrandId) {
+        console.log(`🔄 Compatibility[${index}] brand changed from`, prevBrandId, "to", selectedBrandId);
+        setValue(`compatibility.${index}.model_id`, "", { shouldValidate: false });
+        setPrevBrandId(selectedBrandId);
+      }
+    }, 0);
+    
+    return () => clearTimeout(timer);
+  }, [selectedBrandId, prevBrandId, index, setValue]);
+
+  // Handler for brand change
+  const handleBrandChange = useCallback((value: any) => {
+    // Extract value from event if it's an event object
+    const brandId = typeof value === 'string' ? value : value?.target?.value || value;
+    console.log(`🎯 Compatibility[${index}] brand selected:`, brandId);
+    setSelectedBrandId(brandId);
+  }, [index]);
     
   const modelOptions: SelectOption[] =
     modelsData?.data?.map((m: any) => ({
@@ -171,13 +202,14 @@ const CompatibilityFormItem: FC<CompatibilityFormItemProps> = ({
           name={`compatibility.${index}.brand`}
           label={t("createproduct.vehicleForm.mainVehicle.fields.brand")}
           options={brandOptions}
+          onChange={handleBrandChange}
         />
 
         <SelectField
           name={`compatibility.${index}.model_id`}
           label={t("createproduct.vehicleForm.compatibility.fields.model")}
           options={modelOptions}
-          disabled={!shouldFetchModels || modelsLoading}
+          disabled={!selectedBrandId || modelsLoading}
         />
 
         <SelectField
@@ -202,6 +234,12 @@ export const VehicleForm: FC<VehicleFormProps> = ({
   const onDataChangeRef = useRef(onDataChange);
   const onValidationChangeRef = useRef(onValidationChange);
   const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Add ref to track if we're currently initializing to prevent loops
+  const isInitializingRef = useRef(false);
+  
+  // Add ref to store serialized initialData for comparison
+  const prevInitialDataRef = useRef<string>('');
 
   // Keep refs updated
   useEffect(() => {
@@ -210,16 +248,17 @@ export const VehicleForm: FC<VehicleFormProps> = ({
   }, [onDataChange, onValidationChange]);
 
   /* ===============================
-     Data Fetching (moved up to get brand data first)
+     Data Fetching
   ================================ */
   const { data: brandsData } = useGetBrandsQuery();
   const { data: vehicleTypesData } = useGetVehicleTypesQuery();
   const { data: bodyTypesData } = useGetVehicleBodyTypesQuery();
+  const { data: allModelsData } = useGetVehicleModelsQuery(); // Fetch all models for brand lookup
 
   /* ===============================
-     Process Initial Data
+     Process Initial Data - MEMOIZED
   ================================ */
-  const getInitialValues = () => {
+  const getInitialValues = useCallback(() => {
     console.log("🔄 getInitialValues called with initialData:", initialData);
 
     if (!initialData || initialData.length === 0) {
@@ -252,19 +291,12 @@ export const VehicleForm: FC<VehicleFormProps> = ({
     console.log("🚗 Main vehicle found:", mainVehicle);
     console.log("🔧 Compatibility vehicles found:", compatibilityVehicles);
 
-    // Helper function to get brand ID from model ID
-    const getBrandFromModel = (modelId: string): string => {
-      // You'll need to fetch the model details to get the brand
-      // For now, return empty string - we'll handle this with useEffect
-      return "";
-    };
-
     const result = {
       mainVehicle: mainVehicle
         ? {
             type_id: mainVehicle.type_id || "",
             body_type_id: mainVehicle.body_type_id || "",
-            brand: getBrandFromModel(mainVehicle.model_id), // Will be set later
+            brand: "", // Will be populated by useEffect after fetching model data
             model_id: mainVehicle.model_id || "",
             year: mainVehicle.year || "",
           }
@@ -280,7 +312,7 @@ export const VehicleForm: FC<VehicleFormProps> = ({
           ? compatibilityVehicles.map((v) => ({
               type_id: v.type_id || "",
               body_type_id: v.body_type_id || "",
-              brand: getBrandFromModel(v.model_id), // Will be set later
+              brand: "", // Will be populated by useEffect after fetching model data
               model_id: v.model_id || "",
               year: v.year || "",
             }))
@@ -297,7 +329,7 @@ export const VehicleForm: FC<VehicleFormProps> = ({
 
     console.log("✅ Initial values prepared:", result);
     return result;
-  };
+  }, [initialData]);
 
   /* ===============================
      Form Setup
@@ -308,26 +340,43 @@ export const VehicleForm: FC<VehicleFormProps> = ({
     defaultValues: getInitialValues(),
   });
 
-  const { watch, formState, setValue, reset } = methods;
+  const { watch, formState, setValue, reset, getValues } = methods;
   const mainVehicle = watch("mainVehicle");
 
-  // Watch main vehicle brand
-  const mainVehicleBrand = watch("mainVehicle.brand");
+  // State for main vehicle brand
+  const [mainVehicleBrandId, setMainVehicleBrandId] = useState("");
+  const [prevMainBrandId, setPrevMainBrandId] = useState("");
 
   /* ===============================
      Main Vehicle Models Fetching
   ================================ */
   const { data: mainModelsData, isLoading: mainModelsLoading } =
-    useGetVehicleModelsByBrandQuery(mainVehicleBrand || "", {
-      skip: !mainVehicleBrand || mainVehicleBrand.trim() === "",
+    useGetVehicleModelsByBrandQuery(mainVehicleBrandId, {
+      skip: !mainVehicleBrandId,
+      refetchOnMountOrArgChange: true,
     });
 
-  // Reset main vehicle model when brand changes (but not on initial load)
+  // Reset model when brand actually changes
   useEffect(() => {
-    if (mainVehicleBrand && isInitialized) {
-      setValue("mainVehicle.model_id", "");
+    if (isInitializingRef.current) return; // Skip during initialization
+    
+    if (mainVehicleBrandId && mainVehicleBrandId !== prevMainBrandId && prevMainBrandId !== "") {
+      console.log("🔄 Main brand changed from", prevMainBrandId, "to", mainVehicleBrandId);
+      setValue("mainVehicle.model_id", "", { shouldValidate: false });
+      setPrevMainBrandId(mainVehicleBrandId);
+    } else if (mainVehicleBrandId && prevMainBrandId === "") {
+      // First time setting brand (from initial data)
+      setPrevMainBrandId(mainVehicleBrandId);
     }
-  }, [mainVehicleBrand, setValue, isInitialized]);
+  }, [mainVehicleBrandId, prevMainBrandId, setValue]);
+
+  // Handler for main brand change
+  const handleMainBrandChange = useCallback((value: any) => {
+    // Extract value from event if it's an event object
+    const brandId = typeof value === 'string' ? value : value?.target?.value || value;
+    console.log("🎯 Main brand selected:", brandId);
+    setMainVehicleBrandId(brandId);
+  }, []);
 
   /* ===============================
      Options Mapping
@@ -365,28 +414,92 @@ export const VehicleForm: FC<VehicleFormProps> = ({
   });
 
   /* ===============================
-     Reset form when initialData changes
+     Populate brand IDs from model IDs when editing
+     FIXED: Only depends on allModelsData, runs once when data is available
   ================================ */
   useEffect(() => {
+    if (isInitializingRef.current) return; // Skip during initialization
+    if (!initialData || initialData.length === 0) return;
+    if (!allModelsData?.data) return;
+
+    const values = getValues();
+    let needsUpdate = false;
+    
+    // Handle main vehicle
+    const mainVehicleData = initialData.find((v) => v.is_main);
+    if (mainVehicleData?.model_id && !values.mainVehicle.brand) {
+      const model = allModelsData.data.find(
+        (m: any) => String(m.id) === mainVehicleData.model_id
+      );
+      if (model?.brandId) {
+        console.log("🔧 Setting main vehicle brand from model:", model.brandId);
+        setValue("mainVehicle.brand", String(model.brandId), { shouldValidate: false });
+        setMainVehicleBrandId(String(model.brandId));
+        needsUpdate = true;
+      }
+    }
+
+    // Handle compatibility vehicles
+    const compatibilityVehicles = initialData.filter((v) => !v.is_main);
+    compatibilityVehicles.forEach((vehicle, index) => {
+      if (vehicle.model_id && !values.compatibility[index]?.brand) {
+        const model = allModelsData.data.find(
+          (m: any) => String(m.id) === vehicle.model_id
+        );
+        if (model?.brandId) {
+          console.log(`🔧 Setting compatibility[${index}] brand from model:`, model.brandId);
+          setValue(`compatibility.${index}.brand`, String(model.brandId), { shouldValidate: false });
+          needsUpdate = true;
+        }
+      }
+    });
+
+    if (needsUpdate) {
+      console.log("✅ Brand population complete");
+    }
+  }, [allModelsData]); // ONLY depend on allModelsData
+
+  /* ===============================
+     Reset form when initialData changes
+     FIXED: Uses deep comparison and initialization flag
+  ================================ */
+  useEffect(() => {
+    // Serialize initialData for deep comparison
+    const currentInitialDataStr = JSON.stringify(initialData || []);
+    
+    // Only reset if initialData actually changed
+    if (currentInitialDataStr === prevInitialDataRef.current) {
+      return;
+    }
+    
     console.log("🔄 initialData changed, resetting form:", initialData);
+    prevInitialDataRef.current = currentInitialDataStr;
+    
+    isInitializingRef.current = true; // Set flag to prevent cascading updates
     
     if (initialData && initialData.length > 0) {
       const newValues = getInitialValues();
       console.log("📝 Resetting form with values:", newValues);
       reset(newValues);
       
-      // Mark as initialized after first reset
-      setTimeout(() => setIsInitialized(true), 100);
+      // Mark as initialized after reset completes
+      setTimeout(() => {
+        setIsInitialized(true);
+        isInitializingRef.current = false; // Clear flag
+      }, 100);
     } else if (!isInitialized) {
       // First render with no data
       setIsInitialized(true);
+      isInitializingRef.current = false;
+    } else {
+      isInitializingRef.current = false;
     }
-  }, [initialData]);
+  }, [initialData, reset, getInitialValues, isInitialized]);
 
   /* ===============================
-     Payload Builder
+     Payload Builder - MEMOIZED
   ================================ */
-  const buildVehiclesPayload = (values: VehicleFormValues): VehicleData[] => {
+  const buildVehiclesPayload = useCallback((values: VehicleFormValues): VehicleData[] => {
     const vehicles: VehicleData[] = [];
 
     const main = values.mainVehicle;
@@ -417,14 +530,15 @@ export const VehicleForm: FC<VehicleFormProps> = ({
     });
 
     return vehicles;
-  };
+  }, []);
 
   /* ===============================
      Effects
   ================================ */
   // Watch form changes and notify parent
+  // FIXED: Guards against initialization and memoizes callback
   useEffect(() => {
-    if (!isInitialized) return; // Don't notify during initialization
+    if (!isInitialized || isInitializingRef.current) return; // Don't notify during initialization
 
     const subscription = watch((values) => {
       const payload = buildVehiclesPayload(values as VehicleFormValues);
@@ -432,11 +546,14 @@ export const VehicleForm: FC<VehicleFormProps> = ({
       onDataChangeRef.current?.(payload);
     });
     return () => subscription.unsubscribe();
-  }, [watch, isInitialized]);
+  }, [watch, isInitialized, buildVehiclesPayload]);
 
   // Notify parent of validation state changes
+  // FIXED: Guards against initialization
   useEffect(() => {
-    onValidationChangeRef.current?.(formState.isValid);
+    if (!isInitializingRef.current) {
+      onValidationChangeRef.current?.(formState.isValid);
+    }
   }, [formState.isValid]);
 
   const compatibility = watch("compatibility") ?? [];
@@ -450,13 +567,15 @@ export const VehicleForm: FC<VehicleFormProps> = ({
       compatibility,
       isValid: formState.isValid,
       errors: formState.errors,
+      isInitialized,
+      isInitializing: isInitializingRef.current,
     });
-  }, [mainVehicle, compatibility, formState.isValid, formState.errors]);
+  }, [mainVehicle, compatibility, formState.isValid, formState.errors, isInitialized]);
 
   /* ===============================
      Handlers
   ================================ */
-  const handleAddCompatibility = () => {
+  const handleAddCompatibility = useCallback(() => {
     setValue("compatibility", [
       ...compatibility,
       {
@@ -467,21 +586,21 @@ export const VehicleForm: FC<VehicleFormProps> = ({
         year: "",
       },
     ]);
-  };
+  }, [compatibility, setValue]);
 
-  const handleSaveCompatibility = () => {
+  const handleSaveCompatibility = useCallback(() => {
     const values = methods.getValues();
     const payload = buildVehiclesPayload(values);
     console.log("💾 Saving compatibility, payload:", payload);
     onDataChange?.(payload);
-  };
+  }, [methods, buildVehiclesPayload, onDataChange]);
 
-  const handleRemoveCompatibility = (index: number) => {
+  const handleRemoveCompatibility = useCallback((index: number) => {
     setValue(
       "compatibility",
       compatibility.filter((_, i) => i !== index),
     );
-  };
+  }, [compatibility, setValue]);
 
   /* ===============================
      Render
@@ -516,13 +635,14 @@ export const VehicleForm: FC<VehicleFormProps> = ({
               name="mainVehicle.brand"
               label={t("createproduct.vehicleForm.mainVehicle.fields.brand")}
               options={brandOptions}
+              onChange={handleMainBrandChange}
             />
 
             <SelectField
               name="mainVehicle.model_id"
               label={t("createproduct.vehicleForm.mainVehicle.fields.model")}
               options={mainModelOptions}
-              disabled={!mainVehicleBrand || mainModelsLoading}
+              disabled={!mainVehicleBrandId || mainModelsLoading}
             />
 
             <SelectField
@@ -569,7 +689,7 @@ export const VehicleForm: FC<VehicleFormProps> = ({
             
             <Button
               type="button"
-              className="bg-[var(--theme-color-accent)] text-white "
+              className="bg-[var(--theme-color-accent)] text-white"
               onClick={handleSaveCompatibility}
             >
               {t("createproduct.vehicleForm.submit.saveVehicle")}

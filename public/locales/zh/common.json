@@ -59,6 +59,7 @@
     "sku": "SKU 编号",
     "price": "价格",
     "stock": "库存",
+    "category": "分类",
     "status": "状态",
     "actions": "操作",
     "view": "查看",
@@ -612,8 +613,9 @@
           "vehicleType": "车辆类型",
           "bodyType": "车身类型",
           "make": "制造商",
+          "brand": "品牌",
           "model": "型号",
-          "yearRange": "年份范围"
+          "year": "年份"
         },
         "placeholders": {
           "vehicleType": "选择车辆类型",
@@ -705,5 +707,87 @@
       "title": "确认拒绝",
       "description": "您确定要拒绝此项目吗？"
     }
+  },
+  "productdetails": {
+    "header": {
+      "ProductDetails": "产品详情"
+    },
+    "buttons": {
+      "update": "更新产品",
+      "delete": "删除",
+      "back": "返回产品列表"
+    },
+    "sections": {
+      "description": "产品描述",
+      "variants": "变体",
+      "compatibility": "车辆兼容性",
+      "specifications": "规格参数"
+    },
+    "status": {
+      "inStock": "有货",
+      "outOfStock": "缺货",
+      "draft": "草稿",
+      "published": "已发布"
+    },
+    "pricing": {
+      "brand": "品牌",
+      "discount": "折扣"
+    },
+    "stock": {
+      "stock": "库存",
+      "units": "件",
+      "supplier": "供应商"
+    },
+    "rating": {
+      "reviews": "评论"
+    },
+    "tags": {
+      "title": "标签"
+    },
+    "features": {
+      "details": "详细信息",
+      "shipping": "配送信息",
+      "return": "退货政策"
+    },
+    "table": {
+      "type": "类型",
+      "value": "值",
+      "price": "价格",
+      "supplier": "供应商",
+      "actions": "操作"
+    },
+    "vehicle": {
+      "main": "主车辆",
+      "compatible": "兼容车辆",
+      "type": "类型",
+      "model": "型号",
+      "bodyType": "车身类型",
+      "year": "年份"
+    },
+    "specs": {
+      "manufacturer": "制造商",
+      "category": "分类",
+      "brand": "品牌",
+      "weight": "重量",
+      "dimensions": "尺寸",
+      "height": "高度",
+      "width": "宽度",
+      "length": "长度",
+      "fragile": "易碎",
+      "status": "状态",
+      "sku": "SKU编码",
+      "slug": "链接",
+      "created": "创建时间",
+      "updated": "最后更新"
+    },
+    "variants": {
+      "color": "颜色",
+      "material": "材质",
+      "size": "尺寸"
+    },
+    "loading": "正在加载产品详情...",
+    "error": "加载产品时出错",
+    "notFound": "找不到产品"
   }
+
 }
