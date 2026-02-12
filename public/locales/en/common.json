@@ -688,6 +688,10 @@
     "header": {
       "UpdateProduct": "Update Product",
       "saveAsDraft": "Save as Draft"
+    },
+    "steps": {
+      "title": "Update Product",
+      "description": "Update your product details in 4 easy steps"
     }
   },
   "dialog": {

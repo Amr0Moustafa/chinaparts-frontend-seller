@@ -692,7 +692,12 @@
     "header": {
       "UpdateProduct": "تعديل المنتج",
       "saveAsDraft": "حفظ كمسودة"
+    },
+    "steps": {
+      "title": "تعديل المنتج",
+      "description": "قم بتحديث تفاصيل منتجك في 4 خطوات سهلة"
     }
+    
   },
   "dialog": {
     "approve": {

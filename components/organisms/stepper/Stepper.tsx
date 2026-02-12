@@ -22,6 +22,10 @@ import {
   useUpdateProductMutation,
   useGetProductByIdQuery,
 } from "@/features/products";
+import {
+  useCreateVariantMutation,
+  useUpdateVariantMutation,
+} from "@/features/variants"; // ✅ Add variants API
 import VariantFormCard from "../product/VariantForm";
 import { useRouter } from "next/navigation";
 
@@ -57,22 +61,28 @@ type ShippingData = {
   is_fragile: boolean;
 };
 
-// ✅ NEW: Variant types matching the new component
+// ✅ Variant types matching the NEW component
 interface VariationType {
-  id: string;
+  id: number;
   name: string;
-  values: string[];
+  selectedValues: number[]; // IDs of selected attribute values
 }
 
 interface VariantCombination {
   id: string;
-  combinations: { [key: string]: string };
-  price: string;
-  quantity: number;
+  combinations: { [attributeName: string]: { id: number; value: string } };
+  attribute_value_ids: number[];
+  variant_name: string;
+  cost_price: string;
+  selling_price: string;
+  discount_price: string;
+  stock_quantity: number;
+  is_default: boolean;
+  status: number;
 }
 
 interface VariantData {
-  variation_types: VariationType[];
+  // variation_types: VariationType[];
   variants: VariantCombination[];
 }
 
@@ -128,9 +138,8 @@ const INITIAL_SHIPPING_DATA: ShippingData = {
   is_fragile: false,
 };
 
-// ✅ NEW: Initial variant data
 const INITIAL_VARIANT_DATA: VariantData = {
-  variation_types: [],
+  // variation_types: [],
   variants: [],
 };
 
@@ -142,18 +151,18 @@ interface StepperProps {
 export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
   const { t } = useTranslation();
   const isEditMode = !!product_id;
-  const router=useRouter()
-  // ✅ Add ref to prevent cascading updates during initialization
+  const router = useRouter();
+
   const isInitializingRef = useRef(false);
-  const prevProductDataRef = useRef<string>('');
+  const prevProductDataRef = useRef<string>("");
 
   /* ------------------ State ------------------ */
   const [currentStep, setCurrentStep] = useState(1);
   const [stepValidation, setStepValidation] = useState<StepValidationState>(
-    INITIAL_STEP_VALIDATION,
+    INITIAL_STEP_VALIDATION
   );
   const [step1Validation, setStep1Validation] = useState<Step1ValidationState>(
-    INITIAL_STEP1_VALIDATION,
+    INITIAL_STEP1_VALIDATION
   );
 
   // Step 1 Data
@@ -162,10 +171,10 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
   const [productDescriptionData, setProductDescriptionData] =
     useState<ProductDescriptionData>(INITIAL_PRODUCT_DESCRIPTION);
   const [categoryTagsData, setCategoryTagsData] = useState<StepperFormValues>(
-    INITIAL_CATEGORY_TAGS,
+    INITIAL_CATEGORY_TAGS
   );
   const [productImagesData, setProductImagesData] = useState<ProductImagesData>(
-    INITIAL_PRODUCT_IMAGES,
+    INITIAL_PRODUCT_IMAGES
   );
 
   // Step 2 Data - ✅ Updated type
@@ -174,12 +183,12 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
   // Step 3 Data
   const [vehicleData, setVehicleData] = useState<VehicleData[]>([]);
   const [shippingData, setShippingData] = useState<ShippingData>(
-    INITIAL_SHIPPING_DATA,
+    INITIAL_SHIPPING_DATA
   );
 
   // Product ID (returned from step 1 or passed as prop)
   const [productId, setProductId] = useState<number | null>(
-    product_id ? Number(product_id) : null,
+    product_id ? Number(product_id) : null
   );
 
   // UI State
@@ -193,6 +202,12 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     useCreateProductMutation();
   const [updateProduct, { isLoading: updateLoading }] =
     useUpdateProductMutation();
+  
+  // ✅ Add variant mutation hooks
+  const [createVariant, { isLoading: createVariantLoading }] =
+    useCreateVariantMutation();
+  const [updateVariant, { isLoading: updateVariantLoading }] =
+    useUpdateVariantMutation();
 
   // Fetch existing product data if in edit mode
   const {
@@ -218,10 +233,8 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
       return;
     }
 
-    // ✅ Serialize product data for deep comparison
     const currentProductDataStr = JSON.stringify(existingProduct.data);
-    
-    // Only update if product data actually changed
+
     if (currentProductDataStr === prevProductDataRef.current) {
       return;
     }
@@ -288,7 +301,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     // ✅ Load Vehicle Data
     if (product.main_vehicle || product.compatible_vehicles) {
       const transformedVehicles: VehicleData[] = [];
-      
+
       if (product.main_vehicle) {
         transformedVehicles.push({
           year: product.main_vehicle.year,
@@ -298,7 +311,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
           is_main: true,
         });
       }
-      
+
       if (product.compatible_vehicles && Array.isArray(product.compatible_vehicles)) {
         product.compatible_vehicles.forEach((vehicle: any) => {
           transformedVehicles.push({
@@ -310,19 +323,30 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
           });
         });
       }
-      
+
       setVehicleData(transformedVehicles);
     }
 
     // ✅ Load Variant Data - Transform from API format to new component format
     if (product.variants && Array.isArray(product.variants)) {
+      // Transform API response to match new component structure
       const transformedVariantData: VariantData = {
-        variation_types: product.variation_types || [],
+        // variation_types: product.variation_types?.map((vt: any) => ({
+        //   id: vt.id || vt.attribute_id,
+        //   name: vt.name || vt.attribute_name,
+        //   selectedValues: vt.selectedValues || vt.value_ids || [],
+        // })) || [],
         variants: product.variants.map((v: any) => ({
-          id: v.id || Math.random().toString(36).substr(2, 9),
-          combinations: v.combinations || v.attributes || {},
-          price: String(v.price || ""),
-          quantity: Number(v.quantity || 0),
+          id: String(v.id) || Math.random().toString(36).substr(2, 9),
+          combinations: v.combinations || {},
+          attribute_value_ids: v.attribute_value_ids || [],
+          variant_name: v.variant_name || v.name || "",
+          cost_price: String(v.cost_price || ""),
+          selling_price: String(v.selling_price || v.price || ""),
+          discount_price: String(v.discount_price || ""),
+          stock_quantity: Number(v.stock_quantity || v.quantity || 0),
+          is_default: Boolean(v.is_default),
+          status: Number(v.status ?? 1),
         })),
       };
       setVariantData(transformedVariantData);
@@ -394,38 +418,66 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     return response;
   };
 
-  // ✅ Updated Step 2 submission to handle variant data
-  const submitStep2Data = async (data: VariantData) => {
-    if (!productId) {
-      throw new Error("Product ID is missing");
-    }
+  // ✅ NEW: Updated Step 2 submission using variant mutations
+const submitStep2Data = async (data: VariantData) => {
+  if (!productId) {
+    throw new Error("Product ID is missing");
+  }
 
-    // Transform variant data for API
-    // const body = {
-    //   store_step: "2",
-    //   product_id: productId,
-    //   variation_types: data.variation_types.map(vt => ({
-    //     name: vt.name,
-    //     values: vt.values,
-    //   })),
-    //   variants: data.variants.map(v => ({
-    //     combinations: v.combinations,
-    //     price: parseFloat(v.price.replace(/[^0-9.]/g, "")) || 0,
-    //     quantity: v.quantity,
-    //   })),
-    // };
+  console.log("📤 Submitting step 2 data:", data);
 
-    // console.log("Submitting step 2 data:", body);
+  // Transform variant data for API
+  const variantsPayload = data.variants.map((v) => ({
+    attribute_value_ids: v.attribute_value_ids,
+    variant_name: v.variant_name,
+    cost_price: parseFloat(v.cost_price) || 0,
+    selling_price: parseFloat(v.selling_price) || 0,
+    discount_price: parseFloat(v.discount_price) || 0,
+    stock_quantity: v.stock_quantity,
+    is_default: v.is_default,
+    status: v.status,
+  }));
 
-    // const response = await updateProduct({
-    //   id: productId,
-    //   data: body,
-    // }).unwrap();
+  console.log("🔄 Transformed variants payload:", variantsPayload);
 
-    // setMessage("Variants saved successfully!");
-    // return response;
-  };
+  let response;
 
+  if (isEditMode && data.variants.length > 0 && data.variants[0].id) {
+    // ✅ UPDATE existing variants
+    console.log("🔄 Updating existing variants...");
+    
+    // Update each variant individually
+    const updatePromises = data.variants.map((variant, index) => {
+      const payload = variantsPayload[index];
+      
+      return updateVariant({
+        productId: String(productId),
+        variantId: variant.id,
+        data: payload, 
+      }).unwrap();
+    });
+
+    response = await Promise.all(updatePromises);
+    setMessage(`${data.variants.length} variant(s) updated successfully!`);
+  } else {
+    // ✅ CREATE new variants
+    console.log("✨ Creating new variants...");
+    
+    // Send each variant individually
+    const createPromises = variantsPayload.map((payload) => {
+      return createVariant({
+        productId: String(productId),
+        data: payload, // ✅ Send individual variant object (matches your desired format)
+      }).unwrap();
+    });
+
+    response = await Promise.all(createPromises);
+    setMessage(`${data.variants.length} variant(s) created successfully!`);
+  }
+
+  console.log("✅ Variant operation response:", response);
+  return response;
+};
   const submitStep3Data = async () => {
     if (!productId) {
       throw new Error("Product ID is missing");
@@ -457,10 +509,9 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
       throw new Error("Product ID is missing");
     }
 
-    // TODO: Implement final submission API call
     const body = {
       store_step: "4",
-      status: "published", // or whatever status you need
+      status: "published",
     };
 
     const response = await updateProduct({
@@ -495,14 +546,14 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
         subtitle: t("createproduct.stepper.steps.4.subtitle"),
       },
     ],
-    [t],
+    [t]
   );
 
   /* ------------------ Effects ------------------ */
   // Update step 1 validation based on all sub-forms
   useEffect(() => {
     if (isInitializingRef.current) return;
-    
+
     const allValid = Object.values(step1Validation).every(Boolean);
     setStepValidation((prev) => {
       if (prev[1] === allValid) return prev;
@@ -514,7 +565,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
   const handleValidationChange = useCallback(
     (step: number, isValid: boolean, formName?: string) => {
       if (isInitializingRef.current) return;
-      
+
       if (step === 1 && formName) {
         setStep1Validation((prev) => {
           if (prev[formName as Step1ValidationKeys] === isValid) return prev;
@@ -527,7 +578,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
         });
       }
     },
-    [],
+    []
   );
 
   const handleProductInfoChange = useCallback((data: ProductInfoData) => {
@@ -540,7 +591,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
       if (isInitializingRef.current) return;
       setProductDescriptionData(data);
     },
-    [],
+    []
   );
 
   const handleCategoryChange = useCallback((data: StepperFormValues) => {
@@ -563,7 +614,6 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
   const handleShippingDataChange = useCallback((data: any) => {
     if (isInitializingRef.current) return;
     if (data) {
-      // Extract only the shipping-related fields, not product_id
       setShippingData({
         weight: Number(data.weight) || 0,
         height: Number(data.height) || 0,
@@ -625,7 +675,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
       setSubmitError(
         error instanceof Error
           ? error.message
-          : `Failed to submit step ${currentStep} data`,
+          : `Failed to submit step ${currentStep} data`
       );
       setMessage(null);
     } finally {
@@ -647,44 +697,52 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
   const handleFinalSubmit = useCallback(async () => {
     setSubmitError(null);
     setIsSubmitting(true);
-router.push(`/dashboard/products/${productId}/show`);
+    router.push(`/dashboard/products/${productId}/show`);
+    
+    // Uncomment when ready to implement final submission
     // try {
     //   const response = await submitStep4Data();
     //   setMessage(
     //     isEditMode
     //       ? "Product updated successfully!"
-    //       : "Product created successfully!",
+    //       : "Product created successfully!"
     //   );
-    //   // TODO: Redirect to product page
-    //   router.push(`/products/${productId}`);
+    //   router.push(`/dashboard/products/${productId}/show`);
     // } catch (error) {
     //   console.error("Error finalizing product:", error);
     //   setSubmitError(
-    //     error instanceof Error ? error.message : "Failed to finalize product",
+    //     error instanceof Error ? error.message : "Failed to finalize product"
     //   );
     //   setMessage(null);
     // } finally {
     //   setIsSubmitting(false);
     // }
-  }, [productId, isEditMode]);
+  }, [productId, isEditMode, router]);
 
   /* ------------------ Computed Values ------------------ */
   const canProceedToNextStep = stepValidation[currentStep];
   const isLastStep = currentStep === steps.length;
   const isFirstStep = currentStep === 1;
 
-  // ✅ Memoize shippingData to prevent object recreation
-  const memoizedShippingData = useMemo(() => shippingData, [
-    shippingData.weight,
-    shippingData.height,
-    shippingData.width,
-    shippingData.length,
-    shippingData.is_fragile,
-  ]);
+  const memoizedShippingData = useMemo(
+    () => shippingData,
+    [
+      shippingData.weight,
+      shippingData.height,
+      shippingData.width,
+      shippingData.length,
+      shippingData.is_fragile,
+    ]
+  );
+
+  // ✅ Get selected category ID for variant form
+  const selectedCategoryId = useMemo(() => {
+    const catId = categoryTagsData.sub_category_id || categoryTagsData.category_id;
+    return catId ? Number(catId) : null;
+  }, [categoryTagsData.category_id, categoryTagsData.sub_category_id]);
 
   /* ------------------ Render Content ------------------ */
   const renderSectionContent = useCallback(() => {
-    // ✅ FIX: Use stable key that only changes when productId changes
     const dataKey = isEditMode ? String(productId) : "new";
 
     switch (currentStep) {
@@ -735,12 +793,13 @@ router.push(`/dashboard/products/${productId}/show`);
             <VariantFormCard
               key={`variants-${dataKey}`}
               productId={productId ? String(productId) : null}
+              categoryId={selectedCategoryId} 
               onDataChange={handleVariantDataChange}
               onValidationChange={(isValid) =>
                 handleValidationChange(2, isValid)
               }
               initialValues={{
-                variationTypes: variantData.variation_types,
+                // variationTypes: variantData.variation_types,
                 variants: variantData.variants,
               }}
             />
@@ -753,18 +812,14 @@ router.push(`/dashboard/products/${productId}/show`);
             <VehicleForm
               key={`vehicle-${dataKey}`}
               onDataChange={handleVehicleDataChange}
-              onValidationChange={(isValid) =>
-                handleValidationChange(3, isValid)
-              }
+              onValidationChange={(isValid) => handleValidationChange(3, isValid)}
               initialData={vehicleData}
             />
             <ShippingInfoCard
               key={`shipping-${dataKey}`}
               productId={productId}
               onDataChange={handleShippingDataChange}
-              onValidationChange={(isValid) =>
-                handleValidationChange(3, isValid)
-              }
+              onValidationChange={(isValid) => handleValidationChange(3, isValid)}
               initialData={memoizedShippingData}
             />
           </div>
@@ -779,7 +834,6 @@ router.push(`/dashboard/products/${productId}/show`);
               categoryTags={categoryTagsData}
               description={productDescriptionData}
               images={productImagesData}
-              // variants={variantData}
               shipping={{
                 productId: productId,
                 weight: String(memoizedShippingData.weight),
@@ -798,6 +852,7 @@ router.push(`/dashboard/products/${productId}/show`);
   }, [
     currentStep,
     productId,
+    selectedCategoryId,
     isEditMode,
     handleValidationChange,
     handleProductInfoChange,
@@ -812,7 +867,7 @@ router.push(`/dashboard/products/${productId}/show`);
     productDescriptionData,
     productImagesData,
     variantData,
-    memoizedShippingData, // ✅ Use memoized version
+    memoizedShippingData,
     vehicleData,
   ]);
 

@@ -696,6 +696,10 @@
     "header": {
       "UpdateProduct": "更新产品",
       "saveAsDraft": "保存为草稿"
+    },
+    "steps": {
+      "title": "更新产品",
+      "description": "更新您的产品详情在 4 个简单步骤中"
     }
   },
   "dialog": {

@@ -231,6 +231,7 @@ export const VehicleForm: FC<VehicleFormProps> = ({
   initialData,
 }) => {
   const { t } = useTranslation();
+ 
   const onDataChangeRef = useRef(onDataChange);
   const onValidationChangeRef = useRef(onValidationChange);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -255,14 +256,23 @@ export const VehicleForm: FC<VehicleFormProps> = ({
   const { data: bodyTypesData } = useGetVehicleBodyTypesQuery();
   const { data: allModelsData } = useGetVehicleModelsQuery(); // Fetch all models for brand lookup
 
+
+   const findBrandByModel = useCallback(
+    (modelId?: string) => {
+      if (!modelId || !allModelsData?.data) return "";
+      const model = allModelsData.data.find(
+        (m: any) => String(m.id) === modelId
+      );
+      return model?.brandId ? String(model.brandId) : "";
+    },
+    [allModelsData]
+  );
+
   /* ===============================
      Process Initial Data - MEMOIZED
   ================================ */
-  const getInitialValues = useCallback(() => {
-    console.log("🔄 getInitialValues called with initialData:", initialData);
-
+const getInitialValues = useCallback(() => {
     if (!initialData || initialData.length === 0) {
-      console.log("📝 No initial data, using defaults");
       return {
         mainVehicle: {
           type_id: "",
@@ -283,20 +293,15 @@ export const VehicleForm: FC<VehicleFormProps> = ({
       };
     }
 
-    // Find main vehicle
     const mainVehicle = initialData.find((v) => v.is_main);
-    // Get compatibility vehicles (non-main)
     const compatibilityVehicles = initialData.filter((v) => !v.is_main);
 
-    console.log("🚗 Main vehicle found:", mainVehicle);
-    console.log("🔧 Compatibility vehicles found:", compatibilityVehicles);
-
-    const result = {
+    return {
       mainVehicle: mainVehicle
         ? {
             type_id: mainVehicle.type_id || "",
             body_type_id: mainVehicle.body_type_id || "",
-            brand: "", // Will be populated by useEffect after fetching model data
+            brand: findBrandByModel(mainVehicle.model_id),
             model_id: mainVehicle.model_id || "",
             year: mainVehicle.year || "",
           }
@@ -312,7 +317,7 @@ export const VehicleForm: FC<VehicleFormProps> = ({
           ? compatibilityVehicles.map((v) => ({
               type_id: v.type_id || "",
               body_type_id: v.body_type_id || "",
-              brand: "", // Will be populated by useEffect after fetching model data
+              brand: findBrandByModel(v.model_id),
               model_id: v.model_id || "",
               year: v.year || "",
             }))
@@ -326,10 +331,8 @@ export const VehicleForm: FC<VehicleFormProps> = ({
               },
             ],
     };
+  }, [initialData, findBrandByModel]);
 
-    console.log("✅ Initial values prepared:", result);
-    return result;
-  }, [initialData]);
 
   /* ===============================
      Form Setup
