@@ -124,7 +124,7 @@
     "title": "Recent Notifications",
     "viewall": "View All"
   },
-  "product": {
+  "products": {
     "title": "Products",
     "addproduct": "Add Product",
     "mainimage": "Main Image",
@@ -132,7 +132,10 @@
     "image2": "Image 2",
     "image3": "Image 3",
     "image4": "Image 4",
-    "Recommended": "Recommended: 800x800 pixels"
+    "Recommended": "Recommended: 800x800 pixels",
+    "deleteTitle": "Delete Product",
+    "deleteConfirm": "Are you sure you want to delete",
+    "deleteWarning": "This action cannot be undone."
   },
   "order": {
     "title": "Orders Management",
@@ -784,5 +787,9 @@
     "loading": "Loading product details...",
     "error": "Error loading product",
     "notFound": "Product not found"
+  },
+  "common":{
+    "delete": "Delete",
+    "cancel": "Cancel"
   }
 }

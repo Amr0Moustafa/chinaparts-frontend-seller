@@ -132,7 +132,10 @@
     "image2": "图像 2",
     "image3": "图像 3",
     "image4": "图像 4",
-    "Recommended": "推荐：800x800 像素"
+    "Recommended": "推荐：800x800 像素",
+    "deleteTitle": "删除产品",
+    "deleteConfirm": "您确定要删除",
+    "deleteWarning": "此操作无法撤销。"
   },
   "order": {
     "title": "订单管理",
@@ -792,6 +795,10 @@
     "loading": "正在加载产品详情...",
     "error": "加载产品时出错",
     "notFound": "找不到产品"
+  },
+  "common":{
+    "delete": "删除",
+    "cancel": "取消"
   }
 
 }

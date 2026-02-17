@@ -93,7 +93,14 @@ const vehicleSchema = yup.object({
         year: yup.string().optional(),
       }),
     )
-    .required(),
+    .required()
+    .default([{
+      type_id: "",
+      body_type_id: "",
+      brand: "",
+      model_id: "",
+      year: "",
+    }]),
 });
 
 /* ===============================
@@ -214,7 +221,7 @@ const CompatibilityFormItem: FC<CompatibilityFormItemProps> = ({
 
         <SelectField
           name={`compatibility.${index}.year`}
-          label={t("createproduct.vehicleForm.compatibility.fields.yearRange")}
+          label={t("createproduct.vehicleForm.mainVehicle.fields.year")}
           options={yearOptions}
         />
       </div>
@@ -299,11 +306,11 @@ const getInitialValues = useCallback(() => {
     return {
       mainVehicle: mainVehicle
         ? {
-            type_id: mainVehicle.type_id || "",
-            body_type_id: mainVehicle.body_type_id || "",
+            type_id: mainVehicle.type_id ?? "",
+            body_type_id: mainVehicle.body_type_id ?? "",
             brand: findBrandByModel(mainVehicle.model_id),
-            model_id: mainVehicle.model_id || "",
-            year: mainVehicle.year || "",
+            model_id: mainVehicle.model_id ?? "",
+            year: mainVehicle.year ?? "",
           }
         : {
             type_id: "",
@@ -315,11 +322,11 @@ const getInitialValues = useCallback(() => {
       compatibility:
         compatibilityVehicles.length > 0
           ? compatibilityVehicles.map((v) => ({
-              type_id: v.type_id || "",
-              body_type_id: v.body_type_id || "",
+              type_id: v.type_id ?? "",
+              body_type_id: v.body_type_id ?? "",
               brand: findBrandByModel(v.model_id),
-              model_id: v.model_id || "",
-              year: v.year || "",
+              model_id: v.model_id ?? "",
+              year: v.year ?? "",
             }))
           : [
               {
@@ -612,14 +619,14 @@ const getInitialValues = useCallback(() => {
     <FormProvider {...methods}>
       <div className="space-y-6">
         {/* MAIN VEHICLE */}
-        <Card className="border border-gray-300">
+        <Card className="border border-gray-300 bg-white">
           <CardHeader>
             <CardTitle>
               {t("createproduct.vehicleForm.mainVehicle.title")}
             </CardTitle>
           </CardHeader>
 
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-">
             <SelectField
               name="mainVehicle.type_id"
               label={t(
@@ -657,14 +664,14 @@ const getInitialValues = useCallback(() => {
         </Card>
 
         {/* COMPATIBILITY */}
-        <Card className="border border-gray-300">
+        <Card className="border border-gray-300 bg-white">
           <CardHeader>
             <CardTitle>
               {t("createproduct.vehicleForm.compatibility.title")}
             </CardTitle>
           </CardHeader>
 
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-">
             <div className="flex justify-end">
               <Button
                 type="button"
