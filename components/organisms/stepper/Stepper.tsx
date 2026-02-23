@@ -49,7 +49,6 @@ type Step1ValidationKeys =
   | "images";
 
 type Step1ValidationState = Record<Step1ValidationKeys, boolean>;
-
 type StepValidationState = Record<number, boolean>;
 
 type ProductImagesData = {
@@ -106,6 +105,7 @@ const INITIAL_PRODUCT_INFO: ProductInfoData = {
   sku: "",
   manufacturer_name: "",
   priority: "",
+  quality_type_id: "",
 };
 
 const INITIAL_PRODUCT_DESCRIPTION: ProductDescriptionData = {
@@ -142,21 +142,15 @@ const INITIAL_VARIANT_DATA: VariantData = {
 
 /* ==================== Helpers ==================== */
 
-/** Deep-compare two values by serialising to JSON */
 const isEqual = (a: unknown, b: unknown): boolean =>
   JSON.stringify(a) === JSON.stringify(b);
 
-/**
- * Returns true when images data has changed.
- * A new File object means the user picked a new file.
- * URL changes (removed images) also count as a change.
- */
 const hasImagesChanged = (
   current: ProductImagesData,
   original: ProductImagesData,
 ): boolean => {
-  if (current.main_image !== null) return true; // new file selected
-  if (current.images.length > 0) return true; // new files selected
+  if (current.main_image !== null) return true;
+  if (current.images.length > 0) return true;
   if (current.main_image_url !== original.main_image_url) return true;
   if (!isEqual(current.images_url, original.images_url)) return true;
   return false;
@@ -175,7 +169,6 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
   const isInitializingRef = useRef(false);
   const prevProductDataRef = useRef<string>("");
 
-  /* ---- Refs that hold the "original" data loaded from the API ---- */
   const originalStep1Ref = useRef<{
     productInfo: ProductInfoData;
     categoryTags: StepperFormValues;
@@ -199,7 +192,6 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     INITIAL_STEP1_VALIDATION,
   );
 
-  // Step 1 Data
   const [productInfoData, setProductInfoData] =
     useState<ProductInfoData>(INITIAL_PRODUCT_INFO);
   const [productDescriptionData, setProductDescriptionData] =
@@ -211,21 +203,23 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     INITIAL_PRODUCT_IMAGES,
   );
 
-  // Step 2 Data
   const [variantData, setVariantData] =
     useState<VariantData>(INITIAL_VARIANT_DATA);
 
-  // Step 3 Data
   const [vehicleData, setVehicleData] = useState<VehicleData[]>([]);
   const [shippingData, setShippingData] = useState<ShippingData>(
     INITIAL_SHIPPING_DATA,
   );
 
+  const [step3Validation, setStep3Validation] = useState<{
+    vehicle: boolean;
+    shipping: boolean;
+  }>({ vehicle: false, shipping: false });
+
   const [productId, setProductId] = useState<number | null>(
     product_id ? Number(product_id) : null,
   );
 
-  // UI State
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -245,11 +239,20 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     skip: !product_id,
   });
 
-  /* ------------------ React Hook Form ------------------ */
   const formMethods = useForm<StepperFormValues>({
     defaultValues: INITIAL_CATEGORY_TAGS,
     mode: "onChange",
   });
+
+  /* ------------------ Sync step3 validation ------------------ */
+  useEffect(() => {
+    if (isInitializingRef.current) return;
+    const allValid = step3Validation.vehicle && step3Validation.shipping;
+    setStepValidation((prev) => {
+      if (prev[3] === allValid) return prev;
+      return { ...prev, 3: allValid };
+    });
+  }, [step3Validation]);
 
   /* ------------------ Load Existing Product Data ------------------ */
   useEffect(() => {
@@ -263,7 +266,6 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     const currentProductDataStr = JSON.stringify(existingProduct.data);
     if (currentProductDataStr === prevProductDataRef.current) return;
 
-    console.log("📦 Loading product data...");
     prevProductDataRef.current = currentProductDataStr;
     isInitializingRef.current = true;
 
@@ -273,12 +275,13 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
       setProductId(product.id);
     }
 
-    // ---- Step 1 data ----
+    // ---- Step 1 ----
     const newProductInfo: ProductInfoData = {
       name: product.name || "",
       sku: product.sku || "",
       manufacturer_name: product.manufacturer_name || "",
       priority: product.priority || "",
+      quality_type_id: String(product.quality_type_id || ""),
     };
     setProductInfoData(newProductInfo);
 
@@ -306,7 +309,6 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     };
     setProductImagesData(newImages);
 
-    // Snapshot original step 1 data
     originalStep1Ref.current = {
       productInfo: newProductInfo,
       categoryTags: newCategoryTags,
@@ -314,7 +316,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
       productImages: newImages,
     };
 
-    // ---- Step 3 data ----
+    // ---- Step 3 ----
     const newShipping: ShippingData = {
       weight: Number(product.weight) || 0,
       height: Number(product.height) || 0,
@@ -324,7 +326,16 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     };
     setShippingData(newShipping);
 
+    // ---- Transform vehicles ----
+    // Main vehicle:
+    //   model_id  = vehicle.model?.id   ✅
+    //   brand     = vehicle.model?.brand?.id  ✅
+    //
+    // Compatible vehicles (each uses its OWN model and brand):
+    //   model_id  = vehicle.model?.id   ✅
+    //   brand     = vehicle.model?.brand?.id  ✅
     const transformedVehicles: VehicleData[] = [];
+
     if (product.main_vehicle) {
       transformedVehicles.push({
         year: product.main_vehicle.year,
@@ -332,28 +343,37 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
         model_id: String(product.main_vehicle.model?.id || ""),
         body_type_id: String(product.main_vehicle.body_type?.id || ""),
         is_main: true,
+        brand: String(product.main_vehicle.model?.brand?.id || ""),
       });
     }
-    if (product.compatible_vehicles && Array.isArray(product.compatible_vehicles)) {
+
+    if (
+      product.compatible_vehicles &&
+      Array.isArray(product.compatible_vehicles)
+    ) {
       product.compatible_vehicles.forEach((vehicle: any) => {
+        console.log(vehicle)
         transformedVehicles.push({
           year: vehicle.year,
           type_id: String(vehicle.type?.id || ""),
+          // ✅ model_id from each compatible vehicle's own model?.id
           model_id: String(vehicle.model?.id || ""),
           body_type_id: String(vehicle.body_type?.id || ""),
           is_main: false,
+          // ✅ brand from each compatible vehicle's own model?.brand?.id
+          brand: String(vehicle.model?.brand?.id || ""),
         });
       });
     }
+
     setVehicleData(transformedVehicles);
 
-    // Snapshot original step 3 data
     originalStep3Ref.current = {
       shipping: newShipping,
       vehicles: transformedVehicles,
     };
 
-    // ---- Step 2 data (variants) ----
+    // ---- Step 2 (variants) ----
     if (product.variants && Array.isArray(product.variants)) {
       const transformedVariantData: VariantData = {
         variants: product.variants.map((v: any) => ({
@@ -370,62 +390,44 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
         })),
       };
       setVariantData(transformedVariantData);
-      // Snapshot original variant data
       originalVariantRef.current = transformedVariantData;
     }
 
     setTimeout(() => {
       setIsDataLoaded(true);
       isInitializingRef.current = false;
-      console.log("✅ Product data loaded");
     }, 100);
   }, [existingProduct, isEditMode, productId]);
 
-  /* ==================== Change Detection Helpers ==================== */
+  /* ==================== Change Detection ==================== */
 
-  /**
-   * Returns true if step 1 data has changed compared to the originally
-   * loaded snapshot. In create mode it always returns true.
-   */
   const hasStep1Changed = useCallback((): boolean => {
     if (!isEditMode || !originalStep1Ref.current) return true;
-
     const orig = originalStep1Ref.current;
-
     return (
       !isEqual(productInfoData, orig.productInfo) ||
       !isEqual(categoryTagsData, orig.categoryTags) ||
       !isEqual(productDescriptionData, orig.productDescription) ||
       hasImagesChanged(productImagesData, orig.productImages)
     );
-  }, [
-    isEditMode,
-    productInfoData,
-    categoryTagsData,
-    productDescriptionData,
-    productImagesData,
-  ]);
+  }, [isEditMode, productInfoData, categoryTagsData, productDescriptionData, productImagesData]);
 
-  /**
-   * Returns true if variant data has changed compared to the originally
-   * loaded snapshot. In create mode it always returns true.
-   */
   const hasStep2Changed = useCallback((): boolean => {
     if (!isEditMode || !originalVariantRef.current) return true;
     return !isEqual(variantData, originalVariantRef.current);
   }, [isEditMode, variantData]);
 
-  /**
-   * Returns true if step 3 (shipping + vehicles) data has changed.
-   */
-  const hasStep3Changed = useCallback((): boolean => {
-    if (!isEditMode || !originalStep3Ref.current) return true;
-    const orig = originalStep3Ref.current;
-    return (
-      !isEqual(shippingData, orig.shipping) ||
-      !isEqual(vehicleData, orig.vehicles)
-    );
-  }, [isEditMode, shippingData, vehicleData]);
+  const hasStep3Changed = useCallback(
+    (currentShipping: ShippingData, currentVehicles: VehicleData[]): boolean => {
+      if (!isEditMode || !originalStep3Ref.current) return true;
+      const orig = originalStep3Ref.current;
+      return (
+        !isEqual(currentShipping, orig.shipping) ||
+        !isEqual(currentVehicles, orig.vehicles)
+      );
+    },
+    [isEditMode],
+  );
 
   /* ==================== API Functions ==================== */
 
@@ -451,6 +453,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     formData.append("details_info", data.productDescription.details_info);
     formData.append("shipping_info", data.productDescription.shipping_info);
     formData.append("return_info", data.productDescription.return_info);
+    formData.append("quality_type_id", data.productInfo.quality_type_id);
 
     if (data.productImages.main_image) {
       formData.append("main_image", data.productImages.main_image);
@@ -464,17 +467,11 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     if (isEditMode && productId) {
       response = await updateProduct({ id: productId, data: formData }).unwrap();
       setMessage("Product updated successfully!");
-
-      // Update snapshot so subsequent navigation doesn't re-send
       originalStep1Ref.current = {
         productInfo: data.productInfo,
         categoryTags: data.categoryTags,
         productDescription: data.productDescription,
-        productImages: {
-          ...data.productImages,
-          main_image: null,  // reset file after upload
-          images: [],
-        },
+        productImages: { ...data.productImages, main_image: null, images: [] },
       };
     } else {
       response = await createProduct(formData).unwrap();
@@ -495,66 +492,71 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
       return { success: true, message: "No variants to create" };
     }
 
-    const variantsPayload = data.variants.map((v) => ({
-      attribute_value_ids: v.attribute_value_ids,
-      variant_name: v.variant_name,
-      cost_price: parseFloat(v.cost_price) || 0,
-      selling_price: parseFloat(v.selling_price) || 0,
-      discount_price: parseFloat(v.discount_price) || 0,
-      stock_quantity: v.stock_quantity,
-      is_default: v.is_default,
-      status: v.status,
-    }));
-
     let response;
 
     if (isEditMode && data.variants[0]?.id) {
-      const updatePromises = data.variants.map((variant, index) =>
+      const updatePromises = data.variants.map((v) =>
         updateVariant({
           productId: String(productId),
-          variantId: variant.id,
-          data: variantsPayload[index],
+          variantId: v.id,
+          data: {
+            attribute_value_ids: v.attribute_value_ids,
+            variant_name: v.variant_name,
+            cost_price: parseFloat(v.cost_price) || 0,
+            selling_price: parseFloat(v.selling_price) || 0,
+            discount_price: parseFloat(v.discount_price) || 0,
+            stock_quantity: v.stock_quantity,
+            is_default: v.is_default,
+            status: v.status,
+          },
         }).unwrap(),
       );
       response = await Promise.all(updatePromises);
       setMessage(`${data.variants.length} variant(s) updated successfully!`);
     } else {
-      const createPromises = variantsPayload.map((payload) =>
-        createVariant({ productId: String(productId), data: payload }).unwrap(),
+      const createPromises = data.variants.map((v) =>
+        createVariant({
+          productId: String(productId),
+          data: {
+            attribute_value_ids: v.attribute_value_ids,
+            variant_name: v.variant_name,
+            cost_price: parseFloat(v.cost_price) || 0,
+            selling_price: parseFloat(v.selling_price) || 0,
+            discount_price: parseFloat(v.discount_price) || 0,
+            stock_quantity: v.stock_quantity,
+            is_default: v.is_default,
+            status: v.status,
+          },
+        }).unwrap(),
       );
       response = await Promise.all(createPromises);
       setMessage(`${data.variants.length} variant(s) created successfully!`);
     }
 
-    // Update snapshot
     originalVariantRef.current = data;
-
     return response;
   };
 
-  const submitStep3Data = async () => {
+  const submitStep3Data = async (
+    shipping: ShippingData,
+    vehicles: VehicleData[],
+  ) => {
     if (!productId) throw new Error("Product ID is missing");
 
     const body = {
       store_step: "3",
-      vehicles: vehicleData,
-      weight: shippingData.weight,
-      height: shippingData.height,
-      width: shippingData.width,
-      length: shippingData.length,
-      is_fragile: shippingData.is_fragile,
+      vehicles,
+      weight: shipping.weight,
+      height: shipping.height,
+      width: shipping.width,
+      length: shipping.length,
+      is_fragile: shipping.is_fragile,
     };
 
     const response = await updateProduct({ id: productId, data: body }).unwrap();
     setMessage("Product updated successfully!");
     setSubmitError(null);
-
-    // Update snapshot
-    originalStep3Ref.current = {
-      shipping: shippingData,
-      vehicles: vehicleData,
-    };
-
+    originalStep3Ref.current = { shipping, vehicles };
     return response;
   };
 
@@ -608,6 +610,11 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
       if (step === 1 && formName) {
         setStep1Validation((prev) => {
           if (prev[formName as Step1ValidationKeys] === isValid) return prev;
+          return { ...prev, [formName]: isValid };
+        });
+      } else if (step === 3 && formName) {
+        setStep3Validation((prev) => {
+          if (prev[formName as "vehicle" | "shipping"] === isValid) return prev;
           return { ...prev, [formName]: isValid };
         });
       } else {
@@ -680,7 +687,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     setCurrentStep((prev) => Math.max(1, prev - 1));
   }, []);
 
-  /* ------------------ Submit Logic for Each Step ------------------ */
+  /* ------------------ Submit Logic ------------------ */
   const handleNextStep = useCallback(async () => {
     setSubmitError(null);
     setIsSubmitting(true);
@@ -689,7 +696,6 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
       switch (currentStep) {
         case 1: {
           if (hasStep1Changed()) {
-            console.log("🔄 Step 1 data changed — calling API");
             await submitStep1Data({
               productInfo: productInfoData,
               categoryTags: categoryTagsData,
@@ -697,34 +703,28 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
               productImages: productImagesData,
             });
           } else {
-            console.log("✅ Step 1 data unchanged — skipping API call");
-            setMessage(null); // clear any previous message
+            setMessage(null);
           }
           break;
         }
-
         case 2: {
           if (hasStep2Changed()) {
-            console.log("🔄 Step 2 data changed — calling API");
             await submitStep2Data(variantData);
           } else {
-            console.log("✅ Step 2 data unchanged — skipping API call");
             setMessage(null);
           }
           break;
         }
-
         case 3: {
-          if (hasStep3Changed()) {
-            console.log("🔄 Step 3 data changed — calling API");
-            await submitStep3Data();
+          const currentShipping = shippingData;
+          const currentVehicles = vehicleData;
+          if (hasStep3Changed(currentShipping, currentVehicles)) {
+            await submitStep3Data(currentShipping, currentVehicles);
           } else {
-            console.log("✅ Step 3 data unchanged — skipping API call");
             setMessage(null);
           }
           break;
         }
-
         default:
           break;
       }
@@ -780,8 +780,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
   );
 
   const selectedCategoryId = useMemo(() => {
-    const catId =
-      categoryTagsData.sub_category_id || categoryTagsData.category_id;
+    const catId = categoryTagsData.sub_category_id || categoryTagsData.category_id;
     return catId ? Number(catId) : null;
   }, [categoryTagsData.category_id, categoryTagsData.sub_category_id]);
 
@@ -853,7 +852,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
               key={`vehicle-${dataKey}`}
               onDataChange={handleVehicleDataChange}
               onValidationChange={(isValid) =>
-                handleValidationChange(3, isValid)
+                handleValidationChange(3, isValid, "vehicle")
               }
               initialData={vehicleData}
             />
@@ -862,7 +861,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
               productId={productId}
               onDataChange={handleShippingDataChange}
               onValidationChange={(isValid) =>
-                handleValidationChange(3, isValid)
+                handleValidationChange(3, isValid, "shipping")
               }
               initialData={memoizedShippingData}
             />
@@ -886,6 +885,8 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
                 height: String(memoizedShippingData.height),
                 is_fragile: memoizedShippingData.is_fragile,
               }}
+              variants={variantData?.variants || []}
+              vehicles={vehicleData}
             />
           </div>
         );
@@ -915,7 +916,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     vehicleData,
   ]);
 
-  /* ------------------ Loading State ------------------ */
+  /* ------------------ Loading States ------------------ */
   if (isLoadingProduct && isEditMode) {
     return (
       <div className="max-w-7xl mx-auto mt-5 flex justify-center items-center min-h-[400px]">
@@ -959,7 +960,10 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     <FormProvider {...formMethods}>
       <div className="max-w-7xl mx-auto mt-5">
         {/* Stepper Navigation */}
-        <nav className="flex lg:items-center justify-center gap-4 md:gap-0 pb-4 mb-6" aria-label="Progress">
+        <nav
+          className="flex lg:items-center justify-center gap-4 md:gap-0 pb-4 mb-6"
+          aria-label="Progress"
+        >
           {steps.map((step, index) => (
             <div key={step.id} className="lg:shrink-0">
               <StepItem

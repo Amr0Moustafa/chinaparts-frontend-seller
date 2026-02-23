@@ -15,7 +15,6 @@ import {
   useGetVehicleTypesQuery,
   useGetVehicleModelsByBrandQuery,
   useGetVehicleBodyTypesQuery,
-  useGetVehicleModelsQuery,
 } from "@/features/sellerAttributes";
 
 /* ===============================
@@ -26,6 +25,7 @@ interface SelectOption {
   value: string;
 }
 
+// All fields optional to match yup schema inference (string | undefined)
 interface CompatibilityItem {
   type_id?: string;
   body_type_id?: string;
@@ -53,6 +53,7 @@ export interface VehicleData {
   model_id: string;
   body_type_id: string;
   is_main: boolean;
+  brand: string;
 }
 
 interface VehicleFormProps {
@@ -93,14 +94,7 @@ const vehicleSchema = yup.object({
         year: yup.string().optional(),
       }),
     )
-    .required()
-    .default([{
-      type_id: "",
-      body_type_id: "",
-      brand: "",
-      model_id: "",
-      year: "",
-    }]),
+    .required(),
 });
 
 /* ===============================
@@ -117,19 +111,16 @@ const CompatibilityFormItem: FC<CompatibilityFormItemProps> = ({
 }) => {
   const { t } = useTranslation();
   const { setValue, watch } = useFormContext<VehicleFormValues>();
-  
-  // State for brand tracking
+
   const [selectedBrandId, setSelectedBrandId] = useState("");
   const [prevBrandId, setPrevBrandId] = useState("");
   const isInitializedRef = useRef(false);
 
-  // Watch form value to sync with state (for initialData)
+  // Watch form brand value — syncs state when initialData is loaded
   const formBrandValue = watch(`compatibility.${index}.brand`);
 
-  // Sync state with form value when it changes from outside (initialData)
   useEffect(() => {
     if (formBrandValue && formBrandValue !== selectedBrandId) {
-      console.log(`📥 Syncing compatibility[${index}] brand state from form:`, formBrandValue);
       setSelectedBrandId(formBrandValue);
       if (!isInitializedRef.current) {
         setPrevBrandId(formBrandValue);
@@ -138,37 +129,37 @@ const CompatibilityFormItem: FC<CompatibilityFormItemProps> = ({
     }
   }, [formBrandValue, selectedBrandId, index]);
 
-  // Fetch models using RTK Query - will auto fetch when selectedBrandId changes
+  // Fetch models for this compatibility item's selected brand
   const { data: modelsData, isLoading: modelsLoading } =
     useGetVehicleModelsByBrandQuery(selectedBrandId, {
       skip: !selectedBrandId,
       refetchOnMountOrArgChange: true,
     });
 
-  // Reset model when brand actually changes (not during initialization)
+  // Reset model_id when brand changes (not on initial load)
   useEffect(() => {
     if (!isInitializedRef.current) return;
-    
-    // Use a small timeout to debounce and avoid cascading updates
+
     const timer = setTimeout(() => {
       if (selectedBrandId && selectedBrandId !== prevBrandId) {
-        console.log(`🔄 Compatibility[${index}] brand changed from`, prevBrandId, "to", selectedBrandId);
         setValue(`compatibility.${index}.model_id`, "", { shouldValidate: false });
         setPrevBrandId(selectedBrandId);
       }
     }, 0);
-    
+
     return () => clearTimeout(timer);
   }, [selectedBrandId, prevBrandId, index, setValue]);
 
-  // Handler for brand change
-  const handleBrandChange = useCallback((value: any) => {
-    // Extract value from event if it's an event object
-    const brandId = typeof value === 'string' ? value : value?.target?.value || value;
-    console.log(`🎯 Compatibility[${index}] brand selected:`, brandId);
-    setSelectedBrandId(brandId);
-  }, [index]);
-    
+  const handleBrandChange = useCallback(
+    (value: any) => {
+      const brandId =
+        typeof value === "string" ? value : value?.target?.value || value;
+      setSelectedBrandId(brandId);
+    },
+    [index],
+  );
+
+  // model options: value = m.id (the model's id from API)
   const modelOptions: SelectOption[] =
     modelsData?.data?.map((m: any) => ({
       label: m.name,
@@ -176,7 +167,7 @@ const CompatibilityFormItem: FC<CompatibilityFormItemProps> = ({
     })) || [];
 
   return (
-    <div className="border border-gray-300 rounded-lg p-4 relative space-y-4">
+    <div className="border border-gray-300 mt-5 mb-5 rounded-lg p-4 relative space-y-4">
       {canRemove && (
         <Button
           type="button"
@@ -193,9 +184,7 @@ const CompatibilityFormItem: FC<CompatibilityFormItemProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SelectField
           name={`compatibility.${index}.type_id`}
-          label={t(
-            "createproduct.vehicleForm.compatibility.fields.vehicleType",
-          )}
+          label={t("createproduct.vehicleForm.compatibility.fields.vehicleType")}
           options={vehicleTypeOptions}
         />
 
@@ -212,6 +201,7 @@ const CompatibilityFormItem: FC<CompatibilityFormItemProps> = ({
           onChange={handleBrandChange}
         />
 
+        {/* model_id value = m.id from API (vehicle.model?.id) */}
         <SelectField
           name={`compatibility.${index}.model_id`}
           label={t("createproduct.vehicleForm.compatibility.fields.model")}
@@ -238,18 +228,13 @@ export const VehicleForm: FC<VehicleFormProps> = ({
   initialData,
 }) => {
   const { t } = useTranslation();
- 
+
   const onDataChangeRef = useRef(onDataChange);
   const onValidationChangeRef = useRef(onValidationChange);
   const [isInitialized, setIsInitialized] = useState(false);
-  
-  // Add ref to track if we're currently initializing to prevent loops
   const isInitializingRef = useRef(false);
-  
-  // Add ref to store serialized initialData for comparison
-  const prevInitialDataRef = useRef<string>('');
+  const prevInitialDataRef = useRef<string>("");
 
-  // Keep refs updated
   useEffect(() => {
     onDataChangeRef.current = onDataChange;
     onValidationChangeRef.current = onValidationChange;
@@ -261,24 +246,11 @@ export const VehicleForm: FC<VehicleFormProps> = ({
   const { data: brandsData } = useGetBrandsQuery();
   const { data: vehicleTypesData } = useGetVehicleTypesQuery();
   const { data: bodyTypesData } = useGetVehicleBodyTypesQuery();
-  const { data: allModelsData } = useGetVehicleModelsQuery(); // Fetch all models for brand lookup
-
-
-   const findBrandByModel = useCallback(
-    (modelId?: string) => {
-      if (!modelId || !allModelsData?.data) return "";
-      const model = allModelsData.data.find(
-        (m: any) => String(m.id) === modelId
-      );
-      return model?.brandId ? String(model.brandId) : "";
-    },
-    [allModelsData]
-  );
 
   /* ===============================
-     Process Initial Data - MEMOIZED
+     Process Initial Data
   ================================ */
-const getInitialValues = useCallback(() => {
+  const getInitialValues = useCallback((): VehicleFormValues => {
     if (!initialData || initialData.length === 0) {
       return {
         mainVehicle: {
@@ -306,11 +278,12 @@ const getInitialValues = useCallback(() => {
     return {
       mainVehicle: mainVehicle
         ? {
-            type_id: mainVehicle.type_id ?? "",
-            body_type_id: mainVehicle.body_type_id ?? "",
-            brand: findBrandByModel(mainVehicle.model_id),
-            model_id: mainVehicle.model_id ?? "",
-            year: mainVehicle.year ?? "",
+            type_id: mainVehicle.type_id || "",
+            body_type_id: mainVehicle.body_type_id || "",
+            brand: mainVehicle.brand || "",
+            // model_id comes from vehicle.model?.id passed via initialData
+            model_id: mainVehicle.model_id || "",
+            year: mainVehicle.year || "",
           }
         : {
             type_id: "",
@@ -322,11 +295,12 @@ const getInitialValues = useCallback(() => {
       compatibility:
         compatibilityVehicles.length > 0
           ? compatibilityVehicles.map((v) => ({
-              type_id: v.type_id ?? "",
-              body_type_id: v.body_type_id ?? "",
-              brand: findBrandByModel(v.model_id),
-              model_id: v.model_id ?? "",
-              year: v.year ?? "",
+              type_id: v.type_id || "",
+              body_type_id: v.body_type_id || "",
+              brand: v.brand || "",
+              // model_id comes from vehicle.model?.id passed via initialData
+              model_id: v.model_id || "",
+              year: v.year || "",
             }))
           : [
               {
@@ -338,27 +312,32 @@ const getInitialValues = useCallback(() => {
               },
             ],
     };
-  }, [initialData, findBrandByModel]);
-
+  }, [initialData]);
 
   /* ===============================
      Form Setup
   ================================ */
   const methods = useForm<VehicleFormValues>({
-    resolver: yupResolver(vehicleSchema),
+    // Cast resolver to avoid yup optional inference mismatch with CompatibilityItem
+    resolver: yupResolver(vehicleSchema) as any,
     mode: "onChange",
     defaultValues: getInitialValues(),
   });
 
-  const { watch, formState, setValue, reset, getValues } = methods;
-  const mainVehicle = watch("mainVehicle");
+  const { watch, formState, setValue, reset } = methods;
 
-  // State for main vehicle brand
-  const [mainVehicleBrandId, setMainVehicleBrandId] = useState("");
-  const [prevMainBrandId, setPrevMainBrandId] = useState("");
+  // Initialize brand state from initialData
+  const [mainVehicleBrandId, setMainVehicleBrandId] = useState(
+    () => initialData?.find((v) => v.is_main)?.brand || "",
+  );
+  const [prevMainBrandId, setPrevMainBrandId] = useState(
+    () => initialData?.find((v) => v.is_main)?.brand || "",
+  );
 
   /* ===============================
      Main Vehicle Models Fetching
+     — fetches models for the selected brand
+     — options value = m.id (vehicle.model?.id)
   ================================ */
   const { data: mainModelsData, isLoading: mainModelsLoading } =
     useGetVehicleModelsByBrandQuery(mainVehicleBrandId, {
@@ -366,25 +345,25 @@ const getInitialValues = useCallback(() => {
       refetchOnMountOrArgChange: true,
     });
 
-  // Reset model when brand actually changes
+  // Reset model_id when main vehicle brand changes
   useEffect(() => {
-    if (isInitializingRef.current) return; // Skip during initialization
-    
-    if (mainVehicleBrandId && mainVehicleBrandId !== prevMainBrandId && prevMainBrandId !== "") {
-      console.log("🔄 Main brand changed from", prevMainBrandId, "to", mainVehicleBrandId);
+    if (isInitializingRef.current) return;
+
+    if (
+      mainVehicleBrandId &&
+      mainVehicleBrandId !== prevMainBrandId &&
+      prevMainBrandId !== ""
+    ) {
       setValue("mainVehicle.model_id", "", { shouldValidate: false });
       setPrevMainBrandId(mainVehicleBrandId);
     } else if (mainVehicleBrandId && prevMainBrandId === "") {
-      // First time setting brand (from initial data)
       setPrevMainBrandId(mainVehicleBrandId);
     }
   }, [mainVehicleBrandId, prevMainBrandId, setValue]);
 
-  // Handler for main brand change
   const handleMainBrandChange = useCallback((value: any) => {
-    // Extract value from event if it's an event object
-    const brandId = typeof value === 'string' ? value : value?.target?.value || value;
-    console.log("🎯 Main brand selected:", brandId);
+    const brandId =
+      typeof value === "string" ? value : value?.target?.value || value;
     setMainVehicleBrandId(brandId);
   }, []);
 
@@ -409,6 +388,7 @@ const getInitialValues = useCallback(() => {
       value: String(b.id),
     })) || [];
 
+  // Main vehicle model options: value = m.id (vehicle.model?.id)
   const mainModelOptions: SelectOption[] =
     mainModelsData?.data?.map((m: any) => ({
       label: m.name,
@@ -417,88 +397,48 @@ const getInitialValues = useCallback(() => {
 
   const yearOptions: SelectOption[] = Array.from({ length: 30 }).map((_, i) => {
     const year = 1995 + i;
-    return {
-      label: `${year}`,
-      value: `${year}`,
-    };
+    return { label: `${year}`, value: `${year}` };
   });
 
   /* ===============================
-     Populate brand IDs from model IDs when editing
-     FIXED: Only depends on allModelsData, runs once when data is available
+     Sync mainVehicleBrandId when initialData arrives
   ================================ */
   useEffect(() => {
-    if (isInitializingRef.current) return; // Skip during initialization
+    if (isInitializingRef.current) return;
     if (!initialData || initialData.length === 0) return;
-    if (!allModelsData?.data) return;
 
-    const values = getValues();
-    let needsUpdate = false;
-    
-    // Handle main vehicle
     const mainVehicleData = initialData.find((v) => v.is_main);
-    if (mainVehicleData?.model_id && !values.mainVehicle.brand) {
-      const model = allModelsData.data.find(
-        (m: any) => String(m.id) === mainVehicleData.model_id
-      );
-      if (model?.brandId) {
-        console.log("🔧 Setting main vehicle brand from model:", model.brandId);
-        setValue("mainVehicle.brand", String(model.brandId), { shouldValidate: false });
-        setMainVehicleBrandId(String(model.brandId));
-        needsUpdate = true;
-      }
+    if (mainVehicleData?.brand && mainVehicleData.brand !== mainVehicleBrandId) {
+      setMainVehicleBrandId(mainVehicleData.brand);
+      setPrevMainBrandId(mainVehicleData.brand);
     }
-
-    // Handle compatibility vehicles
-    const compatibilityVehicles = initialData.filter((v) => !v.is_main);
-    compatibilityVehicles.forEach((vehicle, index) => {
-      if (vehicle.model_id && !values.compatibility[index]?.brand) {
-        const model = allModelsData.data.find(
-          (m: any) => String(m.id) === vehicle.model_id
-        );
-        if (model?.brandId) {
-          console.log(`🔧 Setting compatibility[${index}] brand from model:`, model.brandId);
-          setValue(`compatibility.${index}.brand`, String(model.brandId), { shouldValidate: false });
-          needsUpdate = true;
-        }
-      }
-    });
-
-    if (needsUpdate) {
-      console.log("✅ Brand population complete");
-    }
-  }, [allModelsData]); // ONLY depend on allModelsData
+  }, [initialData]);
 
   /* ===============================
      Reset form when initialData changes
-     FIXED: Uses deep comparison and initialization flag
   ================================ */
   useEffect(() => {
-    // Serialize initialData for deep comparison
     const currentInitialDataStr = JSON.stringify(initialData || []);
-    
-    // Only reset if initialData actually changed
-    if (currentInitialDataStr === prevInitialDataRef.current) {
-      return;
-    }
-    
-    console.log("🔄 initialData changed, resetting form:", initialData);
+    if (currentInitialDataStr === prevInitialDataRef.current) return;
+
     prevInitialDataRef.current = currentInitialDataStr;
-    
-    isInitializingRef.current = true; // Set flag to prevent cascading updates
-    
+    isInitializingRef.current = true;
+
     if (initialData && initialData.length > 0) {
       const newValues = getInitialValues();
-      console.log("📝 Resetting form with values:", newValues);
       reset(newValues);
-      
-      // Mark as initialized after reset completes
+
+      const mainVehicleData = initialData.find((v) => v.is_main);
+      if (mainVehicleData?.brand) {
+        setMainVehicleBrandId(mainVehicleData.brand);
+        setPrevMainBrandId(mainVehicleData.brand);
+      }
+
       setTimeout(() => {
         setIsInitialized(true);
-        isInitializingRef.current = false; // Clear flag
+        isInitializingRef.current = false;
       }, 100);
     } else if (!isInitialized) {
-      // First render with no data
       setIsInitialized(true);
       isInitializingRef.current = false;
     } else {
@@ -507,59 +447,58 @@ const getInitialValues = useCallback(() => {
   }, [initialData, reset, getInitialValues, isInitialized]);
 
   /* ===============================
-     Payload Builder - MEMOIZED
+     Payload Builder
+     model_id = vehicle.model?.id (the id from API, stored as SelectField value)
   ================================ */
-  const buildVehiclesPayload = useCallback((values: VehicleFormValues): VehicleData[] => {
-    const vehicles: VehicleData[] = [];
+  const buildVehiclesPayload = useCallback(
+    (values: VehicleFormValues): VehicleData[] => {
+      const vehicles: VehicleData[] = [];
 
-    const main = values.mainVehicle;
-    if (main?.year && main?.type_id && main?.model_id && main?.body_type_id) {
-      const year = main.year.includes("-")
-        ? main.year.split("-")[0]
-        : main.year;
-      vehicles.push({
-        year,
-        type_id: main.type_id,
-        model_id: main.model_id,
-        body_type_id: main.body_type_id,
-        is_main: true,
-      });
-    }
-
-    values.compatibility?.forEach((c) => {
-      if (c?.year && c?.type_id && c?.model_id && c?.body_type_id) {
-        const year = c.year.includes("-") ? c.year.split("-")[0] : c.year;
+      const main = values.mainVehicle;
+      if (main?.year && main?.type_id && main?.model_id && main?.body_type_id) {
+        const year = main.year.includes("-") ? main.year.split("-")[0] : main.year;
         vehicles.push({
           year,
-          type_id: c.type_id,
-          model_id: c.model_id,
-          body_type_id: c.body_type_id,
-          is_main: false,
+          type_id: main.type_id,
+          model_id: main.model_id, // value = vehicle.model?.id
+          body_type_id: main.body_type_id,
+          is_main: true,
+          brand: main.brand || "",
         });
       }
-    });
 
-    return vehicles;
-  }, []);
+      values.compatibility?.forEach((c) => {
+        if (c?.year && c?.type_id && c?.model_id && c?.body_type_id) {
+          const year = c.year.includes("-") ? c.year.split("-")[0] : c.year;
+          vehicles.push({
+            year,
+            type_id: c.type_id,
+            model_id: c.model_id, // value = vehicle.model?.id
+            body_type_id: c.body_type_id,
+            is_main: false,
+            brand: c.brand || "",
+          });
+        }
+      });
+
+      return vehicles;
+    },
+    [],
+  );
 
   /* ===============================
-     Effects
+     Watch form changes and notify parent
   ================================ */
-  // Watch form changes and notify parent
-  // FIXED: Guards against initialization and memoizes callback
   useEffect(() => {
-    if (!isInitialized || isInitializingRef.current) return; // Don't notify during initialization
+    if (!isInitialized || isInitializingRef.current) return;
 
     const subscription = watch((values) => {
       const payload = buildVehiclesPayload(values as VehicleFormValues);
-      console.log("📊 Form values changed, payload:", payload);
       onDataChangeRef.current?.(payload);
     });
     return () => subscription.unsubscribe();
   }, [watch, isInitialized, buildVehiclesPayload]);
 
-  // Notify parent of validation state changes
-  // FIXED: Guards against initialization
   useEffect(() => {
     if (!isInitializingRef.current) {
       onValidationChangeRef.current?.(formState.isValid);
@@ -567,20 +506,6 @@ const getInitialValues = useCallback(() => {
   }, [formState.isValid]);
 
   const compatibility = watch("compatibility") ?? [];
-
-  /* ===============================
-     Debug Effect
-  ================================ */
-  useEffect(() => {
-    console.log("📊 Current form state:", {
-      mainVehicle,
-      compatibility,
-      isValid: formState.isValid,
-      errors: formState.errors,
-      isInitialized,
-      isInitializing: isInitializingRef.current,
-    });
-  }, [mainVehicle, compatibility, formState.isValid, formState.errors, isInitialized]);
 
   /* ===============================
      Handlers
@@ -601,16 +526,18 @@ const getInitialValues = useCallback(() => {
   const handleSaveCompatibility = useCallback(() => {
     const values = methods.getValues();
     const payload = buildVehiclesPayload(values);
-    console.log("💾 Saving compatibility, payload:", payload);
     onDataChange?.(payload);
   }, [methods, buildVehiclesPayload, onDataChange]);
 
-  const handleRemoveCompatibility = useCallback((index: number) => {
-    setValue(
-      "compatibility",
-      compatibility.filter((_, i) => i !== index),
-    );
-  }, [compatibility, setValue]);
+  const handleRemoveCompatibility = useCallback(
+    (index: number) => {
+      setValue(
+        "compatibility",
+        compatibility.filter((_, i) => i !== index),
+      );
+    },
+    [compatibility, setValue],
+  );
 
   /* ===============================
      Render
@@ -626,12 +553,10 @@ const getInitialValues = useCallback(() => {
             </CardTitle>
           </CardHeader>
 
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-">
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <SelectField
               name="mainVehicle.type_id"
-              label={t(
-                "createproduct.vehicleForm.mainVehicle.fields.vehicleType",
-              )}
+              label={t("createproduct.vehicleForm.mainVehicle.fields.vehicleType")}
               options={vehicleTypeOptions}
             />
 
@@ -648,6 +573,7 @@ const getInitialValues = useCallback(() => {
               onChange={handleMainBrandChange}
             />
 
+            {/* model_id value = m.id (vehicle.model?.id from API) */}
             <SelectField
               name="mainVehicle.model_id"
               label={t("createproduct.vehicleForm.mainVehicle.fields.model")}
@@ -696,7 +622,7 @@ const getInitialValues = useCallback(() => {
                 onRemove={() => handleRemoveCompatibility(index)}
               />
             ))}
-            
+
             <Button
               type="button"
               className="bg-[var(--theme-color-accent)] text-white"

@@ -5,6 +5,7 @@ import { sellerProductsApi } from "@/features/products";
 import { sellerAttributesApi } from "@/features/sellerAttributes";
 import { sellerSubOrdersApi } from "@/features/sellerSubOrders";
 import { variantsApi } from "@/features/variants";
+import { qualityTypesApi } from "@/features/qualitytypes";
 
 export const store = configureStore({
   reducer: {
@@ -13,6 +14,7 @@ export const store = configureStore({
     [sellerAttributesApi.reducerPath]: sellerAttributesApi.reducer,
     [sellerSubOrdersApi.reducerPath]: sellerSubOrdersApi.reducer,
     [variantsApi.reducerPath]: variantsApi.reducer,
+    [qualityTypesApi.reducerPath]: qualityTypesApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -23,6 +25,7 @@ export const store = configureStore({
       sellerAttributesApi.middleware,
       sellerSubOrdersApi.middleware,
       variantsApi.middleware,
+      qualityTypesApi.middleware
     ),
 });
 

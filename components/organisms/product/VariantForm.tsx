@@ -3,28 +3,21 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { InputField } from "@/components/atoms/input";
-import SelectField from "@/components/atoms/SelectField";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Palette, Plus, X, Copy, Search, AlertCircle, Trash2, Save } from "lucide-react";
+import { X, Copy, Search, AlertCircle, Trash2, Save, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { useTranslation } from "react-i18next";
 import { useGetCategoriesQuery } from "@/features/category";
 import {
   useGetVariantsQuery,
   useUpdateVariantMutation,
   useDeleteVariantMutation,
+  useCreateVariantMutation,
 } from "@/features/variants";
+
+/* ==================== Types ==================== */
 
 interface AttributeValue {
   id: number;
@@ -56,6 +49,13 @@ interface VariantCombination {
   status: number;
 }
 
+interface BulkPriceForm {
+  costPrice: string;
+  sellingPrice: string;
+  discountPrice: string;
+  quantity: string;
+}
+
 interface VariantCardProps {
   productId: string | null;
   categoryId: number | null;
@@ -67,13 +67,65 @@ interface VariantCardProps {
   };
 }
 
-/* ── Bulk-apply form shape ── */
-interface BulkPriceForm {
-  costPrice: string;
-  sellingPrice: string;
-  discountPrice: string;
-  quantity: string;
-}
+/* ==================== Helpers ==================== */
+
+const generateCombinations = (
+  types: VariationType[],
+  attributes: Attribute[]
+): Array<{
+  valuesByName: { [key: string]: { id: number; value: string } };
+  valueIds: number[];
+}> => {
+  if (types.length === 0) return [];
+
+  const generate = (
+    index: number,
+    currentValuesByName: { [key: string]: { id: number; value: string } },
+    currentValueIds: number[]
+  ): Array<{
+    valuesByName: { [key: string]: { id: number; value: string } };
+    valueIds: number[];
+  }> => {
+    if (index === types.length)
+      return [{ valuesByName: { ...currentValuesByName }, valueIds: [...currentValueIds] }];
+
+    const type = types[index];
+    const attribute = attributes.find((a) => a.id === type.id);
+    if (!attribute) return [];
+
+    return type.selectedValues.flatMap((valueId) => {
+      const attributeValue = attribute.values.find((v) => v.id === valueId);
+      if (!attributeValue) return [];
+      return generate(
+        index + 1,
+        { ...currentValuesByName, [attribute.name]: { id: valueId, value: attributeValue.value } },
+        [...currentValueIds, valueId]
+      );
+    });
+  };
+
+  return generate(0, {}, []);
+};
+
+/* ==================== Spinner ==================== */
+
+const Spinner = ({ className = "h-3 w-3" }: { className?: string }) => (
+  <svg
+    className={`animate-spin ${className}`}
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+  >
+    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+    <path
+      className="opacity-75"
+      fill="currentColor"
+      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+    />
+  </svg>
+);
+
+/* ==================== Component ==================== */
 
 export default function VariantFormCard({
   productId,
@@ -83,27 +135,39 @@ export default function VariantFormCard({
   initialValues,
 }: VariantCardProps) {
   const { t } = useTranslation();
+  const isEditMode = !!productId;
 
+  /* ── Bulk price form ── */
   const priceForm = useForm<BulkPriceForm>({
-    defaultValues: {
-      costPrice: "",
-      sellingPrice: "",
-      discountPrice: "",
-      quantity: "",
-    },
+    defaultValues: { costPrice: "", sellingPrice: "", discountPrice: "", quantity: "" },
   });
 
+  /* ── UI state ── */
   const [isApplying, setIsApplying] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [hasLoadedVariants, setHasLoadedVariants] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const [debugMode, setDebugMode] = useState(false);
+  const [hasLoadedVariants, setHasLoadedVariants] = useState(false);
   const isInitializingRef = useRef(false);
 
+  /* ── Per-row loading state ── */
   const [updatingVariants, setUpdatingVariants] = useState<Set<string>>(new Set());
   const [deletingVariants, setDeletingVariants] = useState<Set<string>>(new Set());
+  const [savingNewVariants, setSavingNewVariants] = useState<Set<string>>(new Set());
 
-  const { data: categoriesData, isLoading: isCategoriesLoading } =
-    useGetCategoriesQuery();
+  /* ── Search ── */
+  const [attributeSearchQueries, setAttributeSearchQueries] = useState<{ [key: number]: string }>({});
+
+  /* ── Core data state ── */
+  const [variationTypes, setVariationTypes] = useState<VariationType[]>(
+    initialValues?.variationTypes || []
+  );
+  const [variants, setVariants] = useState<VariantCombination[]>(
+    initialValues?.variants || []
+  );
+
+  /* ── API ── */
+  const { data: categoriesData, isLoading: isCategoriesLoading } = useGetCategoriesQuery();
 
   const {
     data: existingVariants,
@@ -116,43 +180,32 @@ export default function VariantFormCard({
 
   const [updateVariant] = useUpdateVariantMutation();
   const [deleteVariant] = useDeleteVariantMutation();
-
-  const [variationTypes, setVariationTypes] = useState<VariationType[]>(
-    initialValues?.variationTypes || []
-  );
-  const [variants, setVariants] = useState<VariantCombination[]>(
-    initialValues?.variants || []
-  );
-
-  const [attributeSearchQueries, setAttributeSearchQueries] = useState<{
-    [key: number]: string;
-  }>({});
+  const [createVariant] = useCreateVariantMutation();
 
   /* ── Attributes from selected category ── */
   const availableAttributes: Attribute[] = useMemo(() => {
     if (!categoriesData?.data || !categoryId) return [];
-
     const findCategory = (categories: any[]): any => {
-      for (const category of categories) {
-        if (category.id === categoryId) return category;
-        if (category.sub_categories) {
-          const found = findCategory(category.sub_categories);
+      for (const cat of categories) {
+        if (cat.id === categoryId) return cat;
+        if (cat.sub_categories) {
+          const found = findCategory(cat.sub_categories);
           if (found) return found;
         }
       }
       return null;
     };
-
     const selectedCategory = findCategory(categoriesData.data);
     return selectedCategory?.attributes || [];
   }, [categoriesData, categoryId]);
 
-  /* ── Load variants from API ── */
+  /* ── Load variants from API (edit mode) ── */
   useEffect(() => {
     if (hasLoadedVariants) return;
     if (!availableAttributes || availableAttributes.length === 0) return;
     if (!existingVariants?.data || !Array.isArray(existingVariants.data)) return;
     if (!productId) return;
+
     if (existingVariants.data.length === 0) {
       setHasLoadedVariants(true);
       return;
@@ -161,7 +214,7 @@ export default function VariantFormCard({
     try {
       isInitializingRef.current = true;
 
-      const transformedVariants = existingVariants.data.map((v: any) => {
+      const transformedVariants: VariantCombination[] = existingVariants.data.map((v: any) => {
         const combinations: { [key: string]: { id: number; value: string } } = {};
         const attribute_value_ids: number[] = [];
 
@@ -186,50 +239,50 @@ export default function VariantFormCard({
         };
       });
 
+      /* Reconstruct variationTypes from loaded variant data */
       if (transformedVariants.length > 0 && availableAttributes.length > 0) {
         const attributeValueMap: { [attributeId: number]: Set<number> } = {};
 
-        transformedVariants.forEach((variant: any) => {
+        transformedVariants.forEach((variant) => {
           Object.keys(variant.combinations).forEach((attributeName) => {
-            const attribute = availableAttributes.find(
-              (attr) => attr.name === attributeName
-            );
+            const attribute = availableAttributes.find((attr) => attr.name === attributeName);
             if (attribute) {
               if (!attributeValueMap[attribute.id]) {
                 attributeValueMap[attribute.id] = new Set();
               }
-              attributeValueMap[attribute.id].add(
-                variant.combinations[attributeName].id
-              );
+              attributeValueMap[attribute.id].add(variant.combinations[attributeName].id);
             }
           });
         });
 
-        const extractedVariationTypes: VariationType[] = Object.keys(
-          attributeValueMap
-        ).map((attributeIdStr) => {
-          const attributeId = Number(attributeIdStr);
-          const attribute = availableAttributes.find((attr) => attr.id === attributeId)!;
-          return {
-            id: attributeId,
-            name: attribute.name,
-            selectedValues: Array.from(attributeValueMap[attributeId]),
-          };
-        });
+        const extractedVariationTypes: VariationType[] = Object.keys(attributeValueMap).map(
+          (attributeIdStr) => {
+            const attributeId = Number(attributeIdStr);
+            const attribute = availableAttributes.find((attr) => attr.id === attributeId)!;
+            return {
+              id: attributeId,
+              name: attribute.name,
+              selectedValues: Array.from(attributeValueMap[attributeId]),
+            };
+          }
+        );
 
         setVariationTypes(extractedVariationTypes);
       }
 
       setVariants(transformedVariants);
       setHasLoadedVariants(true);
-      isInitializingRef.current = false;
+
+      setTimeout(() => {
+        isInitializingRef.current = false;
+      }, 100);
     } catch (error) {
       console.error("❌ Error loading variants:", error);
       isInitializingRef.current = false;
     }
   }, [existingVariants, hasLoadedVariants, productId, availableAttributes]);
 
-  /* ── Load initial values when no API data ── */
+  /* ── Load initial values (create mode) ── */
   useEffect(() => {
     if (initialValues && !hasLoadedVariants && !productId) {
       if (initialValues.variationTypes) setVariationTypes(initialValues.variationTypes);
@@ -237,47 +290,9 @@ export default function VariantFormCard({
     }
   }, [initialValues, hasLoadedVariants, productId]);
 
-  /* ── Helpers ── */
-  const getFilteredAttributeValues = (attributeId: number) => {
-    const attribute = availableAttributes.find((attr) => attr.id === attributeId);
-    if (!attribute) return [];
-    const q = attributeSearchQueries[attributeId]?.toLowerCase() || "";
-    return q
-      ? attribute.values.filter((v) => v.value.toLowerCase().includes(q))
-      : attribute.values;
-  };
-
-  const getSelectedAttributeValues = (attributeId: number) => {
-    const vt = variationTypes.find((v) => v.id === attributeId);
-    const attr = availableAttributes.find((a) => a.id === attributeId);
-    if (!vt || !attr) return [];
-    return vt.selectedValues
-      .map((id) => attr.values.find((v) => v.id === id))
-      .filter(Boolean) as AttributeValue[];
-  };
-
-  /* ── Notify parent ── */
+  /* ── Generate combinations — CREATE mode only ── */
   useEffect(() => {
-    if (isInitializingRef.current) return;
-    if (!productId && !variationTypes.length && !variants.length) return;
-
-    onDataChange?.({ variants, variation_types: variationTypes });
-
-    const isValid =
-      variationTypes.length > 0 &&
-      variationTypes.every((vt) => vt.selectedValues.length > 0) &&
-      variants.length > 0 &&
-      variants.every(
-        (v) =>
-          v.selling_price &&
-          parseFloat(v.selling_price) > 0 &&
-          v.stock_quantity >= 0
-      );
-    onValidationChange?.(isValid);
-  }, [variationTypes, variants, productId, onDataChange, onValidationChange]);
-
-  /* ── Generate combinations when selection changes ── */
-  useEffect(() => {
+    if (isEditMode) return; // ✅ Never runs in edit mode
     if (hasLoadedVariants) return;
 
     if (
@@ -290,9 +305,7 @@ export default function VariantFormCard({
           id: Math.random().toString(36).substr(2, 9),
           combinations: combo.valuesByName,
           attribute_value_ids: combo.valueIds,
-          variant_name: Object.values(combo.valuesByName)
-            .map((v) => v.value)
-            .join(" - "),
+          variant_name: Object.values(combo.valuesByName).map((v) => v.value).join(" - "),
           cost_price: "",
           selling_price: "",
           discount_price: "",
@@ -304,41 +317,57 @@ export default function VariantFormCard({
     } else {
       setVariants([]);
     }
-  }, [variationTypes, availableAttributes, hasLoadedVariants]);
+  }, [variationTypes, availableAttributes, hasLoadedVariants, isEditMode]);
 
-  const generateCombinations = (types: VariationType[], attributes: Attribute[]) => {
-    if (types.length === 0) return [];
+  /* ── Notify parent ── */
+  useEffect(() => {
+    if (isInitializingRef.current) return;
+    if (!isEditMode && !variationTypes.length && !variants.length) return;
 
-    const generate = (
-      index: number,
-      currentValuesByName: { [key: string]: { id: number; value: string } },
-      currentValueIds: number[]
-    ): Array<{
-      valuesByName: { [key: string]: { id: number; value: string } };
-      valueIds: number[];
-    }> => {
-      if (index === types.length)
-        return [{ valuesByName: { ...currentValuesByName }, valueIds: [...currentValueIds] }];
+    onDataChange?.({ variants, variation_types: variationTypes });
 
-      const type = types[index];
-      const attribute = attributes.find((a) => a.id === type.id);
-      if (!attribute) return [];
+    const isValid =
+      variationTypes.length > 0 &&
+      variationTypes.every((vt) => vt.selectedValues.length > 0) &&
+      variants.length > 0 &&
+      variants.every(
+        (v) => v.selling_price && parseFloat(v.selling_price) > 0 && v.stock_quantity >= 0
+      );
+    onValidationChange?.(isValid);
+  }, [variationTypes, variants, isEditMode, onDataChange, onValidationChange]);
 
-      return type.selectedValues.flatMap((valueId) => {
-        const attributeValue = attribute.values.find((v) => v.id === valueId);
-        if (!attributeValue) return [];
-        return generate(
-          index + 1,
-          { ...currentValuesByName, [attribute.name]: { id: valueId, value: attributeValue.value } },
-          [...currentValueIds, valueId]
-        );
-      });
-    };
+  /* ==================== Helpers ==================== */
 
-    return generate(0, {}, []);
+  const getFilteredAttributeValues = (attributeId: number) => {
+    const attribute = availableAttributes.find((attr) => attr.id === attributeId);
+    if (!attribute) return [];
+    const q = attributeSearchQueries[attributeId]?.toLowerCase() || "";
+    return q ? attribute.values.filter((v) => v.value.toLowerCase().includes(q)) : attribute.values;
   };
 
-  /* ── Attribute selection handlers ── */
+  const getSelectedAttributeValues = (attributeId: number) => {
+    const vt = variationTypes.find((v) => v.id === attributeId);
+    const attr = availableAttributes.find((a) => a.id === attributeId);
+    if (!vt || !attr) return [];
+    return vt.selectedValues
+      .map((id) => attr.values.find((v) => v.id === id))
+      .filter(Boolean) as AttributeValue[];
+  };
+
+  const isExistingVariant = (variantId: string): boolean => !variantId.startsWith("new_");
+
+  const showSuccessToast = (message: string) => {
+    setSuccessMessage(message);
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 2500);
+  };
+
+  /* ==================== Attribute Handlers ==================== */
+
+  /**
+   * Toggle entire attribute checkbox.
+   * ✅ No setHasLoadedVariants(false) — never wipes loaded data in edit mode.
+   */
   const handleToggleAttribute = (attributeId: number) => {
     const exists = variationTypes.find((vt) => vt.id === attributeId);
     if (exists) {
@@ -357,41 +386,137 @@ export default function VariantFormCard({
         ]);
       }
     }
-    setHasLoadedVariants(false);
   };
 
+  /**
+   * Toggle a specific attribute value.
+   *
+   * CREATE mode → marks hasLoadedVariants=false → generate effect re-runs.
+   *
+   * EDIT mode:
+   *   ADDING   → appends new combination rows (preserves all existing data)
+   *   REMOVING → filters out rows that used that value
+   */
   const handleToggleAttributeValue = (attributeId: number, valueId: number) => {
+    const currentType = variationTypes.find((vt) => vt.id === attributeId);
+    const isAdding = !currentType?.selectedValues.includes(valueId);
+
+    // 1. Update variationTypes selected values
     setVariationTypes((prev) =>
       prev.map((vt) => {
         if (vt.id !== attributeId) return vt;
-        const isSelected = vt.selectedValues.includes(valueId);
         return {
           ...vt,
-          selectedValues: isSelected
-            ? vt.selectedValues.filter((id) => id !== valueId)
-            : [...vt.selectedValues, valueId],
+          selectedValues: isAdding
+            ? [...vt.selectedValues, valueId]
+            : vt.selectedValues.filter((id) => id !== valueId),
         };
       })
     );
-    setHasLoadedVariants(false);
+
+    if (isEditMode) {
+      const attribute = availableAttributes.find((a) => a.id === attributeId);
+      if (!attribute) return;
+
+      if (isAdding) {
+        // ── Append new rows for the newly selected value ──
+        const addedValue = attribute.values.find((v) => v.id === valueId);
+        if (!addedValue) return;
+
+        // Other attribute types (not the one being toggled)
+        const otherTypes = variationTypes.filter((vt) => vt.id !== attributeId);
+
+        let newRows: VariantCombination[] = [];
+
+        if (otherTypes.length === 0) {
+          // Single attribute — one new row
+          newRows = [
+            {
+              id: `new_${Math.random().toString(36).substr(2, 9)}`,
+              combinations: {
+                [attribute.name]: { id: valueId, value: addedValue.value },
+              },
+              attribute_value_ids: [valueId],
+              variant_name: addedValue.value,
+              cost_price: "",
+              selling_price: "",
+              discount_price: "",
+              stock_quantity: 0,
+              is_default: false,
+              status: 1,
+            },
+          ];
+        } else {
+          // Multiple attributes — cross new value with all existing combos
+          const otherCombos = generateCombinations(otherTypes, availableAttributes);
+
+          newRows = otherCombos.map((combo) => {
+            const allCombinations = {
+              ...combo.valuesByName,
+              [attribute.name]: { id: valueId, value: addedValue.value },
+            };
+            const allValueIds = [...combo.valueIds, valueId];
+
+            return {
+              id: `new_${Math.random().toString(36).substr(2, 9)}`,
+              combinations: allCombinations,
+              attribute_value_ids: allValueIds,
+              variant_name: Object.values(allCombinations).map((v) => v.value).join(" - "),
+              cost_price: "",
+              selling_price: "",
+              discount_price: "",
+              stock_quantity: 0,
+              is_default: false,
+              status: 1,
+            };
+          });
+        }
+
+        // Append only truly new combinations (dedup by sorted value-id key)
+        setVariants((prevVariants) => {
+          const existingKeys = new Set(
+            prevVariants.map((v) =>
+              JSON.stringify(
+                Object.values(v.combinations).map((c) => c.id).sort()
+              )
+            )
+          );
+
+          const uniqueNewRows = newRows.filter((row) => {
+            const key = JSON.stringify(
+              Object.values(row.combinations).map((c) => c.id).sort()
+            );
+            return !existingKeys.has(key);
+          });
+
+          return [...prevVariants, ...uniqueNewRows];
+        });
+      } else {
+        // ── Remove rows that used this deselected value ──
+        setVariants((prevVariants) =>
+          prevVariants.filter((v) => {
+            const combo = v.combinations[attribute.name];
+            return !combo || combo.id !== valueId;
+          })
+        );
+      }
+    } else {
+      // Create mode — let generate effect handle it
+      setHasLoadedVariants(false);
+    }
   };
 
+  /** Remove badge = same as deselecting the value */
   const handleRemoveAttributeValue = (attributeId: number, valueId: number) => {
-    setVariationTypes((prev) =>
-      prev.map((vt) =>
-        vt.id !== attributeId
-          ? vt
-          : { ...vt, selectedValues: vt.selectedValues.filter((id) => id !== valueId) }
-      )
-    );
-    setHasLoadedVariants(false);
+    handleToggleAttributeValue(attributeId, valueId);
   };
 
   const handleAttributeSearch = (attributeId: number, query: string) => {
     setAttributeSearchQueries((prev) => ({ ...prev, [attributeId]: query }));
   };
 
-  /* ── Variant field update ── */
+  /* ==================== Variant Field Handlers ==================== */
+
   const handleUpdateVariant = (
     variantId: string,
     field: keyof VariantCombination,
@@ -409,33 +534,22 @@ export default function VariantFormCard({
     );
   };
 
-  /* ── Apply field to all variants ── */
-  const handleApplyFieldToAll = (
-    field: keyof VariantCombination,
-    sourceVariantId: string
-  ) => {
+  const handleApplyFieldToAll = (field: keyof VariantCombination, sourceVariantId: string) => {
     const sourceVariant = variants.find((v) => v.id === sourceVariantId);
     if (!sourceVariant) return;
     const value = sourceVariant[field];
     setVariants((prev) => prev.map((v) => ({ ...v, [field]: value })));
+    showSuccessToast(`"${String(field)}" applied to all variants`);
   };
 
-  /* ────────────────────────────────────────────────────────
-   *  Apply bulk prices to ALL variants
-   *  Called directly (not via handleSubmit) so it always runs
-   * ──────────────────────────────────────────────────────── */
-  const handleApplyPriceToAll = () => {
-    const { costPrice, sellingPrice, discountPrice, quantity } =
-      priceForm.getValues();
+  /* ==================== Bulk Price Handler ==================== */
 
-    // Nothing filled in → nothing to do
-    const hasAnyValue = [costPrice, sellingPrice, discountPrice, quantity].some(
-      (v) => v !== ""
-    );
+  const handleApplyPriceToAll = () => {
+    const { costPrice, sellingPrice, discountPrice, quantity } = priceForm.getValues();
+    const hasAnyValue = [costPrice, sellingPrice, discountPrice, quantity].some((v) => v !== "");
     if (!hasAnyValue) return;
 
     setIsApplying(true);
-
     setVariants((prev) =>
       prev.map((variant) => ({
         ...variant,
@@ -445,24 +559,17 @@ export default function VariantFormCard({
         ...(quantity !== "" && { stock_quantity: parseInt(quantity) || 0 }),
       }))
     );
-
-    setShowSuccess(true);
-    setTimeout(() => {
-      setIsApplying(false);
-      setShowSuccess(false);
-    }, 2000);
+    showSuccessToast("Prices applied to all variants!");
+    setTimeout(() => setIsApplying(false), 500);
   };
 
-  const handleClearAll = () => {
-    priceForm.reset({
-      costPrice: "",
-      sellingPrice: "",
-      discountPrice: "",
-      quantity: "",
-    });
+  const handleClearBulkForm = () => {
+    priceForm.reset({ costPrice: "", sellingPrice: "", discountPrice: "", quantity: "" });
   };
 
-  /* ── Save individual variant ── */
+  /* ==================== API Handlers ==================== */
+
+  /** Update an already-saved variant */
   const handleSaveVariant = async (variantId: string) => {
     if (!productId) return;
     const variant = variants.find((v) => v.id === variantId);
@@ -484,9 +591,7 @@ export default function VariantFormCard({
           status: variant.status,
         },
       }).unwrap();
-
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 2000);
+      showSuccessToast("Variant saved!");
     } catch (error) {
       console.error(`❌ Error updating variant ${variantId}:`, error);
       alert(`Failed to update variant: ${error}`);
@@ -499,20 +604,39 @@ export default function VariantFormCard({
     }
   };
 
-  /* ── Delete individual variant ── */
-  const handleDeleteVariant = async (variantId: string) => {
+  /** Create a new (unsaved new_ row) via API */
+  const handleCreateNewVariant = async (variantId: string) => {
     if (!productId) return;
-    if (!confirm("Are you sure you want to delete this variant?")) return;
+    const variant = variants.find((v) => v.id === variantId);
+    if (!variant) return;
 
-    setDeletingVariants((prev) => new Set(prev).add(variantId));
+    setSavingNewVariants((prev) => new Set(prev).add(variantId));
     try {
-      await deleteVariant({ productId: String(productId), variantId }).unwrap();
-      setVariants((prev) => prev.filter((v) => v.id !== variantId));
+      const response = await createVariant({
+        productId: String(productId),
+        data: {
+          attribute_value_ids: variant.attribute_value_ids,
+          variant_name: variant.variant_name,
+          cost_price: parseFloat(variant.cost_price) || 0,
+          selling_price: parseFloat(variant.selling_price) || 0,
+          discount_price: parseFloat(variant.discount_price) || 0,
+          stock_quantity: variant.stock_quantity,
+          is_default: variant.is_default,
+          status: variant.status,
+        },
+      }).unwrap();
+
+      // Replace temp id with real server id
+      const newId = String(response?.data?.id || variantId);
+      setVariants((prev) =>
+        prev.map((v) => (v.id === variantId ? { ...v, id: newId } : v))
+      );
+      showSuccessToast("New variant created!");
     } catch (error) {
-      console.error(`❌ Error deleting variant ${variantId}:`, error);
-      alert(`Failed to delete variant: ${error}`);
+      console.error(`❌ Error creating variant:`, error);
+      alert(`Failed to create variant: ${error}`);
     } finally {
-      setDeletingVariants((prev) => {
+      setSavingNewVariants((prev) => {
         const next = new Set(prev);
         next.delete(variantId);
         return next;
@@ -520,16 +644,61 @@ export default function VariantFormCard({
     }
   };
 
-  /* ── Guards ── */
+  /** Delete variant (API call if existing, local-only if new_) */
+  const handleDeleteVariant = async (variantId: string) => {
+    const existing = isExistingVariant(variantId);
+
+    if (existing) {
+      if (!productId) return;
+      if (!confirm("Are you sure you want to delete this variant?")) return;
+
+      setDeletingVariants((prev) => new Set(prev).add(variantId));
+      try {
+        await deleteVariant({ productId: String(productId), variantId }).unwrap();
+
+        const remaining = variants.filter((v) => v.id !== variantId);
+        setVariants(remaining);
+
+        // Clean up variationTypes selected values if no remaining variant uses them
+        setVariationTypes((prev) =>
+          prev.map((vt) => {
+            const attribute = availableAttributes.find((a) => a.id === vt.id);
+            if (!attribute) return vt;
+            const usedValueIds = new Set(
+              remaining.map((v) => v.combinations[attribute.name]?.id).filter(Boolean)
+            );
+            return {
+              ...vt,
+              selectedValues: vt.selectedValues.filter((id) => usedValueIds.has(id)),
+            };
+          })
+        );
+
+        showSuccessToast("Variant deleted.");
+      } catch (error) {
+        console.error(`❌ Error deleting variant ${variantId}:`, error);
+        alert(`Failed to delete variant: ${error}`);
+      } finally {
+        setDeletingVariants((prev) => {
+          const next = new Set(prev);
+          next.delete(variantId);
+          return next;
+        });
+      }
+    } else {
+      // Unsaved row — just remove from local state
+      setVariants((prev) => prev.filter((v) => v.id !== variantId));
+    }
+  };
+
+  /* ==================== Guards ==================== */
+
   if (isCategoriesLoading || isFetchingVariants) {
     return (
       <Card className="bg-white border border-gray-200 shadow-sm">
         <CardContent className="py-8 text-center">
           <div className="flex flex-col items-center gap-3">
-            <svg className="animate-spin h-8 w-8 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-            </svg>
+            <Spinner className="h-8 w-8 text-orange-500" />
             <p className="text-gray-500">
               {isFetchingVariants ? "Loading variants..." : "Loading attributes..."}
             </p>
@@ -559,57 +728,69 @@ export default function VariantFormCard({
     );
   }
 
-  /* ── Render ── */
+  /* ==================== Render ==================== */
+
   return (
     <Card className="bg-white border border-gray-200 shadow-sm">
+
+      {/* ── Header ── */}
       <CardHeader className="border-b border-gray-200 pb-4">
-        <CardTitle className="flex items-center justify-between">
+        <CardTitle className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-orange-500 rounded-sm flex items-center justify-center">
               <span className="text-white text-xs">◆</span>
             </div>
             <h5 className="font-semibold text-base">Choose Variation Attributes:</h5>
           </div>
-          {hasLoadedVariants && variants.length > 0 && (
-            <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
-              ✓ Loaded {variants.length} existing variant(s)
-            </span>
-          )}
-          <button
-            onClick={() => setDebugMode(!debugMode)}
-            className="ml-2 text-xs text-gray-500 hover:text-gray-700"
-          >
-            <AlertCircle className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            {hasLoadedVariants && variants.length > 0 && (
+              <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded border border-green-200">
+                ✓ {variants.length} variant(s) loaded
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => setDebugMode(!debugMode)}
+              className="p-1 text-gray-400 hover:text-gray-700 rounded"
+              title="Toggle debug"
+            >
+              <AlertCircle className="w-4 h-4" />
+            </button>
+          </div>
         </CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-6 pt-6">
-        {/* Debug panel */}
+
+        {/* ── Debug Panel ── */}
         {debugMode && (
           <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-1 text-xs">
-            <p className="font-semibold text-blue-900">🔍 Debug Info:</p>
-            <p><span className="font-semibold">Product ID:</span> {productId || "None"}</p>
-            <p><span className="font-semibold">Category ID:</span> {categoryId || "None"}</p>
-            <p><span className="font-semibold">Has Loaded Variants:</span> {hasLoadedVariants ? "Yes" : "No"}</p>
-            <p><span className="font-semibold">Variation Types:</span> {variationTypes.length}</p>
-            <p><span className="font-semibold">Variants:</span> {variants.length}</p>
+            <p className="font-semibold text-blue-900">🔍 Debug Info</p>
+            <p><b>Mode:</b> {isEditMode ? "Edit" : "Create"}</p>
+            <p><b>Product ID:</b> {productId || "None"}</p>
+            <p><b>Category ID:</b> {categoryId || "None"}</p>
+            <p><b>Has Loaded Variants:</b> {hasLoadedVariants ? "Yes" : "No"}</p>
+            <p><b>Variation Types:</b> {variationTypes.length}</p>
+            <p><b>Variants:</b> {variants.length}</p>
+            <p><b>Available Attributes:</b> {availableAttributes.length}</p>
           </div>
         )}
 
+        {/* ── Error Banner ── */}
         {variantsError && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-sm font-semibold text-red-900">❌ Error loading variants</p>
           </div>
         )}
 
+        {/* ── Success Toast ── */}
         {showSuccess && (
-          <div className="p-4 bg-green-50 border border-green-200 rounded-lg animate-pulse">
-            <p className="text-sm font-semibold text-green-900">✅ Changes applied successfully!</p>
+          <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-sm font-semibold text-green-800">✅ {successMessage}</p>
           </div>
         )}
 
-        {/* Attribute checkboxes */}
+        {/* ── Attribute Checkboxes ── */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {availableAttributes.map((attribute) => {
             const isSelected = variationTypes.some((vt) => vt.id === attribute.id);
@@ -629,15 +810,17 @@ export default function VariantFormCard({
           })}
         </div>
 
-        {/* Value selectors */}
+        {/* ── Value Selectors ── */}
         {variationTypes.length > 0 && (
           <div className="space-y-6 border-t border-gray-200 pt-6">
             <h6 className="font-semibold text-sm text-gray-900">
               Select values for each attribute:
             </h6>
+
             {variationTypes.map((variationType) => {
               const attribute = availableAttributes.find((a) => a.id === variationType.id);
               if (!attribute) return null;
+
               const selectedValues = getSelectedAttributeValues(variationType.id);
               const filteredValues = getFilteredAttributeValues(variationType.id);
               const searchQuery = attributeSearchQueries[variationType.id] || "";
@@ -648,6 +831,7 @@ export default function VariantFormCard({
                     {attribute.name}
                   </Label>
 
+                  {/* Selected value badges */}
                   {selectedValues.length > 0 && (
                     <div className="flex flex-wrap gap-2 p-3 bg-orange-50 rounded-md border border-orange-200">
                       {selectedValues.map((value) => (
@@ -658,45 +842,43 @@ export default function VariantFormCard({
                           {value.value}
                           <X
                             className="w-4 h-4 cursor-pointer hover:bg-orange-600 rounded-full p-0.5"
-                            onClick={() =>
-                              handleRemoveAttributeValue(variationType.id, value.id)
-                            }
+                            onClick={() => handleRemoveAttributeValue(variationType.id, value.id)}
                           />
                         </span>
                       ))}
                     </div>
                   )}
 
+                  {/* Search */}
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
                       value={searchQuery}
-                      onChange={(e) =>
-                        handleAttributeSearch(variationType.id, e.target.value)
-                      }
+                      onChange={(e) => handleAttributeSearch(variationType.id, e.target.value)}
                       placeholder={`Search ${attribute.name.toLowerCase()}...`}
                       className="pl-10"
                     />
                   </div>
 
+                  {/* Value grid */}
                   <div className="border border-gray-200 rounded-md max-h-64 overflow-y-auto bg-gray-50">
                     {filteredValues.length === 0 ? (
                       <div className="p-4 text-center text-gray-500 text-sm">
-                        {searchQuery ? `No ${attribute.name.toLowerCase()} found` : `No ${attribute.name.toLowerCase()} available`}
+                        {searchQuery
+                          ? `No ${attribute.name.toLowerCase()} found`
+                          : `No ${attribute.name.toLowerCase()} available`}
                       </div>
                     ) : (
                       <div className="grid grid-cols-7 gap-2 p-3">
                         {filteredValues.map((value) => {
-                          const isSelected = variationType.selectedValues.includes(value.id);
+                          const isValueSelected = variationType.selectedValues.includes(value.id);
                           return (
                             <button
                               key={value.id}
                               type="button"
-                              onClick={() =>
-                                handleToggleAttributeValue(variationType.id, value.id)
-                              }
+                              onClick={() => handleToggleAttributeValue(variationType.id, value.id)}
                               className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
-                                isSelected
+                                isValueSelected
                                   ? "bg-orange-500 text-white hover:bg-orange-600"
                                   : "bg-white text-gray-700 border border-gray-300 hover:border-orange-500 hover:bg-orange-50"
                               }`}
@@ -720,10 +902,10 @@ export default function VariantFormCard({
           </div>
         )}
 
-        {/* ── Bulk price setter ── */}
+        {/* ── Bulk Price Setter ── */}
         {variants.length > 0 && (
           <div className="border border-gray-200 rounded-lg p-4 space-y-4 bg-gray-50">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <h6 className="font-semibold text-sm flex items-center gap-2">
                 <div className="w-4 h-4 bg-orange-500 rounded-sm flex items-center justify-center">
                   <span className="text-white text-xs">◆</span>
@@ -733,14 +915,12 @@ export default function VariantFormCard({
               <div className="flex items-center gap-2">
                 <Button
                   type="button"
-                  onClick={handleClearAll}
+                  onClick={handleClearBulkForm}
                   variant="outline"
                   className="text-gray-700 text-xs px-4 py-1.5 rounded border-gray-300"
                 >
                   Clear Form
                 </Button>
-
-                {/* ✅ Direct onClick — no handleSubmit wrapper */}
                 <Button
                   type="button"
                   onClick={handleApplyPriceToAll}
@@ -749,10 +929,7 @@ export default function VariantFormCard({
                 >
                   {isApplying ? (
                     <span className="flex items-center gap-1">
-                      <svg className="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
+                      <Spinner />
                       Applying...
                     </span>
                   ) : (
@@ -762,7 +939,6 @@ export default function VariantFormCard({
               </div>
             </div>
 
-            {/* Bulk form — NOT wrapped in <form> to avoid submit conflicts */}
             <FormProvider {...priceForm}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm bg-white p-4 rounded-md">
                 <div className="space-y-3">
@@ -787,9 +963,7 @@ export default function VariantFormCard({
                     </div>
                   ))}
                   <div className="flex items-center gap-2">
-                    <label className="min-w-[120px] text-xs text-gray-600">
-                      Stock Quantity
-                    </label>
+                    <label className="min-w-[120px] text-xs text-gray-600">Stock Quantity</label>
                     <InputField
                       name="quantity"
                       placeholder="25"
@@ -801,13 +975,18 @@ export default function VariantFormCard({
 
                 <div className="space-y-3">
                   <p className="text-gray-600 text-xs mb-3">Quick Info</p>
-                  <div className="p-3 bg-orange-50 rounded-md border border-orange-200">
-                    <p className="text-xs text-orange-800 mb-2">
-                      💡 Fill in the prices above and click "Apply to All"
+                  <div className="p-3 bg-orange-50 rounded-md border border-orange-200 space-y-2">
+                    <p className="text-xs text-orange-800">
+                      💡 Fill in prices and click <b>"Apply to All"</b> to set them on every variant.
                     </p>
                     <p className="text-xs text-orange-700">
-                      Use the Save (💾) button to update individual variants
+                      Use <b>💾 Save</b> on each row to push individual changes to the server.
                     </p>
+                    {isEditMode && (
+                      <p className="text-xs text-orange-700">
+                        Select a new size/color value above to add new variant rows automatically.
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -815,74 +994,76 @@ export default function VariantFormCard({
           </div>
         )}
 
-        {/* ── Variants table ── */}
+        {/* ── Variants Table ── */}
         {variants.length > 0 && (
           <div className="border border-gray-200 rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Variant Name</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap">Variant Name</th>
                     {variationTypes.map((type) => (
-                      <th key={type.id} className="px-4 py-3 text-left font-semibold text-gray-700">
+                      <th key={type.id} className="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap">
                         {type.name}
                       </th>
                     ))}
-                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Cost Price</th>
-                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Selling Price</th>
-                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Discount</th>
-                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Stock</th>
-                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Default</th>
-                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Status</th>
-                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Actions</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap">Cost Price</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap">Selling Price</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap">Discount</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap">Stock</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap">Default</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap">Status</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
+
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {variants.map((variant, index) => {
                     if (!variant?.combinations) return null;
 
                     const isUpdating = updatingVariants.has(variant.id);
                     const isDeleting = deletingVariants.has(variant.id);
-                    const isExistingVariant =
-                      productId && !variant.id.includes("random");
+                    const isSavingNew = savingNewVariants.has(variant.id);
+                    const existingOnServer = isExistingVariant(variant.id);
 
                     return (
                       <tr
                         key={`${variant.id}-${index}`}
-                        className={`hover:bg-gray-50 transition-colors ${isDeleting ? "opacity-50" : ""}`}
+                        className={`hover:bg-gray-50 transition-colors ${isDeleting ? "opacity-40" : ""} ${
+                          !existingOnServer ? "bg-blue-50/40" : ""
+                        }`}
                       >
-                        {/* Variant name */}
+                        {/* Variant Name */}
                         <td className="px-4 py-3">
                           <input
                             type="text"
                             value={variant.variant_name}
-                            onChange={(e) =>
-                              handleUpdateVariant(variant.id, "variant_name", e.target.value)
-                            }
+                            onChange={(e) => handleUpdateVariant(variant.id, "variant_name", e.target.value)}
                             disabled={isDeleting}
+                            placeholder="e.g. Red / XL"
                             className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:bg-gray-100"
                           />
                         </td>
 
-                        {/* Attribute columns */}
+                        {/* Attribute value columns */}
                         {variationTypes.map((type) => (
-                          <td key={type.id} className="px-4 py-3 text-gray-900">
-                            {variant.combinations?.[type.name]?.value || "-"}
+                          <td key={type.id} className="px-4 py-3 text-gray-700 font-medium">
+                            {variant.combinations?.[type.name]?.value || (
+                              <span className="text-gray-300 italic">—</span>
+                            )}
                           </td>
                         ))}
 
-                        {/* Cost price */}
+                        {/* Cost Price */}
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1">
-                            <span className="text-gray-500">$</span>
+                            <span className="text-gray-400">$</span>
                             <input
                               type="number"
                               step="0.01"
                               min={0}
                               value={variant.cost_price}
-                              onChange={(e) =>
-                                handleUpdateVariant(variant.id, "cost_price", e.target.value)
-                              }
+                              onChange={(e) => handleUpdateVariant(variant.id, "cost_price", e.target.value)}
                               disabled={isDeleting}
                               placeholder="50.00"
                               className="w-20 px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:bg-gray-100"
@@ -899,18 +1080,16 @@ export default function VariantFormCard({
                           </div>
                         </td>
 
-                        {/* Selling price */}
+                        {/* Selling Price */}
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1">
-                            <span className="text-gray-500">$</span>
+                            <span className="text-gray-400">$</span>
                             <input
                               type="number"
                               step="0.01"
                               min={0}
                               value={variant.selling_price}
-                              onChange={(e) =>
-                                handleUpdateVariant(variant.id, "selling_price", e.target.value)
-                              }
+                              onChange={(e) => handleUpdateVariant(variant.id, "selling_price", e.target.value)}
                               disabled={isDeleting}
                               placeholder="80.00"
                               className="w-20 px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:bg-gray-100"
@@ -927,18 +1106,16 @@ export default function VariantFormCard({
                           </div>
                         </td>
 
-                        {/* Discount price */}
+                        {/* Discount Price */}
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1">
-                            <span className="text-gray-500">$</span>
+                            <span className="text-gray-400">$</span>
                             <input
                               type="number"
                               step="0.01"
                               min={0}
                               value={variant.discount_price}
-                              onChange={(e) =>
-                                handleUpdateVariant(variant.id, "discount_price", e.target.value)
-                              }
+                              onChange={(e) => handleUpdateVariant(variant.id, "discount_price", e.target.value)}
                               disabled={isDeleting}
                               placeholder="70.00"
                               className="w-20 px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:bg-gray-100"
@@ -953,11 +1130,7 @@ export default function VariantFormCard({
                             min={0}
                             value={variant.stock_quantity}
                             onChange={(e) =>
-                              handleUpdateVariant(
-                                variant.id,
-                                "stock_quantity",
-                                parseInt(e.target.value) || 0
-                              )
+                              handleUpdateVariant(variant.id, "stock_quantity", parseInt(e.target.value) || 0)
                             }
                             disabled={isDeleting}
                             placeholder="25"
@@ -970,9 +1143,7 @@ export default function VariantFormCard({
                           <input
                             type="checkbox"
                             checked={variant.is_default}
-                            onChange={(e) =>
-                              handleUpdateVariant(variant.id, "is_default", e.target.checked)
-                            }
+                            onChange={(e) => handleUpdateVariant(variant.id, "is_default", e.target.checked)}
                             disabled={isDeleting}
                             className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500 disabled:opacity-50"
                           />
@@ -982,13 +1153,7 @@ export default function VariantFormCard({
                         <td className="px-4 py-3">
                           <select
                             value={variant.status}
-                            onChange={(e) =>
-                              handleUpdateVariant(
-                                variant.id,
-                                "status",
-                                parseInt(e.target.value)
-                              )
-                            }
+                            onChange={(e) => handleUpdateVariant(variant.id, "status", parseInt(e.target.value))}
                             disabled={isDeleting}
                             className="px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:bg-gray-100"
                           >
@@ -1000,7 +1165,8 @@ export default function VariantFormCard({
                         {/* Actions */}
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1">
-                            {isExistingVariant && (
+                            {/* 💾 Save existing variant */}
+                            {isEditMode && existingOnServer && (
                               <button
                                 type="button"
                                 onClick={() => handleSaveVariant(variant.id)}
@@ -1008,34 +1174,33 @@ export default function VariantFormCard({
                                 className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                                 title="Save changes"
                               >
-                                {isUpdating ? (
-                                  <svg className="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                  </svg>
-                                ) : (
-                                  <Save className="w-3 h-3" />
-                                )}
+                                {isUpdating ? <Spinner /> : <Save className="w-3 h-3" />}
                               </button>
                             )}
-                            {isExistingVariant && (
+
+                            {/* ➕ Create new (unsaved) variant via API */}
+                            {isEditMode && !existingOnServer && (
                               <button
                                 type="button"
-                                onClick={() => handleDeleteVariant(variant.id)}
-                                disabled={isUpdating || isDeleting}
-                                className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                                title="Delete variant"
+                                onClick={() => handleCreateNewVariant(variant.id)}
+                                disabled={isSavingNew || isDeleting}
+                                className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Save new variant to server"
                               >
-                                {isDeleting ? (
-                                  <svg className="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                  </svg>
-                                ) : (
-                                  <Trash2 className="w-3 h-3" />
-                                )}
+                                {isSavingNew ? <Spinner /> : <Plus className="w-3 h-3" />}
                               </button>
                             )}
+
+                            {/* 🗑️ Delete */}
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteVariant(variant.id)}
+                              disabled={isUpdating || isDeleting || isSavingNew}
+                              className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                              title={existingOnServer ? "Delete variant" : "Remove row"}
+                            >
+                              {isDeleting ? <Spinner /> : <Trash2 className="w-3 h-3" />}
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -1045,19 +1210,29 @@ export default function VariantFormCard({
               </table>
             </div>
 
-            {/* Pagination */}
-            <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200">
-              <div className="flex items-center gap-2">
-                <button type="button" className="px-3 py-1 bg-orange-500 text-white rounded text-xs hover:bg-orange-600 disabled:opacity-50" disabled>◀</button>
-                <button type="button" className="px-3 py-1 bg-white border border-gray-300 text-gray-700 rounded text-xs">1</button>
-                <button type="button" className="px-3 py-1 bg-white border border-gray-300 text-gray-700 rounded text-xs hover:bg-gray-50 disabled:opacity-50" disabled>▶</button>
-              </div>
+            {/* Table footer */}
+            <div className="flex items-center justify-end px-4 py-3 bg-gray-50 border-t border-gray-200">
               <p className="text-xs text-gray-600">
-                Showing all {variants.length} variant(s)
+                {variants.length} variant(s) total
+                {variants.filter((v) => !isExistingVariant(v.id)).length > 0 && (
+                  <span className="ml-2 text-blue-600 font-medium">
+                    ({variants.filter((v) => !isExistingVariant(v.id)).length} unsaved — click ➕ to save)
+                  </span>
+                )}
               </p>
             </div>
           </div>
         )}
+
+        {/* ── Empty state ── */}
+        {variants.length === 0 && variationTypes.length > 0 && (
+          <div className="border border-dashed border-gray-300 rounded-lg p-8 text-center">
+            <p className="text-gray-500 text-sm">
+              Select values for each attribute above to generate variants.
+            </p>
+          </div>
+        )}
+
       </CardContent>
     </Card>
   );

@@ -477,7 +477,10 @@
       "priorityRequired": "الأولوية مطلوبة",
       "priorityMin": "يجب أن تكون الأولوية 0 أو أكثر",
       "priorityMax": "يجب ألا تتجاوز الأولوية 100",
-      "priorityNumber": "يجب إدخال رقم صحيح للأولوية"
+      "priorityNumber": "يجب إدخال رقم صحيح للأولوية",
+      "qualityTypePlaceholder": "اختر نوع الجودة",
+      "qualityTypeRequired": "يجب اختيار نوع الجودة",
+      "qualityTypeLabel": "نوع الجودة"
     },
     "productDescription": {
       "title": "وصف المنتج",
@@ -718,80 +721,89 @@
     },
     "buttons": {
       "update": "تحديث المنتج",
-      "delete": "حذف",
-      "back": "العودة للمنتجات"
+      "delete": "حذف"
     },
     "sections": {
       "description": "وصف المنتج",
       "variants": "المتغيرات",
-      "compatibility": "التوافق مع المركبات",
+      "compatibility": "توافق المركبات",
       "specifications": "المواصفات"
     },
-    "status": {
-      "inStock": "متوفر",
-      "outOfStock": "غير متوفر",
-      "draft": "مسودة",
-      "published": "منشور"
+    "features": {
+      "details": "معلومات التفاصيل",
+      "shipping": "معلومات الشحن",
+      "return": "سياسة الإرجاع"
     },
+    "table": {
+      "variant": "المتغير",
+      "attributes": "الخصائص",
+      "price": "السعر",
+      "stock": "المخزون",
+      "discount": "الخصم",
+      "status": "الحالة",
+      "actions": {
+        "label": "الإجراءات",
+        "edit": "تعديل",
+        "delete": "حذف"
+      }
+    },
+    "badges": {
+      "default": "افتراضي",
+      "off": "خصم"
+    },
+    "images": {
+      "main": "رئيسية",
+      "product": "منتج"
+    },
+    "sku": "رمز المنتج",
     "pricing": {
-      "brand": "العلامة التجارية",
-      "discount": "خصم"
+      "brand": "العلامة التجارية"
     },
     "stock": {
-      "stock": "المخزون",
-      "units": "وحدات",
-      "supplier": "المورد"
+      "label": "المخزون",
+      "outOfStock": "نفد المخزون"
     },
     "rating": {
       "reviews": "تقييمات"
     },
     "tags": {
-      "title": "الوسوم"
-    },
-    "features": {
-      "details": "معلومات تفصيلية",
-      "shipping": "معلومات الشحن",
-      "return": "سياسة الإرجاع"
-    },
-    "table": {
-      "type": "النوع",
-      "value": "القيمة",
-      "price": "السعر",
-      "supplier": "المورد",
-      "actions": "الإجراءات"
+      "label": "الوسوم"
     },
     "vehicle": {
       "main": "المركبة الرئيسية",
       "compatible": "المركبات المتوافقة",
-      "type": "النوع",
-      "model": "الموديل",
-      "bodyType": "نوع الهيكل",
-      "year": "السنة"
+      "labels": {
+        "type": "النوع",
+        "model": "الموديل",
+        "bodyType": "نوع الهيكل",
+        "main": "رئيسي"
+      }
     },
     "specs": {
       "manufacturer": "الشركة المصنعة",
       "category": "الفئة",
-      "brand": "العلامة التجارية",
       "weight": "الوزن",
       "dimensions": "الأبعاد",
-      "height": "الارتفاع",
-      "width": "العرض",
-      "length": "الطول",
       "fragile": "قابل للكسر",
       "status": "الحالة",
-      "sku": "رمز المنتج",
-      "slug": "الرابط",
-      "created": "تاريخ الإنشاء",
-      "updated": "آخر تحديث"
+      "units": {
+        "kg": "كغ",
+        "cm": "سم"
+      },
+      "values": {
+        "yes": "نعم",
+        "no": "لا"
+      }
     },
-    "variants": {
-      "color": "اللون",
-      "material": "المادة",
-      "size": "الحجم"
+    "loading": {
+      "product": "جارٍ تحميل تفاصيل المنتج...",
+      "variants": "جارٍ تحميل المتغيرات..."
     },
-    "loading": "جاري تحميل تفاصيل المنتج...",
-    "error": "خطأ في تحميل المنتج",
-    "notFound": "المنتج غير موجود"
+    "errors": {
+      "productError": "خطأ في تحميل المنتج",
+      "productNotFound": "المنتج غير موجود",
+      "noVariants": "لا توجد متغيرات"
+    }
   },
   "common":{
     "delete": "حذف",
