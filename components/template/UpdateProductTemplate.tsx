@@ -46,10 +46,10 @@ export const UpdateProductTemplate = () => {
       <div className="flex items-center justify-center mt-6">
         <div className="text-center">
           <h2 className="text-lg lg:text-3xl font-bold text-orange-500">
-            {t("createproduct.steps.title")}
+            {t("updateproduct.steps.title")}
           </h2>
           <p className=" text-sm lg:text-md  text-gray-600">
-            {t("createproduct.steps.description")}
+            {t("updateproduct.steps.description")}
           </p>
         </div>
       </div>

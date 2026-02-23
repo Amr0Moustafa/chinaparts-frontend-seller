@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useMemo, useState, useCallback, useEffect, useRef } from "react";
+import React, {
+  useMemo,
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { StepItem } from "@/components/molecules/stepper/StepItem";
 import { ProductInfoCard } from "../product/ProductInfoCard";
@@ -22,6 +28,10 @@ import {
   useUpdateProductMutation,
   useGetProductByIdQuery,
 } from "@/features/products";
+import {
+  useCreateVariantMutation,
+  useUpdateVariantMutation,
+} from "@/features/variants";
 import VariantFormCard from "../product/VariantForm";
 import { useRouter } from "next/navigation";
 
@@ -39,7 +49,6 @@ type Step1ValidationKeys =
   | "images";
 
 type Step1ValidationState = Record<Step1ValidationKeys, boolean>;
-
 type StepValidationState = Record<number, boolean>;
 
 type ProductImagesData = {
@@ -57,22 +66,20 @@ type ShippingData = {
   is_fragile: boolean;
 };
 
-// ✅ NEW: Variant types matching the new component
-interface VariationType {
-  id: string;
-  name: string;
-  values: string[];
-}
-
 interface VariantCombination {
   id: string;
-  combinations: { [key: string]: string };
-  price: string;
-  quantity: number;
+  combinations: { [attributeName: string]: { id: number; value: string } };
+  attribute_value_ids: number[];
+  variant_name: string;
+  cost_price: string;
+  selling_price: string;
+  discount_price: string;
+  stock_quantity: number;
+  is_default: boolean;
+  status: number;
 }
 
 interface VariantData {
-  variation_types: VariationType[];
   variants: VariantCombination[];
 }
 
@@ -98,6 +105,7 @@ const INITIAL_PRODUCT_INFO: ProductInfoData = {
   sku: "",
   manufacturer_name: "",
   priority: "",
+  quality_type_id: "",
 };
 
 const INITIAL_PRODUCT_DESCRIPTION: ProductDescriptionData = {
@@ -128,10 +136,24 @@ const INITIAL_SHIPPING_DATA: ShippingData = {
   is_fragile: false,
 };
 
-// ✅ NEW: Initial variant data
 const INITIAL_VARIANT_DATA: VariantData = {
-  variation_types: [],
   variants: [],
+};
+
+/* ==================== Helpers ==================== */
+
+const isEqual = (a: unknown, b: unknown): boolean =>
+  JSON.stringify(a) === JSON.stringify(b);
+
+const hasImagesChanged = (
+  current: ProductImagesData,
+  original: ProductImagesData,
+): boolean => {
+  if (current.main_image !== null) return true;
+  if (current.images.length > 0) return true;
+  if (current.main_image_url !== original.main_image_url) return true;
+  if (!isEqual(current.images_url, original.images_url)) return true;
+  return false;
 };
 
 /* ==================== Component ==================== */
@@ -142,10 +164,24 @@ interface StepperProps {
 export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
   const { t } = useTranslation();
   const isEditMode = !!product_id;
-  const router=useRouter()
-  // ✅ Add ref to prevent cascading updates during initialization
+  const router = useRouter();
+
   const isInitializingRef = useRef(false);
-  const prevProductDataRef = useRef<string>('');
+  const prevProductDataRef = useRef<string>("");
+
+  const originalStep1Ref = useRef<{
+    productInfo: ProductInfoData;
+    categoryTags: StepperFormValues;
+    productDescription: ProductDescriptionData;
+    productImages: ProductImagesData;
+  } | null>(null);
+
+  const originalVariantRef = useRef<VariantData | null>(null);
+
+  const originalStep3Ref = useRef<{
+    shipping: ShippingData;
+    vehicles: VehicleData[];
+  } | null>(null);
 
   /* ------------------ State ------------------ */
   const [currentStep, setCurrentStep] = useState(1);
@@ -156,7 +192,6 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     INITIAL_STEP1_VALIDATION,
   );
 
-  // Step 1 Data
   const [productInfoData, setProductInfoData] =
     useState<ProductInfoData>(INITIAL_PRODUCT_INFO);
   const [productDescriptionData, setProductDescriptionData] =
@@ -168,33 +203,34 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     INITIAL_PRODUCT_IMAGES,
   );
 
-  // Step 2 Data - ✅ Updated type
-  const [variantData, setVariantData] = useState<VariantData>(INITIAL_VARIANT_DATA);
+  const [variantData, setVariantData] =
+    useState<VariantData>(INITIAL_VARIANT_DATA);
 
-  // Step 3 Data
   const [vehicleData, setVehicleData] = useState<VehicleData[]>([]);
   const [shippingData, setShippingData] = useState<ShippingData>(
     INITIAL_SHIPPING_DATA,
   );
 
-  // Product ID (returned from step 1 or passed as prop)
+  const [step3Validation, setStep3Validation] = useState<{
+    vehicle: boolean;
+    shipping: boolean;
+  }>({ vehicle: false, shipping: false });
+
   const [productId, setProductId] = useState<number | null>(
     product_id ? Number(product_id) : null,
   );
 
-  // UI State
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   /* ------------------ API Hooks ------------------ */
-  const [createProduct, { isLoading: createLoading }] =
-    useCreateProductMutation();
-  const [updateProduct, { isLoading: updateLoading }] =
-    useUpdateProductMutation();
+  const [createProduct] = useCreateProductMutation();
+  const [updateProduct] = useUpdateProductMutation();
+  const [createVariant] = useCreateVariantMutation();
+  const [updateVariant] = useUpdateVariantMutation();
 
-  // Fetch existing product data if in edit mode
   const {
     data: existingProduct,
     isLoading: isLoadingProduct,
@@ -203,11 +239,20 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     skip: !product_id,
   });
 
-  /* ------------------ React Hook Form ------------------ */
   const formMethods = useForm<StepperFormValues>({
     defaultValues: INITIAL_CATEGORY_TAGS,
     mode: "onChange",
   });
+
+  /* ------------------ Sync step3 validation ------------------ */
+  useEffect(() => {
+    if (isInitializingRef.current) return;
+    const allValid = step3Validation.vehicle && step3Validation.shipping;
+    setStepValidation((prev) => {
+      if (prev[3] === allValid) return prev;
+      return { ...prev, 3: allValid };
+    });
+  }, [step3Validation]);
 
   /* ------------------ Load Existing Product Data ------------------ */
   useEffect(() => {
@@ -218,44 +263,36 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
       return;
     }
 
-    // ✅ Serialize product data for deep comparison
     const currentProductDataStr = JSON.stringify(existingProduct.data);
-    
-    // Only update if product data actually changed
-    if (currentProductDataStr === prevProductDataRef.current) {
-      return;
-    }
+    if (currentProductDataStr === prevProductDataRef.current) return;
 
-    console.log("📦 Loading product data...");
     prevProductDataRef.current = currentProductDataStr;
     isInitializingRef.current = true;
 
     const product = existingProduct.data;
 
-    // Set product ID FIRST
     if (product.id && !productId) {
       setProductId(product.id);
     }
 
-    // Load Product Info
-    const newProductInfo = {
+    // ---- Step 1 ----
+    const newProductInfo: ProductInfoData = {
       name: product.name || "",
       sku: product.sku || "",
       manufacturer_name: product.manufacturer_name || "",
       priority: product.priority || "",
+      quality_type_id: String(product.quality_type_id || ""),
     };
     setProductInfoData(newProductInfo);
 
-    // Load Category & Tags
-    const newCategoryTags = {
+    const newCategoryTags: StepperFormValues = {
       category_id: product.category_id?.toString() || "",
       sub_category_id: product.sub_category_id?.toString() || "",
       tags: product.tags?.map((tag: any) => tag.id) || [],
     };
     setCategoryTagsData(newCategoryTags);
 
-    // Load Description
-    const newDescription = {
+    const newDescription: ProductDescriptionData = {
       description: product.description || "",
       details_info: product.details_info || "",
       shipping_info: product.shipping_info || "",
@@ -263,8 +300,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     };
     setProductDescriptionData(newDescription);
 
-    // Load Images
-    const newImages = {
+    const newImages: ProductImagesData = {
       main_image: null,
       images: [],
       main_image_url: product.main_image || "",
@@ -273,68 +309,125 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     };
     setProductImagesData(newImages);
 
-    // Load Shipping Data
-    if (product.weight || product.height || product.width || product.length) {
-      const newShipping = {
-        weight: Number(product.weight) || 0,
-        height: Number(product.height) || 0,
-        width: Number(product.width) || 0,
-        length: Number(product.length) || 0,
-        is_fragile: product.is_fragile || false,
-      };
-      setShippingData(newShipping);
+    originalStep1Ref.current = {
+      productInfo: newProductInfo,
+      categoryTags: newCategoryTags,
+      productDescription: newDescription,
+      productImages: newImages,
+    };
+
+    // ---- Step 3 ----
+    const newShipping: ShippingData = {
+      weight: Number(product.weight) || 0,
+      height: Number(product.height) || 0,
+      width: Number(product.width) || 0,
+      length: Number(product.length) || 0,
+      is_fragile: product.is_fragile || false,
+    };
+    setShippingData(newShipping);
+
+    // ---- Transform vehicles ----
+    // Main vehicle:
+    //   model_id  = vehicle.model?.id   ✅
+    //   brand     = vehicle.model?.brand?.id  ✅
+    //
+    // Compatible vehicles (each uses its OWN model and brand):
+    //   model_id  = vehicle.model?.id   ✅
+    //   brand     = vehicle.model?.brand?.id  ✅
+    const transformedVehicles: VehicleData[] = [];
+
+    if (product.main_vehicle) {
+      transformedVehicles.push({
+        year: product.main_vehicle.year,
+        type_id: String(product.main_vehicle.type?.id || ""),
+        model_id: String(product.main_vehicle.model?.id || ""),
+        body_type_id: String(product.main_vehicle.body_type?.id || ""),
+        is_main: true,
+        brand: String(product.main_vehicle.model?.brand?.id || ""),
+      });
     }
 
-    // ✅ Load Vehicle Data
-    if (product.main_vehicle || product.compatible_vehicles) {
-      const transformedVehicles: VehicleData[] = [];
-      
-      if (product.main_vehicle) {
+    if (
+      product.compatible_vehicles &&
+      Array.isArray(product.compatible_vehicles)
+    ) {
+      product.compatible_vehicles.forEach((vehicle: any) => {
+        console.log(vehicle)
         transformedVehicles.push({
-          year: product.main_vehicle.year,
-          type_id: String(product.main_vehicle.type?.id || ""),
-          model_id: String(product.main_vehicle.model?.id || ""),
-          body_type_id: String(product.main_vehicle.body_type?.id || ""),
-          is_main: true,
+          year: vehicle.year,
+          type_id: String(vehicle.type?.id || ""),
+          // ✅ model_id from each compatible vehicle's own model?.id
+          model_id: String(vehicle.model?.id || ""),
+          body_type_id: String(vehicle.body_type?.id || ""),
+          is_main: false,
+          // ✅ brand from each compatible vehicle's own model?.brand?.id
+          brand: String(vehicle.model?.brand?.id || ""),
         });
-      }
-      
-      if (product.compatible_vehicles && Array.isArray(product.compatible_vehicles)) {
-        product.compatible_vehicles.forEach((vehicle: any) => {
-          transformedVehicles.push({
-            year: vehicle.year,
-            type_id: String(vehicle.type?.id || ""),
-            model_id: String(vehicle.model?.id || ""),
-            body_type_id: String(vehicle.body_type?.id || ""),
-            is_main: false,
-          });
-        });
-      }
-      
-      setVehicleData(transformedVehicles);
+      });
     }
 
-    // ✅ Load Variant Data - Transform from API format to new component format
+    setVehicleData(transformedVehicles);
+
+    originalStep3Ref.current = {
+      shipping: newShipping,
+      vehicles: transformedVehicles,
+    };
+
+    // ---- Step 2 (variants) ----
     if (product.variants && Array.isArray(product.variants)) {
       const transformedVariantData: VariantData = {
-        variation_types: product.variation_types || [],
         variants: product.variants.map((v: any) => ({
-          id: v.id || Math.random().toString(36).substr(2, 9),
-          combinations: v.combinations || v.attributes || {},
-          price: String(v.price || ""),
-          quantity: Number(v.quantity || 0),
+          id: String(v.id) || Math.random().toString(36).substr(2, 9),
+          combinations: v.combinations || {},
+          attribute_value_ids: v.attribute_value_ids || [],
+          variant_name: v.variant_name || v.name || "",
+          cost_price: String(v.cost_price || ""),
+          selling_price: String(v.selling_price || v.price || ""),
+          discount_price: String(v.discount_price || ""),
+          stock_quantity: Number(v.stock_quantity || v.quantity || 0),
+          is_default: Boolean(v.is_default),
+          status: Number(v.status ?? 1),
         })),
       };
       setVariantData(transformedVariantData);
+      originalVariantRef.current = transformedVariantData;
     }
 
-    // Mark data as loaded and clear initialization flag
     setTimeout(() => {
       setIsDataLoaded(true);
       isInitializingRef.current = false;
-      console.log("✅ Product data loaded");
     }, 100);
   }, [existingProduct, isEditMode, productId]);
+
+  /* ==================== Change Detection ==================== */
+
+  const hasStep1Changed = useCallback((): boolean => {
+    if (!isEditMode || !originalStep1Ref.current) return true;
+    const orig = originalStep1Ref.current;
+    return (
+      !isEqual(productInfoData, orig.productInfo) ||
+      !isEqual(categoryTagsData, orig.categoryTags) ||
+      !isEqual(productDescriptionData, orig.productDescription) ||
+      hasImagesChanged(productImagesData, orig.productImages)
+    );
+  }, [isEditMode, productInfoData, categoryTagsData, productDescriptionData, productImagesData]);
+
+  const hasStep2Changed = useCallback((): boolean => {
+    if (!isEditMode || !originalVariantRef.current) return true;
+    return !isEqual(variantData, originalVariantRef.current);
+  }, [isEditMode, variantData]);
+
+  const hasStep3Changed = useCallback(
+    (currentShipping: ShippingData, currentVehicles: VehicleData[]): boolean => {
+      if (!isEditMode || !originalStep3Ref.current) return true;
+      const orig = originalStep3Ref.current;
+      return (
+        !isEqual(currentShipping, orig.shipping) ||
+        !isEqual(currentVehicles, orig.vehicles)
+      );
+    },
+    [isEditMode],
+  );
 
   /* ==================== API Functions ==================== */
 
@@ -346,27 +439,22 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
   }) => {
     const formData = new FormData();
 
-    // Add product info
     formData.append("store_step", "1");
     formData.append("name", data.productInfo.name);
     formData.append("sku", data.productInfo.sku);
     formData.append("manufacturer_name", data.productInfo.manufacturer_name);
     formData.append("priority", data.productInfo.priority);
-
-    // Add category and tags
     formData.append("category_id", data.categoryTags.category_id);
     formData.append("sub_category_id", data.categoryTags.sub_category_id);
     data.categoryTags.tags.forEach((tagId, index) => {
       formData.append(`tags[${index}]`, String(tagId));
     });
-
-    // Add description
     formData.append("description", data.productDescription.description);
     formData.append("details_info", data.productDescription.details_info);
     formData.append("shipping_info", data.productDescription.shipping_info);
     formData.append("return_info", data.productDescription.return_info);
+    formData.append("quality_type_id", data.productInfo.quality_type_id);
 
-    // Add images (only if new files are selected)
     if (data.productImages.main_image) {
       formData.append("main_image", data.productImages.main_image);
     }
@@ -377,15 +465,17 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     let response;
 
     if (isEditMode && productId) {
-      response = await updateProduct({
-        id: productId,
-        data: formData,
-      }).unwrap();
+      response = await updateProduct({ id: productId, data: formData }).unwrap();
       setMessage("Product updated successfully!");
+      originalStep1Ref.current = {
+        productInfo: data.productInfo,
+        categoryTags: data.categoryTags,
+        productDescription: data.productDescription,
+        productImages: { ...data.productImages, main_image: null, images: [] },
+      };
     } else {
       response = await createProduct(formData).unwrap();
       setMessage("Product created successfully!");
-
       if (response?.data?.id) {
         setProductId(response.data.id);
       }
@@ -394,81 +484,86 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     return response;
   };
 
-  // ✅ Updated Step 2 submission to handle variant data
   const submitStep2Data = async (data: VariantData) => {
-    if (!productId) {
-      throw new Error("Product ID is missing");
+    if (!productId) throw new Error("Product ID is missing");
+
+    if (!data?.variants?.length) {
+      console.warn("⚠️ No variants to submit");
+      return { success: true, message: "No variants to create" };
     }
 
-    // Transform variant data for API
-    // const body = {
-    //   store_step: "2",
-    //   product_id: productId,
-    //   variation_types: data.variation_types.map(vt => ({
-    //     name: vt.name,
-    //     values: vt.values,
-    //   })),
-    //   variants: data.variants.map(v => ({
-    //     combinations: v.combinations,
-    //     price: parseFloat(v.price.replace(/[^0-9.]/g, "")) || 0,
-    //     quantity: v.quantity,
-    //   })),
-    // };
+    let response;
 
-    // console.log("Submitting step 2 data:", body);
+    if (isEditMode && data.variants[0]?.id) {
+      const updatePromises = data.variants.map((v) =>
+        updateVariant({
+          productId: String(productId),
+          variantId: v.id,
+          data: {
+            attribute_value_ids: v.attribute_value_ids,
+            variant_name: v.variant_name,
+            cost_price: parseFloat(v.cost_price) || 0,
+            selling_price: parseFloat(v.selling_price) || 0,
+            discount_price: parseFloat(v.discount_price) || 0,
+            stock_quantity: v.stock_quantity,
+            is_default: v.is_default,
+            status: v.status,
+          },
+        }).unwrap(),
+      );
+      response = await Promise.all(updatePromises);
+      setMessage(`${data.variants.length} variant(s) updated successfully!`);
+    } else {
+      const createPromises = data.variants.map((v) =>
+        createVariant({
+          productId: String(productId),
+          data: {
+            attribute_value_ids: v.attribute_value_ids,
+            variant_name: v.variant_name,
+            cost_price: parseFloat(v.cost_price) || 0,
+            selling_price: parseFloat(v.selling_price) || 0,
+            discount_price: parseFloat(v.discount_price) || 0,
+            stock_quantity: v.stock_quantity,
+            is_default: v.is_default,
+            status: v.status,
+          },
+        }).unwrap(),
+      );
+      response = await Promise.all(createPromises);
+      setMessage(`${data.variants.length} variant(s) created successfully!`);
+    }
 
-    // const response = await updateProduct({
-    //   id: productId,
-    //   data: body,
-    // }).unwrap();
-
-    // setMessage("Variants saved successfully!");
-    // return response;
+    originalVariantRef.current = data;
+    return response;
   };
 
-  const submitStep3Data = async () => {
-    if (!productId) {
-      throw new Error("Product ID is missing");
-    }
+  const submitStep3Data = async (
+    shipping: ShippingData,
+    vehicles: VehicleData[],
+  ) => {
+    if (!productId) throw new Error("Product ID is missing");
 
     const body = {
       store_step: "3",
-      vehicles: vehicleData,
-      weight: shippingData.weight,
-      height: shippingData.height,
-      width: shippingData.width,
-      length: shippingData.length,
-      is_fragile: shippingData.is_fragile,
+      vehicles,
+      weight: shipping.weight,
+      height: shipping.height,
+      width: shipping.width,
+      length: shipping.length,
+      is_fragile: shipping.is_fragile,
     };
 
-    const response = await updateProduct({
-      id: productId,
-      data: body,
-    }).unwrap();
-
+    const response = await updateProduct({ id: productId, data: body }).unwrap();
     setMessage("Product updated successfully!");
     setSubmitError(null);
-
+    originalStep3Ref.current = { shipping, vehicles };
     return response;
   };
 
   const submitStep4Data = async () => {
-    if (!productId) {
-      throw new Error("Product ID is missing");
-    }
-
-    // TODO: Implement final submission API call
-    const body = {
-      store_step: "4",
-      status: "published", // or whatever status you need
-    };
-
-    const response = await updateProduct({
-      id: productId,
-      data: body,
-    }).unwrap();
-
-    return response;
+    if (!productId) throw new Error("Product ID is missing");
+    const body = { store_step: "4", status: "published" };
+    return await updateProduct({ id: productId, data: body }).unwrap();
   };
 
   /* ------------------ Memoized Steps ------------------ */
@@ -499,10 +594,8 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
   );
 
   /* ------------------ Effects ------------------ */
-  // Update step 1 validation based on all sub-forms
   useEffect(() => {
     if (isInitializingRef.current) return;
-    
     const allValid = Object.values(step1Validation).every(Boolean);
     setStepValidation((prev) => {
       if (prev[1] === allValid) return prev;
@@ -514,10 +607,14 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
   const handleValidationChange = useCallback(
     (step: number, isValid: boolean, formName?: string) => {
       if (isInitializingRef.current) return;
-      
       if (step === 1 && formName) {
         setStep1Validation((prev) => {
           if (prev[formName as Step1ValidationKeys] === isValid) return prev;
+          return { ...prev, [formName]: isValid };
+        });
+      } else if (step === 3 && formName) {
+        setStep3Validation((prev) => {
+          if (prev[formName as "vehicle" | "shipping"] === isValid) return prev;
           return { ...prev, [formName]: isValid };
         });
       } else {
@@ -553,17 +650,20 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     setProductImagesData(data);
   }, []);
 
-  // ✅ Updated variant handler
   const handleVariantDataChange = useCallback((data: any) => {
     if (isInitializingRef.current) return;
-    console.log("🎨 Variant data changed:", data);
-    setVariantData(data);
+    if (data?.variants) {
+      setVariantData({ variants: data.variants });
+    } else if (Array.isArray(data)) {
+      setVariantData({ variants: data });
+    } else {
+      setVariantData(data);
+    }
   }, []);
 
   const handleShippingDataChange = useCallback((data: any) => {
     if (isInitializingRef.current) return;
     if (data) {
-      // Extract only the shipping-related fields, not product_id
       setShippingData({
         weight: Number(data.weight) || 0,
         height: Number(data.height) || 0,
@@ -587,7 +687,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     setCurrentStep((prev) => Math.max(1, prev - 1));
   }, []);
 
-  /* ------------------ Submit Logic for Each Step ------------------ */
+  /* ------------------ Submit Logic ------------------ */
   const handleNextStep = useCallback(async () => {
     setSubmitError(null);
     setIsSubmitting(true);
@@ -595,30 +695,40 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     try {
       switch (currentStep) {
         case 1: {
-          const response = await submitStep1Data({
-            productInfo: productInfoData,
-            categoryTags: categoryTagsData,
-            productDescription: productDescriptionData,
-            productImages: productImagesData,
-          });
+          if (hasStep1Changed()) {
+            await submitStep1Data({
+              productInfo: productInfoData,
+              categoryTags: categoryTagsData,
+              productDescription: productDescriptionData,
+              productImages: productImagesData,
+            });
+          } else {
+            setMessage(null);
+          }
           break;
         }
-
         case 2: {
-          const response = await submitStep2Data(variantData);
+          if (hasStep2Changed()) {
+            await submitStep2Data(variantData);
+          } else {
+            setMessage(null);
+          }
           break;
         }
-
         case 3: {
-          const response = await submitStep3Data();
+          const currentShipping = shippingData;
+          const currentVehicles = vehicleData;
+          if (hasStep3Changed(currentShipping, currentVehicles)) {
+            await submitStep3Data(currentShipping, currentVehicles);
+          } else {
+            setMessage(null);
+          }
           break;
         }
-
         default:
           break;
       }
 
-      // Move to next step after successful submission
       setCurrentStep((prev) => Math.min(TOTAL_STEPS, prev + 1));
     } catch (error) {
       console.error(`Error submitting step ${currentStep}:`, error);
@@ -642,49 +752,40 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     vehicleData,
     shippingData,
     isEditMode,
+    hasStep1Changed,
+    hasStep2Changed,
+    hasStep3Changed,
   ]);
 
   const handleFinalSubmit = useCallback(async () => {
     setSubmitError(null);
     setIsSubmitting(true);
-router.push(`/dashboard/products/${productId}/show`);
-    // try {
-    //   const response = await submitStep4Data();
-    //   setMessage(
-    //     isEditMode
-    //       ? "Product updated successfully!"
-    //       : "Product created successfully!",
-    //   );
-    //   // TODO: Redirect to product page
-    //   router.push(`/products/${productId}`);
-    // } catch (error) {
-    //   console.error("Error finalizing product:", error);
-    //   setSubmitError(
-    //     error instanceof Error ? error.message : "Failed to finalize product",
-    //   );
-    //   setMessage(null);
-    // } finally {
-    //   setIsSubmitting(false);
-    // }
-  }, [productId, isEditMode]);
+    router.push(`/dashboard/products/${productId}/show`);
+  }, [productId, isEditMode, router]);
 
   /* ------------------ Computed Values ------------------ */
   const canProceedToNextStep = stepValidation[currentStep];
   const isLastStep = currentStep === steps.length;
   const isFirstStep = currentStep === 1;
 
-  // ✅ Memoize shippingData to prevent object recreation
-  const memoizedShippingData = useMemo(() => shippingData, [
-    shippingData.weight,
-    shippingData.height,
-    shippingData.width,
-    shippingData.length,
-    shippingData.is_fragile,
-  ]);
+  const memoizedShippingData = useMemo(
+    () => shippingData,
+    [
+      shippingData.weight,
+      shippingData.height,
+      shippingData.width,
+      shippingData.length,
+      shippingData.is_fragile,
+    ],
+  );
+
+  const selectedCategoryId = useMemo(() => {
+    const catId = categoryTagsData.sub_category_id || categoryTagsData.category_id;
+    return catId ? Number(catId) : null;
+  }, [categoryTagsData.category_id, categoryTagsData.sub_category_id]);
 
   /* ------------------ Render Content ------------------ */
   const renderSectionContent = useCallback(() => {
-    // ✅ FIX: Use stable key that only changes when productId changes
     const dataKey = isEditMode ? String(productId) : "new";
 
     switch (currentStep) {
@@ -699,7 +800,6 @@ router.push(`/dashboard/products/${productId}/show`);
               onDataChange={handleProductInfoChange}
               initialValues={productInfoData}
             />
-
             <CategoryTagsCard
               key={`category-tags-${dataKey}`}
               onValidationChange={(isValid) =>
@@ -708,7 +808,6 @@ router.push(`/dashboard/products/${productId}/show`);
               onDataChange={handleCategoryChange}
               initialValues={categoryTagsData}
             />
-
             <ProductDescriptionCard
               key={`description-${dataKey}`}
               onValidationChange={(isValid) =>
@@ -717,7 +816,6 @@ router.push(`/dashboard/products/${productId}/show`);
               onDataChange={handleProductDescriptionChange}
               initialValues={productDescriptionData}
             />
-
             <ProductImagesCard
               key={`images-${dataKey}`}
               onValidationChange={(isValid) =>
@@ -735,13 +833,13 @@ router.push(`/dashboard/products/${productId}/show`);
             <VariantFormCard
               key={`variants-${dataKey}`}
               productId={productId ? String(productId) : null}
-              onDataChange={handleVariantDataChange}
+              categoryId={selectedCategoryId}
+              onDataChange={(data) => handleVariantDataChange(data)}
               onValidationChange={(isValid) =>
                 handleValidationChange(2, isValid)
               }
               initialValues={{
-                variationTypes: variantData.variation_types,
-                variants: variantData.variants,
+                variants: variantData?.variants || [],
               }}
             />
           </div>
@@ -754,7 +852,7 @@ router.push(`/dashboard/products/${productId}/show`);
               key={`vehicle-${dataKey}`}
               onDataChange={handleVehicleDataChange}
               onValidationChange={(isValid) =>
-                handleValidationChange(3, isValid)
+                handleValidationChange(3, isValid, "vehicle")
               }
               initialData={vehicleData}
             />
@@ -763,7 +861,7 @@ router.push(`/dashboard/products/${productId}/show`);
               productId={productId}
               onDataChange={handleShippingDataChange}
               onValidationChange={(isValid) =>
-                handleValidationChange(3, isValid)
+                handleValidationChange(3, isValid, "shipping")
               }
               initialData={memoizedShippingData}
             />
@@ -779,7 +877,6 @@ router.push(`/dashboard/products/${productId}/show`);
               categoryTags={categoryTagsData}
               description={productDescriptionData}
               images={productImagesData}
-              // variants={variantData}
               shipping={{
                 productId: productId,
                 weight: String(memoizedShippingData.weight),
@@ -788,6 +885,8 @@ router.push(`/dashboard/products/${productId}/show`);
                 height: String(memoizedShippingData.height),
                 is_fragile: memoizedShippingData.is_fragile,
               }}
+              variants={variantData?.variants || []}
+              vehicles={vehicleData}
             />
           </div>
         );
@@ -798,6 +897,7 @@ router.push(`/dashboard/products/${productId}/show`);
   }, [
     currentStep,
     productId,
+    selectedCategoryId,
     isEditMode,
     handleValidationChange,
     handleProductInfoChange,
@@ -812,34 +912,18 @@ router.push(`/dashboard/products/${productId}/show`);
     productDescriptionData,
     productImagesData,
     variantData,
-    memoizedShippingData, // ✅ Use memoized version
+    memoizedShippingData,
     vehicleData,
   ]);
 
-  /* ------------------ Loading State ------------------ */
+  /* ------------------ Loading States ------------------ */
   if (isLoadingProduct && isEditMode) {
     return (
       <div className="max-w-7xl mx-auto mt-5 flex justify-center items-center min-h-[400px]">
         <div className="text-center">
-          <svg
-            className="animate-spin h-10 w-10 text-orange-500 mx-auto mb-4"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
+          <svg className="animate-spin h-10 w-10 text-orange-500 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
           <p className="text-gray-600">Loading product data...</p>
         </div>
@@ -851,25 +935,9 @@ router.push(`/dashboard/products/${productId}/show`);
     return (
       <div className="max-w-7xl mx-auto mt-5 flex justify-center items-center min-h-[400px]">
         <div className="text-center">
-          <svg
-            className="animate-spin h-10 w-10 text-orange-500 mx-auto mb-4"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
+          <svg className="animate-spin h-10 w-10 text-orange-500 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
           <p className="text-gray-600">Preparing form...</p>
         </div>
@@ -881,9 +949,7 @@ router.push(`/dashboard/products/${productId}/show`);
     return (
       <div className="max-w-7xl mx-auto mt-5">
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-600">
-            Error loading product data. Please try again.
-          </p>
+          <p className="text-sm text-red-600">Error loading product data. Please try again.</p>
         </div>
       </div>
     );
@@ -962,25 +1028,9 @@ router.push(`/dashboard/products/${productId}/show`);
           >
             {isSubmitting ? (
               <>
-                <svg
-                  className="animate-spin h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
                 <span>{isLastStep ? "Submitting..." : "Saving..."}</span>
               </>

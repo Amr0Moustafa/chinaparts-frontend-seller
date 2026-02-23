@@ -132,7 +132,10 @@
     "image2": "图像 2",
     "image3": "图像 3",
     "image4": "图像 4",
-    "Recommended": "推荐：800x800 像素"
+    "Recommended": "推荐：800x800 像素",
+    "deleteTitle": "删除产品",
+    "deleteConfirm": "您确定要删除",
+    "deleteWarning": "此操作无法撤销。"
   },
   "order": {
     "title": "订单管理",
@@ -478,7 +481,10 @@
       "priorityRequired": "优先级是必填项",
       "priorityMin": "优先级必须大于或等于 0",
       "priorityMax": "优先级不能超过 100",
-      "priorityNumber": "优先级必须是数字"
+      "priorityNumber": "优先级必须是数字",
+      "qualityTypePlaceholder": "选择质量类型",
+      "qualityTypeRequired": "选择质量类型",
+      "qualityTypeLabel": "质量类型"
     },
     "productDescription": {
       "title": "产品描述",
@@ -696,6 +702,10 @@
     "header": {
       "UpdateProduct": "更新产品",
       "saveAsDraft": "保存为草稿"
+    },
+    "steps": {
+      "title": "更新产品",
+      "description": "更新您的产品详情在 4 个简单步骤中"
     }
   },
   "dialog": {
@@ -708,41 +718,19 @@
       "description": "您确定要拒绝此项目吗？"
     }
   },
-  "productdetails": {
+   "productdetails": {
     "header": {
       "ProductDetails": "产品详情"
     },
     "buttons": {
       "update": "更新产品",
-      "delete": "删除",
-      "back": "返回产品列表"
+      "delete": "删除"
     },
     "sections": {
       "description": "产品描述",
-      "variants": "变体",
+      "variants": "产品变体",
       "compatibility": "车辆兼容性",
       "specifications": "规格参数"
-    },
-    "status": {
-      "inStock": "有货",
-      "outOfStock": "缺货",
-      "draft": "草稿",
-      "published": "已发布"
-    },
-    "pricing": {
-      "brand": "品牌",
-      "discount": "折扣"
-    },
-    "stock": {
-      "stock": "库存",
-      "units": "件",
-      "supplier": "供应商"
-    },
-    "rating": {
-      "reviews": "评论"
-    },
-    "tags": {
-      "title": "标签"
     },
     "features": {
       "details": "详细信息",
@@ -750,44 +738,79 @@
       "return": "退货政策"
     },
     "table": {
-      "type": "类型",
-      "value": "值",
+      "variant": "变体",
+      "attributes": "属性",
       "price": "价格",
-      "supplier": "供应商",
-      "actions": "操作"
+      "stock": "库存",
+      "discount": "折扣",
+      "status": "状态",
+      "actions": {
+        "label": "操作",
+        "edit": "编辑",
+        "delete": "删除"
+      }
+    },
+    "badges": {
+      "default": "默认",
+      "off": "折"
+    },
+    "images": {
+      "main": "主图",
+      "product": "产品"
+    },
+    "sku": "产品编码",
+    "pricing": {
+      "brand": "品牌"
+    },
+    "stock": {
+      "label": "库存",
+      "outOfStock": "缺货"
+    },
+    "rating": {
+      "reviews": "条评价"
+    },
+    "tags": {
+      "label": "标签"
     },
     "vehicle": {
       "main": "主车辆",
       "compatible": "兼容车辆",
-      "type": "类型",
-      "model": "型号",
-      "bodyType": "车身类型",
-      "year": "年份"
+      "labels": {
+        "type": "类型",
+        "model": "型号",
+        "bodyType": "车身类型",
+        "main": "主要"
+      }
     },
     "specs": {
       "manufacturer": "制造商",
-      "category": "分类",
-      "brand": "品牌",
+      "category": "类别",
       "weight": "重量",
       "dimensions": "尺寸",
-      "height": "高度",
-      "width": "宽度",
-      "length": "长度",
-      "fragile": "易碎",
+      "fragile": "易碎品",
       "status": "状态",
-      "sku": "SKU编码",
-      "slug": "链接",
-      "created": "创建时间",
-      "updated": "最后更新"
+      "units": {
+        "kg": "千克",
+        "cm": "厘米"
+      },
+      "values": {
+        "yes": "是",
+        "no": "否"
+      }
     },
-    "variants": {
-      "color": "颜色",
-      "material": "材质",
-      "size": "尺寸"
+    "loading": {
+      "product": "正在加载产品详情...",
+      "variants": "正在加载变体..."
     },
-    "loading": "正在加载产品详情...",
-    "error": "加载产品时出错",
-    "notFound": "找不到产品"
+    "errors": {
+      "productError": "加载产品时出错",
+      "productNotFound": "未找到产品",
+      "noVariants": "未找到变体"
+    }
+  },
+  "common":{
+    "delete": "删除",
+    "cancel": "取消"
   }
 
 }

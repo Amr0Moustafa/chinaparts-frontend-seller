@@ -12,14 +12,11 @@ import type {
 export const sellerProductsApi = createApi({
   reducerPath: "sellerProductsApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "/api/seller", // Next API
-    credentials: "include", // cookies (seller_token)
+    baseUrl: "/api/seller",
+    credentials: "include",
   }),
   tagTypes: ["Products", "Product", "Attributes"],
   endpoints: (builder) => ({
-    /* =============================
-       GET /products
-    ============================= */
     getProducts: builder.query<ProductListResponse, GetProductsParams>({
       query: (params) => ({
         url: "products",
@@ -29,30 +26,22 @@ export const sellerProductsApi = createApi({
       providesTags: ["Products"],
     }),
 
-    /* =============================
-       GET /products/{id}
-    ============================= */
     getProductById: builder.query<ProductResponse, number | string>({
       query: (id) => `products/${id}`,
       providesTags: (_r, _e, id) => [{ type: "Product", id }],
     }),
 
-    /* =============================
-       POST /products
-    ============================= */
     createProduct: builder.mutation<ProductResponse, ProductCreatePayload | FormData>({
       query: (body) => ({
         url: "products",
         method: "POST",
         body,
+        ...(body instanceof FormData && { formData: true }),
       }),
       invalidatesTags: ["Products"],
     }),
 
-    /* =============================
-       PUT /products/{id}
-    ============================= */
-    updateProduct: builder.mutation<
+    updateProduct: builder.mutation<  
       ProductResponse,
       { id: number | string; data: any }
     >({
@@ -60,6 +49,7 @@ export const sellerProductsApi = createApi({
         url: `products/${id}`,
         method: "PUT",
         body: data,
+        ...(data instanceof FormData && { formData: true }),
       }),
       invalidatesTags: (_r, _e, { id }) => [
         { type: "Product", id },
@@ -67,10 +57,7 @@ export const sellerProductsApi = createApi({
       ],
     }),
 
-    /* =============================
-       POST /products/{id} (FILES)
-    ============================= */
-    updateProductWithFiles: builder.mutation<
+    updateProductWithFiles: builder.mutation<  
       ProductResponse,
       { id: number | string; formData: FormData }
     >({
@@ -78,13 +65,11 @@ export const sellerProductsApi = createApi({
         url: `products/${id}`,
         method: "POST",
         body: formData,
+        formData: true,
       }),
       invalidatesTags: (_r, _e, { id }) => [{ type: "Product", id }],
     }),
 
-    /* =============================
-       DELETE /products/{id}
-    ============================= */
     deleteProduct: builder.mutation<{ success: boolean }, number | string>({
       query: (id) => ({
         url: `products/${id}`,
@@ -93,10 +78,7 @@ export const sellerProductsApi = createApi({
       invalidatesTags: ["Products"],
     }),
 
-    /* =============================
-       PATCH /products/{id}/step
-    ============================= */
-    updateProductStep: builder.mutation<
+    updateProductStep: builder.mutation<  
       ProductResponse,
       { id: number | string; step: number }
     >({
@@ -108,10 +90,7 @@ export const sellerProductsApi = createApi({
       invalidatesTags: (_r, _e, { id }) => [{ type: "Product", id }],
     }),
 
-    /* =============================
-       PATCH /products/{id}/status
-    ============================= */
-    updateProductStatus: builder.mutation<
+    updateProductStatus: builder.mutation<  
       ProductResponse,
       { id: number | string; status: number }
     >({
@@ -123,10 +102,7 @@ export const sellerProductsApi = createApi({
       invalidatesTags: (_r, _e, { id }) => [{ type: "Product", id }],
     }),
 
-    /* =============================
-       GET /products/{id}/attributes
-    ============================= */
-    getProductAttributes: builder.query<
+    getProductAttributes: builder.query<  
       ProductAttributesResponse,
       number | string
     >({
@@ -135,7 +111,6 @@ export const sellerProductsApi = createApi({
     }),
   }),
 });
-
 
 export const {
   useGetProductsQuery,
@@ -148,4 +123,3 @@ export const {
   useUpdateProductStatusMutation,
   useGetProductAttributesQuery,
 } = sellerProductsApi;
-

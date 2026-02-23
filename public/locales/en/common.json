@@ -124,7 +124,7 @@
     "title": "Recent Notifications",
     "viewall": "View All"
   },
-  "product": {
+  "products": {
     "title": "Products",
     "addproduct": "Add Product",
     "mainimage": "Main Image",
@@ -132,7 +132,10 @@
     "image2": "Image 2",
     "image3": "Image 3",
     "image4": "Image 4",
-    "Recommended": "Recommended: 800x800 pixels"
+    "Recommended": "Recommended: 800x800 pixels",
+    "deleteTitle": "Delete Product",
+    "deleteConfirm": "Are you sure you want to delete",
+    "deleteWarning": "This action cannot be undone."
   },
   "order": {
     "title": "Orders Management",
@@ -469,7 +472,10 @@
       "priorityRequired": "Priority is required",
       "priorityMin": "Priority must be 0 or greater",
       "priorityMax": "Priority must be 100 or less",
-      "priorityNumber": "Priority must be a number"
+      "priorityNumber": "Priority must be a number",
+      "qualityTypePlaceholder": "Select quality type",
+      "qualityTypeRequired": "Quality type is required",
+      "qualityTypeLabel": "Quality Type"
     },
     "productDescription": {
       "title": "Product Description",
@@ -688,6 +694,10 @@
     "header": {
       "UpdateProduct": "Update Product",
       "saveAsDraft": "Save as Draft"
+    },
+    "steps": {
+      "title": "Update Product",
+      "description": "Update your product details in 4 easy steps"
     }
   },
   "dialog": {
@@ -700,14 +710,13 @@
       "description": "Are you sure you want to reject this item?"
     }
   },
-   "productdetails": {
+  "productdetails": {
     "header": {
       "ProductDetails": "Product Details"
     },
     "buttons": {
       "update": "Update Product",
-      "delete": "Delete",
-      "back": "Back to Products"
+      "delete": "Delete"
     },
     "sections": {
       "description": "Product Description",
@@ -715,70 +724,84 @@
       "compatibility": "Vehicle Compatibility",
       "specifications": "Specifications"
     },
-    "status": {
-      "inStock": "In Stock",
-      "outOfStock": "Out of Stock",
-      "draft": "Draft",
-      "published": "Published"
-    },
-    "pricing": {
-      "brand": "BRAND",
-      "discount": "OFF"
-    },
-    "stock": {
-      "stock": "Stock",
-      "units": "units",
-      "supplier": "Supplier"
-    },
-    "rating": {
-      "reviews": "reviews"
-    },
-    "tags": {
-      "title": "Tags"
-    },
     "features": {
       "details": "Details Info",
       "shipping": "Shipping Information",
       "return": "Return Policy"
     },
     "table": {
-      "type": "Type",
-      "value": "Value",
+      "variant": "Variant",
+      "attributes": "Attributes",
       "price": "Price",
-      "supplier": "Supplier",
-      "actions": "Actions"
+      "stock": "Stock",
+      "discount": "Discount",
+      "status": "Status",
+      "actions": {
+        "label": "Actions",
+        "edit": "Edit",
+        "delete": "Delete"
+      }
+    },
+    "badges": {
+      "default": "Default",
+      "off": "OFF"
+    },
+    "images": {
+      "main": "Main",
+      "product": "Product"
+    },
+    "sku": "SKU",
+    "pricing": {
+      "brand": "BRAND"
+    },
+    "stock": {
+      "label": "Stock",
+      "outOfStock": "Out of Stock"
+    },
+    "rating": {
+      "reviews": "reviews"
+    },
+    "tags": {
+      "label": "Tags"
     },
     "vehicle": {
       "main": "Main Vehicle",
       "compatible": "Compatible Vehicles",
-      "type": "Type",
-      "model": "Model",
-      "bodyType": "Body Type",
-      "year": "Year"
+      "labels": {
+        "type": "Type",
+        "model": "Model",
+        "bodyType": "Body Type",
+        "main": "Main"
+      }
     },
     "specs": {
       "manufacturer": "Manufacturer",
       "category": "Category",
-      "brand": "Brand",
       "weight": "Weight",
       "dimensions": "Dimensions",
-      "height": "Height",
-      "width": "Width",
-      "length": "Length",
       "fragile": "Fragile",
       "status": "Status",
-      "sku": "SKU",
-      "slug": "Slug",
-      "created": "Created",
-      "updated": "Last Updated"
+      "units": {
+        "kg": "kg",
+        "cm": "cm"
+      },
+      "values": {
+        "yes": "Yes",
+        "no": "No"
+      }
     },
-    "variants": {
-      "color": "Color",
-      "material": "Material",
-      "size": "Size"
+    "loading": {
+      "product": "Loading product details...",
+      "variants": "Loading variants..."
     },
-    "loading": "Loading product details...",
-    "error": "Error loading product",
-    "notFound": "Product not found"
+    "errors": {
+      "productError": "Error loading product",
+      "productNotFound": "Product not found",
+      "noVariants": "No variants found"
+    }
+  },
+  "common":{
+    "delete": "Delete",
+    "cancel": "Cancel"
   }
 }

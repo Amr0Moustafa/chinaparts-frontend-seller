@@ -28,14 +28,35 @@ export async function GET(req: NextRequest, context: Params) {
 
 export async function PUT(req: NextRequest, context: Params) {
   const seller_token = req.cookies.get("seller_token")?.value;
-  const body = await req.json();
   const { product } = await context.params;
+
+  const contentType = req.headers.get("content-type") || "";
+  const isFormData = contentType.includes("multipart/form-data");
+
   try {
-    const res = await axios.put(`${BASE_URL}/products/${product}`, body, {
-      headers: {
-        Authorization: `Bearer ${seller_token}`,
-      },
-    });
+    let res;
+
+    if (isFormData) {
+      // ── FormData (has file uploads) ──────────────────────────────
+      const formData = await req.formData();
+
+      res = await axios.put(`${BASE_URL}/products/${product}`, formData, {
+        headers: {
+          Authorization: `Bearer ${seller_token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    } else {
+      // ── JSON (no file uploads) ───────────────────────────────────
+      const body = await req.json();
+
+      res = await axios.put(`${BASE_URL}/products/${product}`, body, {
+        headers: {
+          Authorization: `Bearer ${seller_token}`,
+          "Content-Type": "application/json",
+        },
+      });
+    }
 
     return NextResponse.json(res.data);
   } catch (error: any) {

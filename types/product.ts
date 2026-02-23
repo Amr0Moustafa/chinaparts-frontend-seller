@@ -142,6 +142,7 @@ sub_category_id:string;
   category: ProductCategory;
   seller: ProductSeller;
   brand: BrandCategory;
+  quality_type_id: string;
  weight: string;
   height: string;
   width: string;
