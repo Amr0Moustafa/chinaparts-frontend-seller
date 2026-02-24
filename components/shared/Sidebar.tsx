@@ -11,8 +11,9 @@ import {
   HiOutlineTag,
   HiOutlineCog6Tooth,
   HiOutlineUserCircle,
+  
 } from "react-icons/hi2";
-import { Percent } from "lucide-react";
+import { Percent,Star } from "lucide-react";
 import { FiShoppingCart } from "react-icons/fi";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
@@ -27,6 +28,7 @@ const NAV_DEFS = [
     href: "/dashboard/messages",
     icon: HiOutlineChatBubbleOvalLeftEllipsis,
   },
+  { key: "reviews", href: "/dashboard/reviews", icon: Star  },
   { key: "reports", href: "/dashboard/reports", icon: HiOutlineChartBar },
   { key: "coupons", href: "/dashboard/coupons", icon: HiOutlineTag },
   { key: "productoffers", href: "/dashboard/offers", icon: Percent },

@@ -25,7 +25,6 @@ interface SelectOption {
   value: string;
 }
 
-// All fields optional to match yup schema inference (string | undefined)
 interface CompatibilityItem {
   type_id?: string;
   body_type_id?: string;
@@ -70,6 +69,9 @@ interface CompatibilityFormItemProps {
   yearOptions: SelectOption[];
   onRemove: () => void;
   canRemove: boolean;
+  // ✅ Pass initial values directly as props so no guessing needed
+  initialBrandId: string;
+  initialModelId: string;
 }
 
 /* ===============================
@@ -108,58 +110,65 @@ const CompatibilityFormItem: FC<CompatibilityFormItemProps> = ({
   yearOptions,
   onRemove,
   canRemove,
+  initialBrandId,
+  initialModelId,
 }) => {
   const { t } = useTranslation();
-  const { setValue, watch } = useFormContext<VehicleFormValues>();
+  const { setValue } = useFormContext<VehicleFormValues>();
 
-  const [selectedBrandId, setSelectedBrandId] = useState("");
-  const [prevBrandId, setPrevBrandId] = useState("");
-  const isInitializedRef = useRef(false);
+  // ✅ Initialize directly from props — no useEffect sync needed
+  const [selectedBrandId, setSelectedBrandId] = useState(initialBrandId);
 
-  // Watch form brand value — syncs state when initialData is loaded
-  const formBrandValue = watch(`compatibility.${index}.brand`);
+  // ✅ Track whether this is the initial render to avoid resetting model on mount
+  const isFirstRenderRef = useRef(true);
+  const prevBrandIdRef = useRef(initialBrandId);
 
-  useEffect(() => {
-    if (formBrandValue && formBrandValue !== selectedBrandId) {
-      setSelectedBrandId(formBrandValue);
-      if (!isInitializedRef.current) {
-        setPrevBrandId(formBrandValue);
-        isInitializedRef.current = true;
-      }
-    }
-  }, [formBrandValue, selectedBrandId, index]);
-
-  // Fetch models for this compatibility item's selected brand
+  // Fetch models for the selected brand
   const { data: modelsData, isLoading: modelsLoading } =
     useGetVehicleModelsByBrandQuery(selectedBrandId, {
       skip: !selectedBrandId,
       refetchOnMountOrArgChange: true,
     });
 
-  // Reset model_id when brand changes (not on initial load)
+  // ✅ Once models load, re-apply the initialModelId (only on first load)
   useEffect(() => {
-    if (!isInitializedRef.current) return;
+    if (!initialModelId) return;
+    if (modelsLoading || !modelsData?.data?.length) return;
+    if (!isFirstRenderRef.current) return;
 
-    const timer = setTimeout(() => {
-      if (selectedBrandId && selectedBrandId !== prevBrandId) {
-        setValue(`compatibility.${index}.model_id`, "", { shouldValidate: false });
-        setPrevBrandId(selectedBrandId);
-      }
-    }, 0);
+    const modelExists = modelsData.data.some(
+      (m: any) => String(m.id) === initialModelId,
+    );
 
-    return () => clearTimeout(timer);
-  }, [selectedBrandId, prevBrandId, index, setValue]);
+    if (modelExists) {
+      setValue(`compatibility.${index}.model_id`, initialModelId, {
+        shouldValidate: false,
+      });
+    }
+
+    // Mark as done so we never overwrite a user selection
+    isFirstRenderRef.current = false;
+  }, [modelsData, modelsLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleBrandChange = useCallback(
     (value: any) => {
       const brandId =
         typeof value === "string" ? value : value?.target?.value || value;
+
+      // Only clear model if brand actually changed from what was there before
+      if (brandId !== prevBrandIdRef.current) {
+        // Not the initial load anymore — user is actively changing brand
+        isFirstRenderRef.current = false;
+        setValue(`compatibility.${index}.model_id`, "", { shouldValidate: false });
+        prevBrandIdRef.current = brandId;
+      }
+
       setSelectedBrandId(brandId);
     },
-    [index],
+    [index, setValue],
   );
 
-  // model options: value = m.id (the model's id from API)
+  // model options: value = m.id from API
   const modelOptions: SelectOption[] =
     modelsData?.data?.map((m: any) => ({
       label: m.name,
@@ -281,7 +290,6 @@ export const VehicleForm: FC<VehicleFormProps> = ({
             type_id: mainVehicle.type_id || "",
             body_type_id: mainVehicle.body_type_id || "",
             brand: mainVehicle.brand || "",
-            // model_id comes from vehicle.model?.id passed via initialData
             model_id: mainVehicle.model_id || "",
             year: mainVehicle.year || "",
           }
@@ -298,7 +306,6 @@ export const VehicleForm: FC<VehicleFormProps> = ({
               type_id: v.type_id || "",
               body_type_id: v.body_type_id || "",
               brand: v.brand || "",
-              // model_id comes from vehicle.model?.id passed via initialData
               model_id: v.model_id || "",
               year: v.year || "",
             }))
@@ -318,7 +325,6 @@ export const VehicleForm: FC<VehicleFormProps> = ({
      Form Setup
   ================================ */
   const methods = useForm<VehicleFormValues>({
-    // Cast resolver to avoid yup optional inference mismatch with CompatibilityItem
     resolver: yupResolver(vehicleSchema) as any,
     mode: "onChange",
     defaultValues: getInitialValues(),
@@ -326,18 +332,17 @@ export const VehicleForm: FC<VehicleFormProps> = ({
 
   const { watch, formState, setValue, reset } = methods;
 
-  // Initialize brand state from initialData
+  // ✅ Initialize main brand from initialData directly
   const [mainVehicleBrandId, setMainVehicleBrandId] = useState(
     () => initialData?.find((v) => v.is_main)?.brand || "",
   );
-  const [prevMainBrandId, setPrevMainBrandId] = useState(
-    () => initialData?.find((v) => v.is_main)?.brand || "",
+  const prevMainBrandIdRef = useRef(
+    initialData?.find((v) => v.is_main)?.brand || "",
   );
+  const mainIsFirstRenderRef = useRef(true);
 
   /* ===============================
      Main Vehicle Models Fetching
-     — fetches models for the selected brand
-     — options value = m.id (vehicle.model?.id)
   ================================ */
   const { data: mainModelsData, isLoading: mainModelsLoading } =
     useGetVehicleModelsByBrandQuery(mainVehicleBrandId, {
@@ -345,27 +350,38 @@ export const VehicleForm: FC<VehicleFormProps> = ({
       refetchOnMountOrArgChange: true,
     });
 
-  // Reset model_id when main vehicle brand changes
+  // ✅ Re-apply main vehicle model_id once models load (first render only)
+  const initialMainModelId = initialData?.find((v) => v.is_main)?.model_id || "";
   useEffect(() => {
-    if (isInitializingRef.current) return;
+    if (!initialMainModelId) return;
+    if (mainModelsLoading || !mainModelsData?.data?.length) return;
+    if (!mainIsFirstRenderRef.current) return;
 
-    if (
-      mainVehicleBrandId &&
-      mainVehicleBrandId !== prevMainBrandId &&
-      prevMainBrandId !== ""
-    ) {
-      setValue("mainVehicle.model_id", "", { shouldValidate: false });
-      setPrevMainBrandId(mainVehicleBrandId);
-    } else if (mainVehicleBrandId && prevMainBrandId === "") {
-      setPrevMainBrandId(mainVehicleBrandId);
+    const modelExists = mainModelsData.data.some(
+      (m: any) => String(m.id) === initialMainModelId,
+    );
+
+    if (modelExists) {
+      setValue("mainVehicle.model_id", initialMainModelId, {
+        shouldValidate: false,
+      });
     }
-  }, [mainVehicleBrandId, prevMainBrandId, setValue]);
+
+    mainIsFirstRenderRef.current = false;
+  }, [mainModelsData, mainModelsLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleMainBrandChange = useCallback((value: any) => {
     const brandId =
       typeof value === "string" ? value : value?.target?.value || value;
+
+    if (brandId !== prevMainBrandIdRef.current) {
+      mainIsFirstRenderRef.current = false;
+      setValue("mainVehicle.model_id", "", { shouldValidate: false });
+      prevMainBrandIdRef.current = brandId;
+    }
+
     setMainVehicleBrandId(brandId);
-  }, []);
+  }, [setValue]);
 
   /* ===============================
      Options Mapping
@@ -388,7 +404,6 @@ export const VehicleForm: FC<VehicleFormProps> = ({
       value: String(b.id),
     })) || [];
 
-  // Main vehicle model options: value = m.id (vehicle.model?.id)
   const mainModelOptions: SelectOption[] =
     mainModelsData?.data?.map((m: any) => ({
       label: m.name,
@@ -399,20 +414,6 @@ export const VehicleForm: FC<VehicleFormProps> = ({
     const year = 1995 + i;
     return { label: `${year}`, value: `${year}` };
   });
-
-  /* ===============================
-     Sync mainVehicleBrandId when initialData arrives
-  ================================ */
-  useEffect(() => {
-    if (isInitializingRef.current) return;
-    if (!initialData || initialData.length === 0) return;
-
-    const mainVehicleData = initialData.find((v) => v.is_main);
-    if (mainVehicleData?.brand && mainVehicleData.brand !== mainVehicleBrandId) {
-      setMainVehicleBrandId(mainVehicleData.brand);
-      setPrevMainBrandId(mainVehicleData.brand);
-    }
-  }, [initialData]);
 
   /* ===============================
      Reset form when initialData changes
@@ -431,7 +432,8 @@ export const VehicleForm: FC<VehicleFormProps> = ({
       const mainVehicleData = initialData.find((v) => v.is_main);
       if (mainVehicleData?.brand) {
         setMainVehicleBrandId(mainVehicleData.brand);
-        setPrevMainBrandId(mainVehicleData.brand);
+        prevMainBrandIdRef.current = mainVehicleData.brand;
+        mainIsFirstRenderRef.current = true; // allow re-apply after reset
       }
 
       setTimeout(() => {
@@ -448,7 +450,6 @@ export const VehicleForm: FC<VehicleFormProps> = ({
 
   /* ===============================
      Payload Builder
-     model_id = vehicle.model?.id (the id from API, stored as SelectField value)
   ================================ */
   const buildVehiclesPayload = useCallback(
     (values: VehicleFormValues): VehicleData[] => {
@@ -460,7 +461,7 @@ export const VehicleForm: FC<VehicleFormProps> = ({
         vehicles.push({
           year,
           type_id: main.type_id,
-          model_id: main.model_id, // value = vehicle.model?.id
+          model_id: main.model_id,
           body_type_id: main.body_type_id,
           is_main: true,
           brand: main.brand || "",
@@ -473,7 +474,7 @@ export const VehicleForm: FC<VehicleFormProps> = ({
           vehicles.push({
             year,
             type_id: c.type_id,
-            model_id: c.model_id, // value = vehicle.model?.id
+            model_id: c.model_id,
             body_type_id: c.body_type_id,
             is_main: false,
             brand: c.brand || "",
@@ -506,6 +507,9 @@ export const VehicleForm: FC<VehicleFormProps> = ({
   }, [formState.isValid]);
 
   const compatibility = watch("compatibility") ?? [];
+
+  // ✅ Build a stable list of compatibility initial values to pass as props
+  const compatibilityInitialData = initialData?.filter((v) => !v.is_main) || [];
 
   /* ===============================
      Handlers
@@ -573,7 +577,6 @@ export const VehicleForm: FC<VehicleFormProps> = ({
               onChange={handleMainBrandChange}
             />
 
-            {/* model_id value = m.id (vehicle.model?.id from API) */}
             <SelectField
               name="mainVehicle.model_id"
               label={t("createproduct.vehicleForm.mainVehicle.fields.model")}
@@ -610,18 +613,26 @@ export const VehicleForm: FC<VehicleFormProps> = ({
               </Button>
             </div>
 
-            {compatibility.map((_, index) => (
-              <CompatibilityFormItem
-                key={index}
-                index={index}
-                brandOptions={brandOptions}
-                vehicleTypeOptions={vehicleTypeOptions}
-                bodyTypeOptions={bodyTypeOptions}
-                yearOptions={yearOptions}
-                canRemove={compatibility.length > 1}
-                onRemove={() => handleRemoveCompatibility(index)}
-              />
-            ))}
+            {compatibility.map((_, index) => {
+              // ✅ Pull initial brand/model from initialData by index
+              const initialItem = compatibilityInitialData[index];
+              return (
+                <CompatibilityFormItem
+                  // ✅ Use a stable key based on initial data so React remounts
+                  // the component when initialData changes (resets internal state)
+                  key={`compat-${initialItem?.brand || ""}-${initialItem?.model_id || ""}-${index}`}
+                  index={index}
+                  brandOptions={brandOptions}
+                  vehicleTypeOptions={vehicleTypeOptions}
+                  bodyTypeOptions={bodyTypeOptions}
+                  yearOptions={yearOptions}
+                  canRemove={compatibility.length > 1}
+                  onRemove={() => handleRemoveCompatibility(index)}
+                  initialBrandId={initialItem?.brand || ""}
+                  initialModelId={initialItem?.model_id || ""}
+                />
+              );
+            })}
 
             <Button
               type="button"

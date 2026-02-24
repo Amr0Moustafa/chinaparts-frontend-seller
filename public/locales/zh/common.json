@@ -15,7 +15,8 @@
       "coupons": "优惠券",
       "productoffers": "产品优惠",
       "settings": "店铺设置",
-      "account": "账户"
+      "account": "账户",
+      "reviews": "评论"
     },
     "sellerLabel": "高级卖家",
     "sellerName": "Mohamed 的汽车配件"
@@ -66,7 +67,8 @@
     "edit": "编辑",
     "delete": "删除",
     "accept": "接受",
-    "reject": "拒绝"
+    "reject": "拒绝",
+     "noData": "没有数据"
   },
   "quickActions": {
     "title": "快速操作",
@@ -806,6 +808,41 @@
       "productError": "加载产品时出错",
       "productNotFound": "未找到产品",
       "noVariants": "未找到变体"
+    }
+  },
+   "reviews": {
+    "title": "产品评价",
+    "product": "产品",
+    "customer": "客户",
+    "rating": "评分",
+    "comment": "评论",
+    "status": "状态",
+
+    "filters": {
+      "searchPlaceholder": "搜索评价...",
+      "allRatings": "所有评分",
+      "stars": "星",
+      "allStatus": "所有状态",
+      "pending": "待审核",
+      "approved": "已通过",
+      "rejected": "已拒绝",
+      "reset": "重置"
+    },
+
+    "stats": {
+      "averageRating": "平均评分",
+      "approved": "已通过",
+      "pending": "待审核",
+      "rejected": "已拒绝"
+    },
+
+    "table": {
+      "title": "评价"
+    },
+
+    "pagination": {
+      "showing": "显示",
+      "of": "条评价"
     }
   },
   "common":{

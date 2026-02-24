@@ -15,7 +15,8 @@
       "coupons": "Coupons",
       "productoffers": "Product Offers",
       "settings": "Store Settings",
-      "account": "Account"
+      "account": "Account",
+      "reviews": "Reviews"
     },
     "sellerLabel": "Premium Seller",
     "sellerName": "Mohamed's Auto Parts"
@@ -66,7 +67,8 @@
     "edit": "Edit",
     "delete": "Delete",
     "accept": "Accept",
-    "reject": "Reject"
+    "reject": "Reject",
+     "noData": "No Data"
   },
   "quickActions": {
     "title": "Quick Actions",
@@ -800,8 +802,45 @@
       "noVariants": "No variants found"
     }
   },
+  "reviews": {
+    "title": "Product Reviews",
+    "product": "Product",
+    "customer": "Customer",
+    "rating": "Rating",
+    "comment": "Comment",
+    "status": "Status",
+
+    "filters": {
+      "searchPlaceholder": "Search reviews...",
+      "allRatings": "All Ratings",
+      "stars": "Stars",
+      "allStatus": "All Status",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "reset": "Reset"
+    },
+
+    "stats": {
+      "averageRating": "Average Rating",
+      "approved": "Approved",
+      "pending": "Pending",
+      "rejected": "Rejected"
+    },
+
+    "table": {
+      "title": "Reviews"
+    },
+
+    "pagination": {
+      "showing": "Showing",
+      "of": "of reviews"
+    }
+  },
   "common":{
     "delete": "Delete",
     "cancel": "Cancel"
+    
   }
+ 
 }
