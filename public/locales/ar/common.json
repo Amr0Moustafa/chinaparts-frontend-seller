@@ -15,7 +15,8 @@
       "coupons": "الكوپونات",
       "productoffers": "عروض المنتجات",
       "settings": "إعدادات المتجر",
-      "account": "الحساب"
+      "account": "الحساب",
+      "reviews": "المراجعات"
     },
     "sellerLabel": "البائع المميز",
     "sellerName": "قطع غيار محمد"
@@ -66,7 +67,8 @@
     "edit": "تعديل",
     "delete": "حذف",
     "accept": "قبول",
-    "reject": "رفض"
+    "reject": "رفض",
+    "noData": "لا يوجد بيانات"
   },
   "quickActions": {
     "title": "خيارات سريعة",
@@ -803,6 +805,41 @@
       "productError": "خطأ في تحميل المنتج",
       "productNotFound": "المنتج غير موجود",
       "noVariants": "لا توجد متغيرات"
+    }
+  },
+  "reviews": {
+    "title": "تقييمات المنتجات",
+    "product": "المنتج",
+    "customer": "العميل",
+    "rating": "التقييم",
+    "comment": "التعليق",
+    "status": "الحالة",
+
+    "filters": {
+      "searchPlaceholder": "ابحث في التقييمات...",
+      "allRatings": "كل التقييمات",
+      "stars": "نجوم",
+      "allStatus": "كل الحالات",
+      "pending": "قيد المراجعة",
+      "approved": "مقبول",
+      "rejected": "مرفوض",
+      "reset": "إعادة تعيين"
+    },
+
+    "stats": {
+      "averageRating": "متوسط التقييم",
+      "approved": "مقبول",
+      "pending": "قيد المراجعة",
+      "rejected": "مرفوض"
+    },
+
+    "table": {
+      "title": "التقييمات"
+    },
+
+    "pagination": {
+      "showing": "عرض",
+      "of": "من التقييمات"
     }
   },
   "common":{

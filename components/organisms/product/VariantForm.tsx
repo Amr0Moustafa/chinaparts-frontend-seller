@@ -903,7 +903,7 @@ export default function VariantFormCard({
         )}
 
         {/* ── Bulk Price Setter ── */}
-        {variants.length > 0 && (
+        {/* {variants.length > 0 && (
           <div className="border border-gray-200 rounded-lg p-4 space-y-4 bg-gray-50">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <h6 className="font-semibold text-sm flex items-center gap-2">
@@ -992,7 +992,7 @@ export default function VariantFormCard({
               </div>
             </FormProvider>
           </div>
-        )}
+        )} */}
 
         {/* ── Variants Table ── */}
         {variants.length > 0 && (
