@@ -14,11 +14,150 @@ import {
   HiOutlineCheckCircle,
   HiOutlineClock,
   HiOutlineXCircle,
+  HiOutlineXMark,
+  HiOutlineUser,
+  HiOutlineShoppingBag,
+  HiOutlineCalendar,
+  HiOutlineChatBubbleLeftEllipsis,
 } from "react-icons/hi2";
 
 import { useGetReviewsQuery } from "@/features/reviews";
 import { Review } from "@/types/review";
 
+// -------------------------------------------------------
+// Review Detail Dialog
+// -------------------------------------------------------
+interface ReviewDialogProps {
+  review: Review | null;
+  onClose: () => void;
+}
+
+const ReviewDialog = ({ review, onClose }: ReviewDialogProps) => {
+  if (!review) return null;
+
+  const statusConfig = {
+    0: { label: "Pending", className: "bg-yellow-100 text-yellow-700" },
+    1: { label: "Approved", className: "bg-green-100 text-green-700" },
+    2: { label: "Rejected", className: "bg-red-100 text-red-700" },
+  };
+
+  const status = statusConfig[review.status as 0 | 1 | 2] ?? statusConfig[0];
+
+  return (
+    /* Backdrop */
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      {/* Panel */}
+      <div
+        className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <h2 className="text-lg font-bold text-gray-800">Review Details</h2>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition"
+          >
+            <HiOutlineXMark className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-5 space-y-5">
+
+          {/* Rating + Status row */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <span
+                  key={i}
+                  className={`text-2xl ${
+                    i < review.rating ? "text-yellow-400" : "text-gray-200"
+                  }`}
+                >
+                  ★
+                </span>
+              ))}
+              <span className="ml-2 text-gray-500 text-sm font-medium">
+                {review.rating} / 5
+              </span>
+            </div>
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-semibold ${status.className}`}
+            >
+              {review.status_label ?? status.label}
+            </span>
+          </div>
+
+          {/* Info cards */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50">
+              <HiOutlineUser className="w-5 h-5 text-indigo-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-gray-400 mb-0.5">Customer</p>
+                <p className="text-sm font-semibold text-gray-700">
+                  {review.customer?.name ?? "—"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50">
+              <HiOutlineShoppingBag className="w-5 h-5 text-purple-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-gray-400 mb-0.5">Product</p>
+                <p className="text-sm font-semibold text-gray-700">
+                  {review.product?.name ?? "—"}
+                </p>
+              </div>
+            </div>
+
+            {review.created_at && (
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 col-span-2">
+                <HiOutlineCalendar className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-gray-400 mb-0.5">Date</p>
+                  <p className="text-sm font-semibold text-gray-700">
+                    {new Date(review.created_at).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Comment */}
+          <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-100">
+            <div className="flex items-center gap-2 mb-2">
+              <HiOutlineChatBubbleLeftEllipsis className="w-4 h-4 text-indigo-500" />
+              <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">
+                Comment
+              </p>
+            </div>
+            <p className="text-sm text-gray-700 leading-relaxed">
+              {review.comment || "No comment provided."}
+            </p>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-gray-100 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-5 py-2 rounded-lg bg-gray-100 text-gray-600 text-sm font-medium hover:bg-gray-200 transition"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// -------------------------------------------------------
+// Main Template
+// -------------------------------------------------------
 export const ReviewTemplate = () => {
   const { t } = useTranslation();
   const router = useRouter();
@@ -32,6 +171,7 @@ export const ReviewTemplate = () => {
   const [rating, setRating] = useState<number | undefined>();
   const [status, setStatus] = useState<number | undefined>();
   const [search, setSearch] = useState("");
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null); // 👈 NEW
 
   // -----------------------
   // API
@@ -59,12 +199,7 @@ export const ReviewTemplate = () => {
   // -----------------------
   const stats = useMemo(() => {
     if (!reviews.length)
-      return {
-        avgRating: 0,
-        approved: 0,
-        pending: 0,
-        rejected: 0,
-      };
+      return { avgRating: 0, approved: 0, pending: 0, rejected: 0 };
 
     const avgRating =
       reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
@@ -104,9 +239,7 @@ export const ReviewTemplate = () => {
       id: "comment",
       header: t("reviews.comment"),
       accessor: (row) => (
-        <p className="line-clamp-2 max-w-xs text-gray-600">
-          {row.comment}
-        </p>
+        <p className="line-clamp-2 max-w-xs text-gray-600">{row.comment}</p>
       ),
     },
     {
@@ -147,7 +280,6 @@ export const ReviewTemplate = () => {
           color="purple"
           home={false}
         />
-
         <StatCard
           icon={<HiOutlineCheckCircle className="w-7 h-7" />}
           value={stats.approved}
@@ -155,7 +287,6 @@ export const ReviewTemplate = () => {
           color="green"
           home={false}
         />
-
         <StatCard
           icon={<HiOutlineClock className="w-7 h-7" />}
           value={stats.pending}
@@ -163,7 +294,6 @@ export const ReviewTemplate = () => {
           color="orange"
           home={false}
         />
-
         <StatCard
           icon={<HiOutlineXCircle className="w-7 h-7" />}
           value={stats.rejected}
@@ -175,7 +305,6 @@ export const ReviewTemplate = () => {
 
       {/* ================= FILTERS ================= */}
       <div className="bg-white p-4 rounded-xl shadow grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
-        {/* Search */}
         <input
           placeholder="Search reviews..."
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-60"
@@ -186,15 +315,12 @@ export const ReviewTemplate = () => {
           }}
         />
 
-        {/* Rating Filter */}
         <select
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
           value={rating ?? ""}
           onChange={(e) => {
             setCurrentPage(1);
-            setRating(
-              e.target.value ? Number(e.target.value) : undefined
-            );
+            setRating(e.target.value ? Number(e.target.value) : undefined);
           }}
         >
           <option value="">All Ratings</option>
@@ -205,15 +331,12 @@ export const ReviewTemplate = () => {
           ))}
         </select>
 
-        {/* Status Filter */}
         <select
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
           value={status ?? ""}
           onChange={(e) => {
             setCurrentPage(1);
-            setStatus(
-              e.target.value ? Number(e.target.value) : undefined
-            );
+            setStatus(e.target.value ? Number(e.target.value) : undefined);
           }}
         >
           <option value="">All Status</option>
@@ -240,9 +363,7 @@ export const ReviewTemplate = () => {
         columns={columns}
         data={reviews}
         isLoading={isLoading}
-        // onShow={(item) =>
-        //   router.push(`/dashboard/reviews/${item.id}`)
-        // }
+        onShow={(item) => setSelectedReview(item)} // 👈 opens dialog
       />
 
       {/* ================= PAGINATION ================= */}
@@ -254,16 +375,18 @@ export const ReviewTemplate = () => {
           showText={false}
           buttonWrapperClassName="flex justify-between w-full"
         />
-
         <span className="hidden md:flex text-sm text-gray-500">
           Showing {(currentPage - 1) * PAGE_SIZE + 1}–
-          {Math.min(
-            currentPage * PAGE_SIZE,
-            pagination?.total || 0
-          )}{" "}
-          of {pagination?.total || 0} reviews
+          {Math.min(currentPage * PAGE_SIZE, pagination?.total || 0)} of{" "}
+          {pagination?.total || 0} reviews
         </span>
       </div>
+
+      {/* ================= DIALOG ================= */}
+      <ReviewDialog
+        review={selectedReview}
+        onClose={() => setSelectedReview(null)}
+      />
     </div>
   );
 };
