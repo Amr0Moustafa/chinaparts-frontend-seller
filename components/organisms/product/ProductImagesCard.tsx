@@ -229,7 +229,7 @@ export const ProductImagesCard = ({
                   <img
                     src={mainImagePreview}
                     alt="Main product"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full max-h-[200px] object-contain"
                   />
                   <button
                     type="button"
@@ -274,7 +274,7 @@ export const ProductImagesCard = ({
                   <img
                     src={additionalImagePreviews[index]}
                     alt={`Product ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full max-h-[200px] object-contain"
                   />
                   <button
                     type="button"

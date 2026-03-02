@@ -1166,7 +1166,7 @@ export default function VariantFormCard({
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1">
                             {/* 💾 Save existing variant */}
-                            {isEditMode && existingOnServer && (
+                            {/* {isEditMode && existingOnServer && (
                               <button
                                 type="button"
                                 onClick={() => handleSaveVariant(variant.id)}
@@ -1176,10 +1176,10 @@ export default function VariantFormCard({
                               >
                                 {isUpdating ? <Spinner /> : <Save className="w-3 h-3" />}
                               </button>
-                            )}
+                            )} */}
 
                             {/* ➕ Create new (unsaved) variant via API */}
-                            {isEditMode && !existingOnServer && (
+                            {/* {isEditMode && !existingOnServer && (
                               <button
                                 type="button"
                                 onClick={() => handleCreateNewVariant(variant.id)}
@@ -1189,7 +1189,7 @@ export default function VariantFormCard({
                               >
                                 {isSavingNew ? <Spinner /> : <Plus className="w-3 h-3" />}
                               </button>
-                            )}
+                            )} */}
 
                             {/* 🗑️ Delete */}
                             <button

@@ -304,18 +304,18 @@ export const ReviewTemplate = () => {
       </div>
 
       {/* ================= FILTERS ================= */}
-      <div className="bg-white p-4 rounded-xl shadow grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
+      <div className="bg-white p-4 rounded-xl shadow grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
         <input
           placeholder="Search reviews..."
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-60"
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full"
           value={search}
           onChange={(e) => {
             setCurrentPage(1);
             setSearch(e.target.value);
           }}
         />
-
-        <select
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+           <select
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
           value={rating ?? ""}
           onChange={(e) => {
@@ -355,6 +355,8 @@ export const ReviewTemplate = () => {
             setCurrentPage(1);
           }}
         />
+        </div>
+       
       </div>
 
       {/* ================= TABLE ================= */}

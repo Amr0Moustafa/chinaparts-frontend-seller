@@ -194,7 +194,7 @@ const ProductDetailsTemplate: React.FC<ProductDetailsTemplateProps> = ({
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="bg-orange-100 text-orange-600 px-3 py-1 rounded-md text-sm font-semibold">
-                    {t('productdetails.pricing.brand')}: 15
+                    {t('productdetails.pricing.brand')}: {product?.brand?.name}
                   </div>
                   {product.discount_percentage && (
                     <div className="bg-red-100 text-red-600 px-3 py-1 rounded-md text-sm font-semibold">

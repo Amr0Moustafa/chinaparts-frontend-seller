@@ -841,6 +841,25 @@
     "delete": "Delete",
     "cancel": "Cancel"
     
+  },
+  "specifications": {
+    "title": "Specifications",
+    "subtitle": "Add technical specifications and product details organized by groups.",
+    "defaultGroupName": "General",
+    "groupPrefix": "Group",
+    "attributeLabel": "Attribute",
+    "valueLabel": "Value",
+    "attributePlaceholder": "e.g., Speed",
+    "valuePlaceholder": "e.g., 750",
+    "addSpec": "Add Spec",
+    "addGroup": "Add Group",
+    "removeSpec": "Remove spec",
+    "removeGroup": "Remove group",
+    "renameGroupTooltip": "Click to rename group",
+    "specSingular": "spec",
+    "specPlural": "specs",
+    "collapse": "Collapse",
+    "expand": "Expand"
   }
  
 }
