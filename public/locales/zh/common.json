@@ -848,6 +848,25 @@
   "common":{
     "delete": "删除",
     "cancel": "取消"
+  },
+  "specifications": {
+    "title": "规格",
+    "subtitle": "添加技术规格和产品详情，按组组织。",
+    "defaultGroupName": "通用",
+    "groupPrefix": "组",
+    "attributeLabel": "属性",
+    "valueLabel": "值",
+    "attributePlaceholder": "例如：速度",
+    "valuePlaceholder": "例如：750",
+    "addSpec": "添加规格",
+    "addGroup": "添加组",
+    "removeSpec": "删除规格",
+    "removeGroup": "删除组",
+    "renameGroupTooltip": "点击重命名组",
+    "specSingular": "规格",
+    "specPlural": "规格",
+    "collapse": "折叠",
+    "expand": "展开"
   }
 
 }

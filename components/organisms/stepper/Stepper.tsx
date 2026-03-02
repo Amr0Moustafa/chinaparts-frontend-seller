@@ -13,7 +13,6 @@ import { ProductInfoCard } from "../product/ProductInfoCard";
 import { ProductImagesCard } from "../product/ProductImagesCard";
 import { ShippingInfoCard } from "../product/ShippingInfoCard";
 import { PricingInventoryCard } from "../product/PricingInventoryCard";
-
 import { VehicleData, VehicleForm } from "../product/VehicleCompatibilityForm";
 import { useTranslation } from "react-i18next";
 import { CategoryTagsCard } from "../product/CategoryTagsCard";
@@ -34,6 +33,7 @@ import {
 } from "@/features/variants";
 import VariantFormCard from "../product/VariantForm";
 import { useRouter } from "next/navigation";
+import { SpecificationsCard, SpecificationsData } from "../product/Specificationscard";
 
 /* ==================== Types ==================== */
 type StepperFormValues = {
@@ -46,7 +46,8 @@ type Step1ValidationKeys =
   | "productInfo"
   | "categoryTags"
   | "productDescription"
-  | "images";
+  | "images"
+  | "specifications";
 
 type Step1ValidationState = Record<Step1ValidationKeys, boolean>;
 type StepValidationState = Record<number, boolean>;
@@ -98,6 +99,7 @@ const INITIAL_STEP1_VALIDATION: Step1ValidationState = {
   categoryTags: false,
   productDescription: false,
   images: false,
+  specifications: true, // optional — starts valid
 };
 
 const INITIAL_PRODUCT_INFO: ProductInfoData = {
@@ -140,6 +142,11 @@ const INITIAL_VARIANT_DATA: VariantData = {
   variants: [],
 };
 
+// Flat key-value array — matches API: [{ key: "Speed", value: "750 RPM" }]
+const INITIAL_SPECIFICATIONS: SpecificationsData = {
+  specifications: [],
+};
+
 /* ==================== Helpers ==================== */
 
 const isEqual = (a: unknown, b: unknown): boolean =>
@@ -174,6 +181,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     categoryTags: StepperFormValues;
     productDescription: ProductDescriptionData;
     productImages: ProductImagesData;
+    specifications: SpecificationsData;
   } | null>(null);
 
   const originalVariantRef = useRef<VariantData | null>(null);
@@ -202,6 +210,8 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
   const [productImagesData, setProductImagesData] = useState<ProductImagesData>(
     INITIAL_PRODUCT_IMAGES,
   );
+  const [specificationsData, setSpecificationsData] =
+    useState<SpecificationsData>(INITIAL_SPECIFICATIONS);
 
   const [variantData, setVariantData] =
     useState<VariantData>(INITIAL_VARIANT_DATA);
@@ -309,11 +319,25 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     };
     setProductImagesData(newImages);
 
+    // ---- Specifications — flat array [{ key, value }] ----
+    let newSpecifications: SpecificationsData = INITIAL_SPECIFICATIONS;
+    if (product.specifications && Array.isArray(product.specifications)) {
+      newSpecifications = {
+        specifications: product.specifications.map((s: any) => ({
+          id: String(s.id || Math.random().toString(36).substr(2, 9)),
+          key: s.key || "",
+          value: s.value || "",
+        })),
+      };
+    }
+    setSpecificationsData(newSpecifications);
+
     originalStep1Ref.current = {
       productInfo: newProductInfo,
       categoryTags: newCategoryTags,
       productDescription: newDescription,
       productImages: newImages,
+      specifications: newSpecifications,
     };
 
     // ---- Step 3 ----
@@ -326,14 +350,6 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     };
     setShippingData(newShipping);
 
-    // ---- Transform vehicles ----
-    // Main vehicle:
-    //   model_id  = vehicle.model?.id   ✅
-    //   brand     = vehicle.model?.brand?.id  ✅
-    //
-    // Compatible vehicles (each uses its OWN model and brand):
-    //   model_id  = vehicle.model?.id   ✅
-    //   brand     = vehicle.model?.brand?.id  ✅
     const transformedVehicles: VehicleData[] = [];
 
     if (product.main_vehicle) {
@@ -352,15 +368,13 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
       Array.isArray(product.compatible_vehicles)
     ) {
       product.compatible_vehicles.forEach((vehicle: any) => {
-        console.log(vehicle)
+        console.log(vehicle);
         transformedVehicles.push({
           year: vehicle.year,
           type_id: String(vehicle.type?.id || ""),
-          // ✅ model_id from each compatible vehicle's own model?.id
           model_id: String(vehicle.model?.id || ""),
           body_type_id: String(vehicle.body_type?.id || ""),
           is_main: false,
-          // ✅ brand from each compatible vehicle's own model?.brand?.id
           brand: String(vehicle.model?.brand?.id || ""),
         });
       });
@@ -408,9 +422,17 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
       !isEqual(productInfoData, orig.productInfo) ||
       !isEqual(categoryTagsData, orig.categoryTags) ||
       !isEqual(productDescriptionData, orig.productDescription) ||
+      !isEqual(specificationsData, orig.specifications) ||
       hasImagesChanged(productImagesData, orig.productImages)
     );
-  }, [isEditMode, productInfoData, categoryTagsData, productDescriptionData, productImagesData]);
+  }, [
+    isEditMode,
+    productInfoData,
+    categoryTagsData,
+    productDescriptionData,
+    productImagesData,
+    specificationsData,
+  ]);
 
   const hasStep2Changed = useCallback((): boolean => {
     if (!isEditMode || !originalVariantRef.current) return true;
@@ -418,7 +440,10 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
   }, [isEditMode, variantData]);
 
   const hasStep3Changed = useCallback(
-    (currentShipping: ShippingData, currentVehicles: VehicleData[]): boolean => {
+    (
+      currentShipping: ShippingData,
+      currentVehicles: VehicleData[],
+    ): boolean => {
       if (!isEditMode || !originalStep3Ref.current) return true;
       const orig = originalStep3Ref.current;
       return (
@@ -436,6 +461,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     categoryTags: StepperFormValues;
     productDescription: ProductDescriptionData;
     productImages: ProductImagesData;
+    specifications: SpecificationsData;
   }) => {
     const formData = new FormData();
 
@@ -455,6 +481,16 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     formData.append("return_info", data.productDescription.return_info);
     formData.append("quality_type_id", data.productInfo.quality_type_id);
 
+    // ---- Specifications: flat array [{ key, value }] ----
+    // Only send rows that have both key and value filled
+    const filledSpecs = data.specifications.specifications.filter(
+      (s) => s.key.trim() && s.value.trim(),
+    );
+    filledSpecs.forEach((spec, index) => {
+      formData.append(`specifications[${index}][key]`, spec.key.trim());
+      formData.append(`specifications[${index}][value]`, spec.value.trim());
+    });
+
     if (data.productImages.main_image) {
       formData.append("main_image", data.productImages.main_image);
     }
@@ -465,13 +501,17 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     let response;
 
     if (isEditMode && productId) {
-      response = await updateProduct({ id: productId, data: formData }).unwrap();
+      response = await updateProduct({
+        id: productId,
+        data: formData,
+      }).unwrap();
       setMessage("Product updated successfully!");
       originalStep1Ref.current = {
         productInfo: data.productInfo,
         categoryTags: data.categoryTags,
         productDescription: data.productDescription,
         productImages: { ...data.productImages, main_image: null, images: [] },
+        specifications: data.specifications,
       };
     } else {
       response = await createProduct(formData).unwrap();
@@ -553,7 +593,10 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
       is_fragile: shipping.is_fragile,
     };
 
-    const response = await updateProduct({ id: productId, data: body }).unwrap();
+    const response = await updateProduct({
+      id: productId,
+      data: body,
+    }).unwrap();
     setMessage("Product updated successfully!");
     setSubmitError(null);
     originalStep3Ref.current = { shipping, vehicles };
@@ -650,6 +693,14 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     setProductImagesData(data);
   }, []);
 
+  const handleSpecificationsChange = useCallback(
+    (data: SpecificationsData) => {
+      if (isInitializingRef.current) return;
+      setSpecificationsData(data);
+    },
+    [],
+  );
+
   const handleVariantDataChange = useCallback((data: any) => {
     if (isInitializingRef.current) return;
     if (data?.variants) {
@@ -701,6 +752,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
               categoryTags: categoryTagsData,
               productDescription: productDescriptionData,
               productImages: productImagesData,
+              specifications: specificationsData,
             });
           } else {
             setMessage(null);
@@ -747,6 +799,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     categoryTagsData,
     productDescriptionData,
     productImagesData,
+    specificationsData,
     productId,
     variantData,
     vehicleData,
@@ -780,7 +833,8 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
   );
 
   const selectedCategoryId = useMemo(() => {
-    const catId = categoryTagsData.sub_category_id || categoryTagsData.category_id;
+    const catId =
+      categoryTagsData.sub_category_id || categoryTagsData.category_id;
     return catId ? Number(catId) : null;
   }, [categoryTagsData.category_id, categoryTagsData.sub_category_id]);
 
@@ -815,6 +869,14 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
               }
               onDataChange={handleProductDescriptionChange}
               initialValues={productDescriptionData}
+            />
+            <SpecificationsCard
+              key={`specifications-${dataKey}`}
+              initialData={specificationsData}
+              onDataChange={handleSpecificationsChange}
+              onValidationChange={(isValid) =>
+                handleValidationChange(1, isValid, "specifications")
+              }
             />
             <ProductImagesCard
               key={`images-${dataKey}`}
@@ -904,6 +966,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     handleCategoryChange,
     handleProductDescriptionChange,
     handleProductImagesChange,
+    handleSpecificationsChange,
     handleVariantDataChange,
     handleShippingDataChange,
     handleVehicleDataChange,
@@ -911,6 +974,7 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     categoryTagsData,
     productDescriptionData,
     productImagesData,
+    specificationsData,
     variantData,
     memoizedShippingData,
     vehicleData,
@@ -921,9 +985,25 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     return (
       <div className="max-w-7xl mx-auto mt-5 flex justify-center items-center min-h-[400px]">
         <div className="text-center">
-          <svg className="animate-spin h-10 w-10 text-orange-500 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          <svg
+            className="animate-spin h-10 w-10 text-orange-500 mx-auto mb-4"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
           </svg>
           <p className="text-gray-600">Loading product data...</p>
         </div>
@@ -935,9 +1015,25 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     return (
       <div className="max-w-7xl mx-auto mt-5 flex justify-center items-center min-h-[400px]">
         <div className="text-center">
-          <svg className="animate-spin h-10 w-10 text-orange-500 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          <svg
+            className="animate-spin h-10 w-10 text-orange-500 mx-auto mb-4"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
           </svg>
           <p className="text-gray-600">Preparing form...</p>
         </div>
@@ -949,7 +1045,9 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
     return (
       <div className="max-w-7xl mx-auto mt-5">
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-600">Error loading product data. Please try again.</p>
+          <p className="text-sm text-red-600">
+            Error loading product data. Please try again.
+          </p>
         </div>
       </div>
     );
@@ -1028,9 +1126,25 @@ export const Stepper: React.FC<StepperProps> = ({ product_id }) => {
           >
             {isSubmitting ? (
               <>
-                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                <svg
+                  className="animate-spin h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
                 </svg>
                 <span>{isLastStep ? "Submitting..." : "Saving..."}</span>
               </>

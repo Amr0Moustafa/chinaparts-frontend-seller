@@ -845,5 +845,24 @@
   "common":{
     "delete": "حذف",
     "cancel": "إلغاء"
+  },
+   "specifications": {
+    "title": "المواصفات",
+    "subtitle": "أضف المواصفات التقنية وتفاصيل المنتج منظمةً في مجموعات.",
+    "defaultGroupName": "عام",
+    "groupPrefix": "مجموعة",
+    "attributeLabel": "الخاصية",
+    "valueLabel": "القيمة",
+    "attributePlaceholder": "مثال: السرعة",
+    "valuePlaceholder": "مثال: 750",
+    "addSpec": "إضافة مواصفة",
+    "addGroup": "إضافة مجموعة",
+    "removeSpec": "حذف المواصفة",
+    "removeGroup": "حذف المجموعة",
+    "renameGroupTooltip": "انقر لإعادة تسمية المجموعة",
+    "specSingular": "مواصفة",
+    "specPlural": "مواصفات",
+    "collapse": "طي",
+    "expand": "توسيع"
   }
 }
