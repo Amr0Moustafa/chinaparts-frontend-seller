@@ -68,7 +68,7 @@
     "delete": "Delete",
     "accept": "Accept",
     "reject": "Reject",
-     "noData": "No Data"
+    "noData": "No Data"
   },
   "quickActions": {
     "title": "Quick Actions",
@@ -157,6 +157,21 @@
       "date": "Date",
       "status": "Status",
       "actions": "Actions"
+    },
+    "loading": "Loading orders...",
+    "error": {
+      "title": "Error Loading Orders",
+      "default": "Failed to load orders. Please try again.",
+      "unknown": "An unknown error occurred"
+    },
+    "empty": {
+      "title": "No Orders Yet",
+      "description": "Your orders will appear here once customers start purchasing."
+    },
+    "pagination": {
+      "showing": "Showing",
+      "of": "of",
+      "orders": "orders"
     }
   },
   "orderdetails": {
@@ -524,7 +539,7 @@
       "quantityInStock": "Quantity in Stock",
       "trackQuantity": "Track quantity"
     },
-   "shippingInfo": {
+    "shippingInfo": {
       "title": "Shipping Information",
       "weight": "Weight (lbs)",
       "length": "Length (inches)",
@@ -692,7 +707,7 @@
       }
     }
   },
-   "updateproduct": {
+  "updateproduct": {
     "header": {
       "UpdateProduct": "Update Product",
       "saveAsDraft": "Save as Draft"
@@ -809,38 +824,48 @@
     "rating": "Rating",
     "comment": "Comment",
     "status": "Status",
-
-    "filters": {
-      "searchPlaceholder": "Search reviews...",
-      "allRatings": "All Ratings",
-      "stars": "Stars",
-      "allStatus": "All Status",
-      "pending": "Pending",
-      "approved": "Approved",
-      "rejected": "Rejected",
-      "reset": "Reset"
+    "dialog": {
+      "title": "Review Details",
+      "close": "Close",
+      "no_comment": "No comment provided.",
+      "rating_label": "/ 5",
+      "sections": {
+        "customer": "Customer",
+        "product": "Product",
+        "date": "Date",
+        "comment": "Comment"
+      }
     },
-
     "stats": {
-      "averageRating": "Average Rating",
+      "average_rating": "Average Rating",
       "approved": "Approved",
       "pending": "Pending",
       "rejected": "Rejected"
     },
-
+    "filters": {
+      "search_placeholder": "Search reviews...",
+      "all_ratings": "All Ratings",
+      "stars": "Stars",
+      "all_status": "All Status",
+      "reset": "Reset"
+    },
+    "status_labels": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
     "table": {
       "title": "Reviews"
     },
-
     "pagination": {
       "showing": "Showing",
-      "of": "of reviews"
+      "of": "of",
+      "reviews": "reviews"
     }
   },
-  "common":{
+  "common": {
     "delete": "Delete",
     "cancel": "Cancel"
-    
   },
   "specifications": {
     "title": "Specifications",
@@ -861,5 +886,4 @@
     "collapse": "Collapse",
     "expand": "Expand"
   }
- 
 }

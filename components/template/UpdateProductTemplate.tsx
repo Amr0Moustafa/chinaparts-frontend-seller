@@ -34,12 +34,12 @@ export const UpdateProductTemplate = () => {
           </h5>
         </div>
         {/* publish product */}
-        <div className="flex-shrink-0">
+        {/* <div className="flex-shrink-0">
           <Button
             text={t("updateproduct.header.saveAsDraft")}
             className="px-2 md:py-2 md:px-3 font-bold text-gray-900 bg-white border border-gray-300 w-auto"
           />
-        </div>
+        </div> */}
       </div>
 
       {/*   add product  steps*/}
