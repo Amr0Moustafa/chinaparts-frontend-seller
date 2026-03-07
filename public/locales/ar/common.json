@@ -159,6 +159,21 @@
       "actions": "الإجراءات",
       "accept": "قبول",
       "reject": "رفض"
+    },
+    "loading": "جارٍ تحميل الطلبات...",
+    "error": {
+      "title": "خطأ في تحميل الطلبات",
+      "default": "فشل تحميل الطلبات. يرجى المحاولة مرة أخرى.",
+      "unknown": "حدث خطأ غير معروف"
+    },
+    "empty": {
+      "title": "لا توجد طلبات بعد",
+      "description": "ستظهر طلباتك هنا بمجرد أن يبدأ العملاء في الشراء."
+    },
+    "pagination": {
+      "showing": "عرض",
+      "of": "من",
+      "orders": "طلبات"
     }
   },
   "orderdetails": {
@@ -483,6 +498,7 @@
       "qualityTypePlaceholder": "اختر نوع الجودة",
       "qualityTypeRequired": "يجب اختيار نوع الجودة",
       "qualityTypeLabel": "نوع الجودة"
+      
     },
     "productDescription": {
       "title": "وصف المنتج",
@@ -814,32 +830,43 @@
     "rating": "التقييم",
     "comment": "التعليق",
     "status": "الحالة",
-
-    "filters": {
-      "searchPlaceholder": "ابحث في التقييمات...",
-      "allRatings": "كل التقييمات",
-      "stars": "نجوم",
-      "allStatus": "كل الحالات",
-      "pending": "قيد المراجعة",
-      "approved": "مقبول",
-      "rejected": "مرفوض",
-      "reset": "إعادة تعيين"
+    "dialog": {
+      "title": "تفاصيل التقييم",
+      "close": "إغلاق",
+      "no_comment": "لم يتم تقديم أي تعليق.",
+      "rating_label": "/ 5",
+      "sections": {
+        "customer": "العميل",
+        "product": "المنتج",
+        "date": "التاريخ",
+        "comment": "التعليق"
+      }
     },
-
     "stats": {
-      "averageRating": "متوسط التقييم",
-      "approved": "مقبول",
-      "pending": "قيد المراجعة",
+      "average_rating": "متوسط التقييم",
+      "approved": "معتمد",
+      "pending": "قيد الانتظار",
       "rejected": "مرفوض"
     },
-
+    "filters": {
+      "search_placeholder": "البحث في التقييمات...",
+      "all_ratings": "جميع التقييمات",
+      "stars": "نجوم",
+      "all_status": "جميع الحالات",
+      "reset": "إعادة تعيين"
+    },
+    "status_labels": {
+      "pending": "قيد الانتظار",
+      "approved": "معتمد",
+      "rejected": "مرفوض"
+    },
     "table": {
       "title": "التقييمات"
     },
-
     "pagination": {
       "showing": "عرض",
-      "of": "من التقييمات"
+      "of": "من",
+      "reviews": "تقييمات"
     }
   },
   "common":{
@@ -865,4 +892,5 @@
     "collapse": "طي",
     "expand": "توسيع"
   }
+  
 }

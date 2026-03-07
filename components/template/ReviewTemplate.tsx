@@ -33,12 +33,14 @@ interface ReviewDialogProps {
 }
 
 const ReviewDialog = ({ review, onClose }: ReviewDialogProps) => {
+  const { t } = useTranslation();
+
   if (!review) return null;
 
   const statusConfig = {
-    0: { label: "Pending", className: "bg-yellow-100 text-yellow-700" },
-    1: { label: "Approved", className: "bg-green-100 text-green-700" },
-    2: { label: "Rejected", className: "bg-red-100 text-red-700" },
+    0: { label: t("reviews.status_labels.pending"), className: "bg-yellow-100 text-yellow-700" },
+    1: { label: t("reviews.status_labels.approved"), className: "bg-green-100 text-green-700" },
+    2: { label: t("reviews.status_labels.rejected"), className: "bg-red-100 text-red-700" },
   };
 
   const status = statusConfig[review.status as 0 | 1 | 2] ?? statusConfig[0];
@@ -56,7 +58,9 @@ const ReviewDialog = ({ review, onClose }: ReviewDialogProps) => {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-bold text-gray-800">Review Details</h2>
+          <h2 className="text-lg font-bold text-gray-800">
+            {t("reviews.dialog.title")}
+          </h2>
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition"
@@ -82,7 +86,7 @@ const ReviewDialog = ({ review, onClose }: ReviewDialogProps) => {
                 </span>
               ))}
               <span className="ml-2 text-gray-500 text-sm font-medium">
-                {review.rating} / 5
+                {review.rating} {t("reviews.dialog.rating_label")}
               </span>
             </div>
             <span
@@ -97,7 +101,9 @@ const ReviewDialog = ({ review, onClose }: ReviewDialogProps) => {
             <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50">
               <HiOutlineUser className="w-5 h-5 text-indigo-500 mt-0.5 shrink-0" />
               <div>
-                <p className="text-xs text-gray-400 mb-0.5">Customer</p>
+                <p className="text-xs text-gray-400 mb-0.5">
+                  {t("reviews.dialog.sections.customer")}
+                </p>
                 <p className="text-sm font-semibold text-gray-700">
                   {review.customer?.name ?? "—"}
                 </p>
@@ -107,7 +113,9 @@ const ReviewDialog = ({ review, onClose }: ReviewDialogProps) => {
             <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50">
               <HiOutlineShoppingBag className="w-5 h-5 text-purple-500 mt-0.5 shrink-0" />
               <div>
-                <p className="text-xs text-gray-400 mb-0.5">Product</p>
+                <p className="text-xs text-gray-400 mb-0.5">
+                  {t("reviews.dialog.sections.product")}
+                </p>
                 <p className="text-sm font-semibold text-gray-700">
                   {review.product?.name ?? "—"}
                 </p>
@@ -118,7 +126,9 @@ const ReviewDialog = ({ review, onClose }: ReviewDialogProps) => {
               <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 col-span-2">
                 <HiOutlineCalendar className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-xs text-gray-400 mb-0.5">Date</p>
+                  <p className="text-xs text-gray-400 mb-0.5">
+                    {t("reviews.dialog.sections.date")}
+                  </p>
                   <p className="text-sm font-semibold text-gray-700">
                     {new Date(review.created_at).toLocaleString()}
                   </p>
@@ -132,11 +142,11 @@ const ReviewDialog = ({ review, onClose }: ReviewDialogProps) => {
             <div className="flex items-center gap-2 mb-2">
               <HiOutlineChatBubbleLeftEllipsis className="w-4 h-4 text-indigo-500" />
               <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">
-                Comment
+                {t("reviews.dialog.sections.comment")}
               </p>
             </div>
             <p className="text-sm text-gray-700 leading-relaxed">
-              {review.comment || "No comment provided."}
+              {review.comment || t("reviews.dialog.no_comment")}
             </p>
           </div>
         </div>
@@ -147,7 +157,7 @@ const ReviewDialog = ({ review, onClose }: ReviewDialogProps) => {
             onClick={onClose}
             className="px-5 py-2 rounded-lg bg-gray-100 text-gray-600 text-sm font-medium hover:bg-gray-200 transition"
           >
-            Close
+            {t("reviews.dialog.close")}
           </button>
         </div>
       </div>
@@ -171,7 +181,7 @@ export const ReviewTemplate = () => {
   const [rating, setRating] = useState<number | undefined>();
   const [status, setStatus] = useState<number | undefined>();
   const [search, setSearch] = useState("");
-  const [selectedReview, setSelectedReview] = useState<Review | null>(null); // 👈 NEW
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null);
 
   // -----------------------
   // API
@@ -267,7 +277,7 @@ export const ReviewTemplate = () => {
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg md:text-2xl font-bold">
-          {t("reviews.title") || "Product Reviews"}
+          {t("reviews.title")}
         </h3>
       </div>
 
@@ -276,28 +286,28 @@ export const ReviewTemplate = () => {
         <StatCard
           icon={<HiOutlineStar className="w-7 h-7" />}
           value={stats.avgRating}
-          label="Average Rating"
+          label={t("reviews.stats.average_rating")}
           color="purple"
           home={false}
         />
         <StatCard
           icon={<HiOutlineCheckCircle className="w-7 h-7" />}
           value={stats.approved}
-          label="Approved"
+          label={t("reviews.stats.approved")}
           color="green"
           home={false}
         />
         <StatCard
           icon={<HiOutlineClock className="w-7 h-7" />}
           value={stats.pending}
-          label="Pending"
+          label={t("reviews.stats.pending")}
           color="orange"
           home={false}
         />
         <StatCard
           icon={<HiOutlineXCircle className="w-7 h-7" />}
           value={stats.rejected}
-          label="Rejected"
+          label={t("reviews.stats.rejected")}
           color="red"
           home={false}
         />
@@ -306,7 +316,7 @@ export const ReviewTemplate = () => {
       {/* ================= FILTERS ================= */}
       <div className="bg-white p-4 rounded-xl shadow grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
         <input
-          placeholder="Search reviews..."
+          placeholder={t("reviews.filters.search_placeholder")}
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full"
           value={search}
           onChange={(e) => {
@@ -315,57 +325,56 @@ export const ReviewTemplate = () => {
           }}
         />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-           <select
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-          value={rating ?? ""}
-          onChange={(e) => {
-            setCurrentPage(1);
-            setRating(e.target.value ? Number(e.target.value) : undefined);
-          }}
-        >
-          <option value="">All Ratings</option>
-          {[5, 4, 3, 2, 1].map((r) => (
-            <option key={r} value={r}>
-              {r} Stars
-            </option>
-          ))}
-        </select>
+          <select
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            value={rating ?? ""}
+            onChange={(e) => {
+              setCurrentPage(1);
+              setRating(e.target.value ? Number(e.target.value) : undefined);
+            }}
+          >
+            <option value="">{t("reviews.filters.all_ratings")}</option>
+            {[5, 4, 3, 2, 1].map((r) => (
+              <option key={r} value={r}>
+                {r} {t("reviews.filters.stars")}
+              </option>
+            ))}
+          </select>
 
-        <select
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-          value={status ?? ""}
-          onChange={(e) => {
-            setCurrentPage(1);
-            setStatus(e.target.value ? Number(e.target.value) : undefined);
-          }}
-        >
-          <option value="">All Status</option>
-          <option value={0}>Pending</option>
-          <option value={1}>Approved</option>
-          <option value={2}>Rejected</option>
-        </select>
+          <select
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            value={status ?? ""}
+            onChange={(e) => {
+              setCurrentPage(1);
+              setStatus(e.target.value ? Number(e.target.value) : undefined);
+            }}
+          >
+            <option value="">{t("reviews.filters.all_status")}</option>
+            <option value={0}>{t("reviews.status_labels.pending")}</option>
+            <option value={1}>{t("reviews.status_labels.approved")}</option>
+            <option value={2}>{t("reviews.status_labels.rejected")}</option>
+          </select>
 
-        <Button
-          text="Reset"
-          className="px-4 py-2"
-          onClick={() => {
-            setRating(undefined);
-            setStatus(undefined);
-            setSearch("");
-            setCurrentPage(1);
-          }}
-        />
+          <Button
+            text={t("reviews.filters.reset")}
+            className="px-4 py-2"
+            onClick={() => {
+              setRating(undefined);
+              setStatus(undefined);
+              setSearch("");
+              setCurrentPage(1);
+            }}
+          />
         </div>
-       
       </div>
 
       {/* ================= TABLE ================= */}
       <DynamicTable
-        title="Reviews"
+        title={t("reviews.table.title")}
         columns={columns}
         data={reviews}
         isLoading={isLoading}
-        onShow={(item) => setSelectedReview(item)} // 👈 opens dialog
+        onShow={(item) => setSelectedReview(item)}
       />
 
       {/* ================= PAGINATION ================= */}
@@ -378,9 +387,9 @@ export const ReviewTemplate = () => {
           buttonWrapperClassName="flex justify-between w-full"
         />
         <span className="hidden md:flex text-sm text-gray-500">
-          Showing {(currentPage - 1) * PAGE_SIZE + 1}–
-          {Math.min(currentPage * PAGE_SIZE, pagination?.total || 0)} of{" "}
-          {pagination?.total || 0} reviews
+          {t("reviews.pagination.showing")} {(currentPage - 1) * PAGE_SIZE + 1}–
+          {Math.min(currentPage * PAGE_SIZE, pagination?.total || 0)} {t("reviews.pagination.of")}{" "}
+          {pagination?.total || 0} {t("reviews.pagination.reviews")}
         </span>
       </div>
 

@@ -137,7 +137,7 @@ export const ProductTemplate = () => {
       )}
 
       <div className="flex items-center justify-between gap-4 mb-3">
-        <h3 className="text-lg md:text-2xl font-bold">{t("product.title")}</h3>
+        <h3 className="text-lg md:text-2xl font-bold">{t("products.title")}</h3>
         <div className="flex-shrink-0">
           <Button
             text={t("products.addproduct") || "Add New Product"}

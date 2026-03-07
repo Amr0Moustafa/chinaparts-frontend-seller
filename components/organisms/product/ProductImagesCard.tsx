@@ -218,9 +218,6 @@ export const ProductImagesCard = ({
       <CardContent className="space-y-6">
         {/* Upload Section */}
         <div>
-          <h6 className="text-sm font-semibold text-gray-700 mb-3">
-            Upload New Images
-          </h6>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Main Image */}
             <div className="col-span-2 row-span-2 relative">
@@ -410,7 +407,8 @@ export const ProductImagesCard = ({
           <p className="text-sm text-red-500">{error}</p>
         ) : (
           <p className="text-sm text-gray-500">
-            {t("createproduct.images.hint")} (Max {MAX_ADDITIONAL_IMAGES} additional images, {MAX_SIZE_MB}MB each)
+            {t("createproduct.images.hint")} 
+            {/* (Max {MAX_ADDITIONAL_IMAGES} additional images, {MAX_SIZE_MB}MB each) */}
           </p>
         )}
       </CardContent>

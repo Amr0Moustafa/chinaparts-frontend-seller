@@ -103,7 +103,7 @@ export const SpecificationsCard: React.FC<SpecificationsCardProps> = ({
         {/* Column Headers */}
         <div className="grid grid-cols-2 gap-0 bg-gray-50 border-b border-gray-200">
           <div className="px-4 py-2 text-xs font-medium text-gray-500 border-r border-gray-200">
-            {t("specifications.keyLabel")}{" "}
+            {t("specifications.attributeLabel")}{" "}
             <span className="text-red-500">*</span>
           </div>
           <div className="px-4 py-2 text-xs font-medium text-gray-500">
@@ -120,7 +120,7 @@ export const SpecificationsCard: React.FC<SpecificationsCardProps> = ({
                 <div className="border-r border-gray-100">
                   <input
                     type="text"
-                    placeholder={t("specifications.keyPlaceholder")}
+                    placeholder={t("specifications.attributePlaceholder")}
                     value={spec.key}
                     onChange={(e) => updateSpec(spec.id, "key", e.target.value)}
                     className="w-full text-sm px-4 py-2.5 placeholder-gray-300 outline-none focus:bg-orange-50 transition"

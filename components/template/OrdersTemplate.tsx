@@ -62,13 +62,12 @@ export const OrderTemplate = () => {
       };
     }
 
-    // Fallback: Calculate from meta or orders array
     return {
       processing: orders.filter((o) => o.status === "processing").length,
       shipped: orders.filter((o) => o.status === "shipped").length,
       delivered: orders.filter((o) => o.status === "delivered").length,
       total: meta.total,
-      rejected: orders.filter((o) =>  o.status === "cancelled").length,
+      rejected: orders.filter((o) => o.status === "cancelled").length,
     };
   }, [orders, salesReport, meta.total]);
 
@@ -79,11 +78,8 @@ export const OrderTemplate = () => {
         id: item.id,
         status: "confirmed",
       }).unwrap();
-      
-      // Optional: Show success message
       console.log(`Order ${item.sub_order_number} confirmed successfully`);
     } catch (error) {
-      // Optional: Show error message
       console.error("Failed to confirm order:", error);
     }
   };
@@ -96,17 +92,13 @@ export const OrderTemplate = () => {
         status: "cancelled",
       };
 
-      // Add notes if provided
       if (item.reject_notes) {
         payload.notes = item.reject_notes;
       }
 
       await updateStatus(payload).unwrap();
-      
-      // Optional: Show success message
       console.log(`Order ${item.sub_order_number} cancelled successfully`);
     } catch (error) {
-      // Optional: Show error message
       console.error("Failed to cancel order:", error);
     }
   };
@@ -114,34 +106,35 @@ export const OrderTemplate = () => {
   // ✅ Handle page change
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // ✅ Table columns using accessor functions for custom rendering
+  // ✅ Table columns
   const orderColumns: Column<SubOrder>[] = [
     { 
       id: "sub_order_number",
       header: t("order.table.orderId"), 
-      accessor: "sub_order_number"
+      accessor: "sub_order_number",
     },
     { 
       id: "customer",
       header: t("order.table.customer"), 
-      accessor: (item:any) => item.customer?.name || "N/A"
+      accessor: (item: any) => item.customer?.name || t("order.table.na"),
     },
     { 
       id: "total",
       header: t("order.table.amount"), 
-      accessor: (item:any) => `$${parseFloat(item.total).toFixed(2)}`
+      accessor: (item: any) => `$${parseFloat(item.total).toFixed(2)}`,
     },
     { 
       id: "created_at",
       header: t("order.table.date"), 
-      accessor: (item:any) => new Date(item.created_at).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      })
+      accessor: (item: any) =>
+        new Date(item.created_at).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        }),
     },
     { 
       id: "status",
@@ -165,28 +158,25 @@ export const OrderTemplate = () => {
             {item.status_label || item.status}
           </span>
         );
-      }
+      },
     },
   ];
 
   // ✅ Type guard for error handling
   const isFetchBaseQueryError = (error: any): error is FetchBaseQueryError => {
-    return error && typeof error === 'object' && 'status' in error;
+    return error && typeof error === "object" && "status" in error;
   };
 
   // ✅ Get error message safely
   const getErrorMessage = (): string => {
     if (!ordersError) return "";
-    
     if (isFetchBaseQueryError(ordersError)) {
-      // FetchBaseQueryError
-      if (ordersError.data && typeof ordersError.data === 'object' && 'message' in ordersError.data) {
+      if (ordersError.data && typeof ordersError.data === "object" && "message" in ordersError.data) {
         return (ordersError.data as { message: string }).message;
       }
       return `Error: ${ordersError.status}`;
     } else {
-      // SerializedError
-      return ordersError.message || "An unknown error occurred";
+      return ordersError.message || t("order.error.unknown");
     }
   };
 
@@ -196,7 +186,7 @@ export const OrderTemplate = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading orders...</p>
+          <p className="text-gray-600">{t("order.loading")}</p>
         </div>
       </div>
     );
@@ -208,9 +198,9 @@ export const OrderTemplate = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <h3 className="text-red-800 font-semibold mb-2">Error Loading Orders</h3>
+            <h3 className="text-red-800 font-semibold mb-2">{t("order.error.title")}</h3>
             <p className="text-red-600 text-sm">
-              {getErrorMessage() || "Failed to load orders. Please try again."}
+              {getErrorMessage() || t("order.error.default")}
             </p>
           </div>
         </div>
@@ -289,10 +279,9 @@ export const OrderTemplate = () => {
                 buttonWrapperClassName="flex justify-between w-full"
               />
             </div>
-
             <span className="hidden md:flex text-sm text-gray-500 w-full items-end justify-end">
-              {t("category.showing")} {meta.from}–{meta.to}{" "}
-              {t("category.of")} {meta.total} {t("category.products")}
+              {t("order.pagination.showing")} {meta.from}–{meta.to}{" "}
+              {t("order.pagination.of")} {meta.total} {t("order.pagination.orders")}
             </span>
           </div>
         )}
@@ -301,8 +290,10 @@ export const OrderTemplate = () => {
         {meta.total === 0 && !ordersLoading && (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <ShoppingCart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">No Orders Yet</h3>
-            <p className="text-gray-500">Your orders will appear here once customers start purchasing.</p>
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+              {t("order.empty.title")}
+            </h3>
+            <p className="text-gray-500">{t("order.empty.description")}</p>
           </div>
         )}
       </div>
