@@ -13,7 +13,7 @@ import {
   HiOutlineUserCircle,
   
 } from "react-icons/hi2";
-import { Percent,Star } from "lucide-react";
+import { Percent,Star ,Wallet} from "lucide-react";
 import { FiShoppingCart } from "react-icons/fi";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
@@ -32,6 +32,7 @@ const NAV_DEFS = [
   { key: "reports", href: "/dashboard/reports", icon: HiOutlineChartBar },
   { key: "coupons", href: "/dashboard/coupons", icon: HiOutlineTag },
   { key: "productoffers", href: "/dashboard/offers", icon: Percent },
+   { key: "wallet", href: "/dashboard/wallet", icon: Wallet },
   { key: "settings", href: "/dashboard/settings", icon: HiOutlineCog6Tooth },
   { key: "account", href: "/dashboard/account", icon: HiOutlineUserCircle },
 ];
