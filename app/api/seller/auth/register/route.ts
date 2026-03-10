@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     
     // Validate required fields
-    const { first_name, last_name, email, phone, password, password_confirmation, verification_code } = body;
+    const { first_name, last_name, email, phone, password, password_confirmation, F } = body;
     
     if (!first_name || !last_name || !email || !phone || !password || !password_confirmation) {
       return NextResponse.json(
