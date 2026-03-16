@@ -17,7 +17,8 @@
       "settings": "Store Settings",
       "account": "Account",
       "reviews": "Reviews",
-      "wallet":"Wallet"
+      "wallet":"Wallet",
+      "reserve": "Reserve"
     },
     "sellerLabel": "Premium Seller",
     "sellerName": "Mohamed's Auto Parts"
@@ -886,5 +887,85 @@
     "specPlural": "specs",
     "collapse": "Collapse",
     "expand": "Expand"
+  },
+  "wallet": {
+    "title": "Wallet Overview",
+    "subtitle": "Analyze your performance and track growth",
+    "available_24": "Available 24 hours before payout",
+    "stats": {
+      "payable": "Payable",
+      "pending": "Pending",
+      "reserved": "Reserved",
+      "disputes": "Disputes",
+      "negative_balance": "Negative Balance"
+    },
+    "payout_method": {
+      "title": "Payout Method",
+      "description": "Choose to receive your earnings automatically every week or request withdrawals manually.",
+      "manual_title": "Manual Withdrawal Request",
+      "manual_desc": "You request withdrawal yourself during the 24-hour window before payout.",
+      "auto_title": "Automatic Weekly Transfer",
+      "auto_desc": "Your payable balance is transferred automatically every Thursday."
+    },
+    "ledger": {
+      "title": "Ledger",
+      "description": "View all financial transactions related to your wallet.",
+      "export": "Export Statement",
+      "columns": {
+        "date": "Date",
+        "type": "Type",
+        "reference": "Reference",
+        "amount": "Amount",
+        "bucket": "Bucket"
+      },
+      "empty": "No transactions found.",
+      "error": "Failed to load transactions."
+    },
+    "bucket_labels": {
+      "Payable": "Payable",
+      "Pending": "Pending",
+      "Reserved": "Reserve",
+      "Disputes": "Disputes"
+    },
+    "pagination": {
+      "showing": "Showing",
+      "of": "of",
+      "transactions": "transactions"
+    },
+    "loading": "Loading...",
+    "error": "Failed to load wallet data."
+  },
+   "reserve": {
+    "title": "Wallet Overview",
+    "subtitle": "Percentage held, auto-released after 30 days",
+    "total_held_label": "Total held",
+    "breadcrumb": {
+      "merchant": "Merchant",
+      "wallet_overview": "Wallet Overview",
+      "reserve_details": "Reserve Details"
+    },
+    "info": {
+      "title": "Why does reserve exist?",
+      "description": "5% of each order is held as reserve to cover disputes or returns. The amount is automatically released after 30 days if no dispute occurs."
+    },
+    "columns": {
+      "reserve_id": "Reserve ID",
+      "order_id": "Order ID",
+      "amount": "Amount",
+      "hold_date": "Hold Date",
+      "release_date": "Release Date",
+      "status": "Status"
+    },
+    "status_labels": {
+      "held": "Held",
+      "released": "Released"
+    },
+    "pagination": {
+      "showing": "Showing",
+      "of": "of",
+      "reserves": "reserves"
+    },
+    "empty": "No reserve entries found.",
+    "error": "Failed to load reserve data."
   }
 }

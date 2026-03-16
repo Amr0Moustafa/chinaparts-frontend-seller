@@ -7,6 +7,7 @@ import { sellerSubOrdersApi } from "@/features/sellerSubOrders";
 import { variantsApi } from "@/features/variants";
 import { qualityTypesApi } from "@/features/qualitytypes";
 import { reviewsApi } from "@/features/reviews";
+import { walletApi } from "@/features/wallet";
 
 export const store = configureStore({
   reducer: {
@@ -17,6 +18,7 @@ export const store = configureStore({
     [variantsApi.reducerPath]: variantsApi.reducer,
     [qualityTypesApi.reducerPath]: qualityTypesApi.reducer,
     [reviewsApi.reducerPath]: reviewsApi.reducer,
+    [walletApi.reducerPath]: walletApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -29,6 +31,7 @@ export const store = configureStore({
       variantsApi.middleware,
       qualityTypesApi.middleware,
       reviewsApi.middleware,
+      walletApi.middleware,
     ),
 });
 

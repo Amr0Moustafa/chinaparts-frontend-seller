@@ -17,7 +17,8 @@
       "settings": "店铺设置",
       "account": "账户",
       "reviews": "评论",
-      "wallet": "钱包"
+      "wallet": "钱包",
+      "reserve": "储备"
     },
     "sellerLabel": "高级卖家",
     "sellerName": "Mohamed 的汽车配件"
@@ -894,5 +895,86 @@
     "specPlural": "规格",
     "collapse": "折叠",
     "expand": "展开"
+  },
+  "wallet": {
+    "title": "钱包概览",
+    "subtitle": "分析您的业绩并追踪增长",
+    "available_24": "付款前24小时可用",
+    "stats": {
+      "payable": "应付金额",
+      "pending": "待处理",
+      "reserved": "预留",
+      "disputes": "争议",
+      "negative_balance": "负余额"
+    },
+    "payout_method": {
+      "title": "付款方式",
+      "description": "选择每周自动接收收益，或手动申请提款。",
+      "manual_title": "手动提款申请",
+      "manual_desc": "在付款前24小时窗口内自行申请提款。",
+      "auto_title": "每周自动转账",
+      "auto_desc": "您的应付余额每周四自动转账。"
+    },
+    "ledger": {
+      "title": "账本",
+      "description": "查看与您钱包相关的所有财务交易。",
+      "export": "导出对账单",
+      "columns": {
+        "date": "日期",
+        "type": "类型",
+        "reference": "参考编号",
+        "amount": "金额",
+        "bucket": "类别"
+      },
+      "empty": "暂无交易记录。",
+      "error": "加载交易失败。"
+    },
+    "bucket_labels": {
+      "Payable": "应付",
+      "Pending": "待处理",
+      "Reserved": "储备",
+      "Disputes": "争议"
+
+    },
+    "pagination": {
+      "showing": "显示",
+      "of": "/",
+      "transactions": "笔交易"
+    },
+    "loading": "加载中...",
+    "error": "钱包数据加载失败。"
+  },
+  "reserve": {
+    "title": "钱包概览",
+    "subtitle": "已扣留比例，30天后自动释放",
+    "total_held_label": "总扣留金额",
+    "breadcrumb": {
+      "merchant": "商户",
+      "wallet_overview": "钱包概览",
+      "reserve_details": "储备详情"
+    },
+    "info": {
+      "title": "为什么存在储备金？",
+      "description": "每笔订单的5%作为储备金扣留，用于覆盖争议或退款。如果30天内没有争议，金额将自动释放。"
+    },
+    "columns": {
+      "reserve_id": "储备编号",
+      "order_id": "订单编号",
+      "amount": "金额",
+      "hold_date": "扣留日期",
+      "release_date": "释放日期",
+      "status": "状态"
+    },
+    "status_labels": {
+      "held": "扣留中",
+      "released": "已释放"
+    },
+    "pagination": {
+      "showing": "显示",
+      "of": "/",
+      "reserves": "条记录"
+    },
+    "empty": "暂无储备记录。",
+    "error": "储备数据加载失败。"
   }
 }
