@@ -1,5 +1,4 @@
-import WalletTemplate from "@/components/template/WalletTemplate";
-
+import { WalletTemplate } from "@/components/template/WalletTemplate";
 
 
 export default async function Wallet() {
