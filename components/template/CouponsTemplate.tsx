@@ -10,9 +10,9 @@ import { DynamicTable } from "../organisms/table/DynamicTable";
 
 // Icons
 
-import { FaUsers  } from "react-icons/fa";
+import { FaUsers } from "react-icons/fa";
 import { Coupon } from "@/types/coupon";
-import { BadgePercent ,BadgeDollarSign } from 'lucide-react'
+import { BadgePercent, BadgeDollarSign } from "lucide-react";
 
 import { IoStatsChartOutline } from "react-icons/io5";
 
@@ -76,10 +76,16 @@ export const CouponsTemplate = () => {
 
   // Table columns
   const couponColumns: Column<Coupon>[] = [
-    { header: t("coupons.table.couponCode") || "Coupon Code", accessor: "code" },
+    {
+      header: t("coupons.table.couponCode") || "Coupon Code",
+      accessor: "code",
+    },
     { header: t("coupons.table.title") || "Title", accessor: "title" },
     { header: t("coupons.table.discount") || "Discount", accessor: "discount" },
-    { header: t("coupons.table.minOrder") || "Min Order", accessor: "minOrder" },
+    {
+      header: t("coupons.table.minOrder") || "Min Order",
+      accessor: "minOrder",
+    },
     { header: t("coupons.table.usage") || "Usage", accessor: "usage" },
     { header: t("coupons.table.date") || "Date", accessor: "date" },
     { header: t("coupons.table.status") || "Status", accessor: "status" },
@@ -109,13 +115,21 @@ export const CouponsTemplate = () => {
         colorClass = "bg-green-100 text-green-700";
         break;
     }
+
+    const labelMap: Record<Coupon["status"], string> = {
+      Active: t("coupons.filters.active"),
+      Expired: t("coupons.filters.expired"),
+      Scheduled: t("coupons.filters.scheduled"),
+    };
+
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${colorClass}`}>
-        {status}
+      <span
+        className={`px-3 py-1 rounded-full text-xs font-semibold ${colorClass}`}
+      >
+        {labelMap[status]}
       </span>
     );
   };
-
   return (
     <div className="min-h-screen md:max-w-5xl 2xl:max-w-full">
       {/* Header */}
@@ -142,7 +156,7 @@ export const CouponsTemplate = () => {
           home={false}
         />
         <StatCard
-          icon={<FaUsers  className="w-7 h-7" />}
+          icon={<FaUsers className="w-7 h-7" />}
           value={45}
           label={t("coupons.stats.totalRedemptions") || "Total Redemptions"}
           color="blue"
@@ -178,7 +192,12 @@ export const CouponsTemplate = () => {
         dialogshow={true}
         dialogdelete={true}
         showFilters={true}
-        filters={["All Coupons","Active", "Expired", "Scheduled"]}
+        filters={[
+          t("coupons.filters.allCoupons"),
+          t("coupons.filters.active"),
+          t("coupons.filters.expired"),
+          t("coupons.filters.scheduled"),
+        ]}
       />
 
       {/* Pagination */}
@@ -194,7 +213,8 @@ export const CouponsTemplate = () => {
         </div>
 
         <span className="hidden md:flex text-sm text-gray-500 w-full flex items-end justify-end">
-          {t("coupons.category.showing") || "Showing"} {(currentPage - 1) * PAGE_SIZE + 1}–
+          {t("coupons.category.showing") || "Showing"}{" "}
+          {(currentPage - 1) * PAGE_SIZE + 1}–
           {Math.min(currentPage * PAGE_SIZE, couponData.length)}{" "}
           {t("coupons.category.of") || "of"} {couponData.length}{" "}
           {t("coupons.category.coupons") || "coupons"}

@@ -254,53 +254,67 @@
     "messageCustomer": "联系客户",
     "productDescriptionPlaceholder": "描述您的产品、其功能、兼容性和优势..."
   },
-  "coupons": {
-    "title": "折扣优惠券",
-    "createOffer": "创建优惠",
-    "stats": {
-      "activeOffers": "有效优惠",
-      "totalRedemptions": "总兑换次数",
-      "discountGiven": "已提供折扣",
-      "avgOrderIncrease": "平均订单增长"
-    },
-    "table": {
-      "couponCode": "优惠码",
-      "title": "标题",
-      "discount": "折扣",
-      "minOrder": "最低订单",
-      "usage": "使用情况",
-      "date": "日期",
-      "status": "状态",
-      "couponList": "优惠券"
-    },
-    "category": {
-      "showing": "显示",
-      "of": "的",
-      "coupons": "优惠券"
-    },
-    "form": {
-      "productName": "产品名称",
-      "couponCode": "优惠码",
-      "couponTitle": "优惠标题",
-      "discountType": "折扣类型",
-      "discountValue": "折扣值 (%)",
-      "minimumOrderValue": "最低订单金额 ($)",
-      "usageLimit": "使用限制",
-      "startDate": "开始日期",
-      "endDate": "结束日期",
-      "addCoupon": "添加优惠券",
-      "productOptions": [
-        { "value": "automotive", "label": "汽车用品" },
-        { "value": "electronics", "label": "电子产品" },
-        { "value": "home", "label": "家居与厨房" }
-      ],
-      "discountOptions": [
-        { "value": "5", "label": "5%" },
-        { "value": "10", "label": "10%" },
-        { "value": "20", "label": "20%" }
-      ]
-    }
+ "coupons": {
+  "title": "折扣优惠券",
+  "createOffer": "创建优惠",
+  "filters": {
+    "allCoupons": "所有优惠券",
+    "active": "有效",
+    "expired": "已过期",
+    "scheduled": "已计划"
   },
+  "stats": {
+    "activeOffers": "有效优惠",
+    "totalRedemptions": "总兑换次数",
+    "discountGiven": "已给折扣",
+    "avgOrderIncrease": "平均订单增长"
+  },
+  "table": {
+    "couponCode": "优惠券代码",
+    "title": "标题",
+    "discount": "折扣",
+    "minOrder": "最低订单",
+    "usage": "使用情况",
+    "date": "日期",
+    "status": "状态",
+    "couponList": "优惠券"
+  },
+  "category": {
+    "showing": "显示",
+    "of": "共",
+    "coupons": "张优惠券"
+  },
+  "form": {
+    "productName": "产品名称",
+    "couponCode": "优惠券代码",
+    "couponTitle": "优惠券标题",
+    "discountType": "折扣类型",
+    "discountValue": "折扣值 (%)",
+    "minimumOrderValue": "最低订单金额 ($)",
+    "usageLimit": "使用限制",
+    "startDate": "开始日期",
+    "endDate": "结束日期",
+    "addCoupon": "添加优惠券",
+    "updateCoupon": "更新优惠券",
+    "applyTo": "优惠券适用于",
+    "selectProducts": "选择产品",
+    "discountTypePercentage": "百分比 (%)",
+    "discountTypeFixed": "固定金额 ($)",
+    "discountTypePlaceholder": "百分比 (%) , 固定金额 ($)",
+    "specificProducts": "指定产品",
+    "allProducts": "所有产品",
+    "category": "类别",
+    "createCoupon": "创建新优惠券",
+    "editCoupon": "编辑优惠券",
+    "subtitle": "填写以下详细信息以设置您的优惠券。",
+    "selectProductsHint": "选择此优惠券适用的产品。",
+    "selected": "已选择",
+    "summary": "优惠券摘要",
+    "products": "产品",
+    "back": "返回",
+    "next": "下一步"
+  }
+},
   "offers": {
     "title": "产品优惠与特价",
     "createOffer": "创建优惠",

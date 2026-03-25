@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { CreateForm } from "../molecules/coupons/CreateForm";
+import CreateCouponForm from "../molecules/coupons/CreateForm";
 import { t } from "i18next";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
@@ -33,7 +33,7 @@ export const CreateCouponsTemplate = () => {
       </div>
 
       {/* create Coupon Form */}
-      <CreateForm />
+      <CreateCouponForm/>
     </div>
   );
 };

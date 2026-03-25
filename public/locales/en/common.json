@@ -256,42 +256,66 @@
     "productDescriptionPlaceholder": "Describe your product, its features, compatibility, and benefits..."
   },
   "coupons": {
-    "title": "Discount Coupons",
-    "createOffer": "Create Offer",
-    "stats": {
-      "activeOffers": "Active Offers",
-      "totalRedemptions": "Total Redemptions",
-      "discountGiven": "Discount Given",
-      "avgOrderIncrease": "Avg. Order Increase"
-    },
-    "table": {
-      "couponCode": "Coupon Code",
-      "title": "Title",
-      "discount": "Discount",
-      "minOrder": "Min Order",
-      "usage": "Usage",
-      "date": "Date",
-      "status": "Status",
-      "couponList": "Coupons"
-    },
-    "category": {
-      "showing": "Showing",
-      "of": "of",
-      "coupons": "coupons"
-    },
-    "form": {
-      "productName": "Product Name",
-      "couponCode": "Coupon Code",
-      "couponTitle": "Coupon Title",
-      "discountType": "Discount Type",
-      "discountValue": "Discount Value (%)",
-      "minimumOrderValue": "Minimum Order Value ($)",
-      "usageLimit": "Usage Limit",
-      "startDate": "Start Date",
-      "endDate": "End Date",
-      "addCoupon": "Add Coupon"
-    }
+  "title": "Discount Coupons",
+  "createOffer": "Create Offer",
+  "filters": {
+    "allCoupons": "All Coupons",
+    "active": "Active",
+    "expired": "Expired",
+    "scheduled": "Scheduled"
   },
+  "stats": {
+    "activeOffers": "Active Offers",
+    "totalRedemptions": "Total Redemptions",
+    "discountGiven": "Discount Given",
+    "avgOrderIncrease": "Avg. Order Increase"
+  },
+  "table": {
+    "couponCode": "Coupon Code",
+    "title": "Title",
+    "discount": "Discount",
+    "minOrder": "Min Order",
+    "usage": "Usage",
+    "date": "Date",
+    "status": "Status",
+    "couponList": "Coupons"
+  },
+  "category": {
+    "showing": "Showing",
+    "of": "of",
+    "coupons": "coupons"
+  },
+  "form": {
+    "productName": "Product Name",
+    "couponCode": "Coupon Code",
+    "couponTitle": "Coupon Title",
+    "discountType": "Discount Type",
+    "discountValue": "Discount Value (%)",
+    "minimumOrderValue": "Minimum Order Value ($)",
+    "usageLimit": "Usage Limit",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "addCoupon": "Add Coupon",
+    "updateCoupon": "Update Coupon",
+    "applyTo": "Apply Coupon To",
+    "selectProducts": "Select Products",
+    "discountTypePercentage": "Percentage (%)",
+    "discountTypeFixed": "Fixed Amount ($)",
+    "discountTypePlaceholder": "Percentage (%) , Fixed Amount ($)",
+    "specificProducts": "Specific Products",
+    "allProducts": "All Products",
+    "category": "Category",
+    "createCoupon": "Create New Coupon",
+    "editCoupon": "Edit Coupon",
+    "subtitle": "Fill in the details below to set up your coupon.",
+    "selectProductsHint": "Choose the products this coupon applies to.",
+    "selected": "selected",
+    "summary": "Coupon Summary",
+    "products": "Products",
+    "back": "Back",
+    "next": "Next"
+  }
+},
   "offers": {
     "title": "Product Offers & Deals",
     "createOffer": "Create Offer",

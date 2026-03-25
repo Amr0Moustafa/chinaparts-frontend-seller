@@ -258,43 +258,66 @@
     "productDescriptionPlaceholder": "صف منتجك وميزاته وتوافقه وفوائده..."
   },
   "coupons": {
-    "title": "كوبونات الخصم",
-    "createOffer": "إنشاء عرض",
-    "stats": {
-      "activeOffers": "العروض النشطة",
-      "totalRedemptions": "إجمالي عمليات الاسترداد",
-      "discountGiven": "إجمالي الخصم المقدم",
-      "avgOrderIncrease": "متوسط زيادة الطلبات"
-    },
-    "table": {
-      "couponCode": "رمز الكوبون",
-      "title": "العنوان",
-      "discount": "الخصم",
-      "minOrder": "الحد الأدنى للطلب",
-      "usage": "الاستخدام",
-      "date": "التاريخ",
-      "status": "الحالة",
-      "couponList": "الكوبونات"
-    },
-    "category": {
-      "showing": "عرض",
-      "of": "من",
-      "coupons": "كوبونات"
-    },
-    "form": {
-      "productName": "اسم المنتج",
-      "couponCode": "رمز الكوبون",
-      "couponTitle": "عنوان الكوبون",
-      "discountType": "نوع الخصم",
-      "discountValue": "قيمة الخصم (%)",
-      "minimumOrderValue": "الحد الأدنى لقيمة الطلب ($)",
-      "usageLimit": "حد الاستخدام",
-      "startDate": "تاريخ البدء",
-      "endDate": "تاريخ الانتهاء",
-      "addCoupon": "إضافة كوبون",
-      "updateCoupon": "تحديث كوبون"
-    }
+  "title": "كوبونات الخصم",
+  "createOffer": "إنشاء عرض",
+  "filters": {
+    "allCoupons": "جميع الكوبونات",
+    "active": "نشط",
+    "expired": "منتهي",
+    "scheduled": "مجدول"
   },
+  "stats": {
+    "activeOffers": "العروض النشطة",
+    "totalRedemptions": "إجمالي الاستخدامات",
+    "discountGiven": "إجمالي الخصومات",
+    "avgOrderIncrease": "متوسط زيادة الطلب"
+  },
+  "table": {
+    "couponCode": "كود الكوبون",
+    "title": "العنوان",
+    "discount": "الخصم",
+    "minOrder": "الحد الأدنى للطلب",
+    "usage": "الاستخدام",
+    "date": "التاريخ",
+    "status": "الحالة",
+    "couponList": "الكوبونات"
+  },
+  "category": {
+    "showing": "عرض",
+    "of": "من",
+    "coupons": "كوبونات"
+  },
+  "form": {
+    "productName": "اسم المنتج",
+    "couponCode": "كود الكوبون",
+    "couponTitle": "عنوان الكوبون",
+    "discountType": "نوع الخصم",
+    "discountValue": "قيمة الخصم (%)",
+    "minimumOrderValue": "الحد الأدنى لقيمة الطلب ($)",
+    "usageLimit": "حد الاستخدام",
+    "startDate": "تاريخ البداية",
+    "endDate": "تاريخ الانتهاء",
+    "addCoupon": "إضافة كوبون",
+    "updateCoupon": "تحديث الكوبون",
+    "applyTo": "تطبيق الكوبون على",
+    "selectProducts": "اختر المنتجات",
+    "discountTypePercentage": "نسبة مئوية (%)",
+    "discountTypeFixed": "مبلغ ثابت ($)",
+    "discountTypePlaceholder": "نسبة مئوية (%) , مبلغ ثابت ($)",
+    "specificProducts": "منتجات محددة",
+    "allProducts": "جميع المنتجات",
+    "category": "الفئة",
+    "createCoupon": "إنشاء كوبون جديد",
+    "editCoupon": "تعديل الكوبون",
+    "subtitle": "املأ التفاصيل أدناه لإعداد الكوبون الخاص بك.",
+    "selectProductsHint": "اختر المنتجات التي ينطبق عليها هذا الكوبون.",
+    "selected": "محدد",
+    "summary": "ملخص الكوبون",
+    "products": "المنتجات",
+    "back": "رجوع",
+    "next": "التالي"
+  }
+},
   "offers": {
     "title": "عروض وصفقات المنتجات",
     "createOffer": "إنشاء عرض",
